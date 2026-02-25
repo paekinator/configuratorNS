@@ -24,17 +24,32 @@ public class PanelSlotManager : MonoBehaviour
 
     [Header("Thickness / Offsets")]
     public float frameThickness = 0.05f;
-    public float panelThickness = 0.01f;
-    public float panelGap = 0.001f;
-    public float panelOutset = 0.01f;
+    public float panelThickness = 0.001f;
+    public float panelGap = 0.01f;
+    public float panelOutset = 0.05f;
 
     [Header("Panel Fit (Inner Opening)")]
     public float panelInsetX = 0.00f;
     public float panelInsetY = 0.00f;
 
     [Header("Slot Detection Tolerances")]
-    public float parallelDotThreshold = 0.985f;     // parallel check
+    public float parallelDotThreshold = 0.005f;     // parallel check
     public float perpendicularDotMax = 0.15f;       // abs(dot) <= this means perpendicular-ish
+    [Tooltip("Minimum vertical gap between two horizontal spans to form a wall slot.")]
+    public float minWallVerticalGap = 0.01f;
+    [Tooltip("Maximum allowed span-length mismatch when pairing wall spans.")]
+    public float maxWallSpanLengthDelta = 0.05f;
+    [Tooltip("A span is considered floor-ish when abs(dir.y) <= this value.")]
+    public float maxFloorSpanDirY = 0.15f;
+    [Tooltip("Minimum H span length considered during graph build. Lower this to detect smaller openings.")]
+    public float minSpanLength = 0.02f;
+    [Tooltip("Minimum wall slot width/height. Lower this to allow smaller wall rectangles.")]
+    public float minWallSlotSize = 0.02f;
+    [Tooltip("Minimum floor slot width/height. Lower this to allow smaller floor/roof rectangles.")]
+    public float minFloorSlotSize = 0.02f;
+    [Tooltip("Splitter chord epsilon = max(splitterEpsilonMin, nodeQuantize * splitterEpsilonScale). Lower values allow smaller floor rectangles.")]
+    public float splitterEpsilonScale = 2.0f;
+    public float splitterEpsilonMin = 0.002f;
 
     [Header("Peg/Hole Proximity Match (PAIRING)")]
     [Tooltip("Peg<->Hole match max distance (meters). If alignment isn't perfect, try 0.03~0.06 temporarily.")]
@@ -47,7 +62,7 @@ public class PanelSlotManager : MonoBehaviour
 
     [Header("Node Quantization (CORNER keys)")]
     [Tooltip("Quantization size for corner keys (meters). Try 0.01 (1cm). If corners drift, try 0.02.")]
-    public float nodeQuantize = 0.01f;
+    public float nodeQuantize = 0.001f;
 
 
     [Header("Scan Settings")]
@@ -118,8 +133,11 @@ public class PanelSlotManager : MonoBehaviour
 
         Vector3 n = (slot.normal.sqrMagnitude > 1e-6f) ? slot.normal.normalized : (rot * Vector3.forward);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 2f * (frameThickness + panelInsetX));
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 2f * (frameThickness + panelInsetY));
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x);
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y);
+
+        Debug.Log($"2innerW={innerW} innerH={innerH}  slot.sizeXY={slot.sizeXY}  frameThick={frameThickness} insetX={panelInsetX} insetY={panelInsetY}");
+
 
         float offset = panelOutset + panelGap + (panelThickness * 0.5f);
         Vector3 pos = slot.center + n * (side > 0 ? offset : -offset);
@@ -484,7 +502,7 @@ public class PanelSlotManager : MonoBehaviour
                 if (SameKey(A.key, B.key)) continue;
 
                 float len = Vector3.Distance(A.point, B.point);
-                if (len < 0.05f) continue;
+                if (len < minSpanLength) continue;
 
                 Vector3 dir = (B.point - A.point).normalized;
                 float avgY = (A.point.y + B.point.y) * 0.5f;
@@ -558,12 +576,12 @@ public class PanelSlotManager : MonoBehaviour
                 HSpan high = list[i + 1];
 
                 float dy = Mathf.Abs(high.avgY - low.avgY);
-                if (dy < 0.01f) continue;
+                if (dy < minWallVerticalGap) continue;
 
                 float dot = Mathf.Abs(Vector3.Dot(low.dir, high.dir));
                 if (dot < parallelDotThreshold) continue;
 
-                if (Mathf.Abs(low.length - high.length) > 0.05f) continue;
+                if (Mathf.Abs(low.length - high.length) > maxWallSpanLengthDelta) continue;
 
                 if (!TryMatchByV(low, high, out Vector3 lowA, out Vector3 lowB, out Vector3 highA, out Vector3 highB))
                     continue;
@@ -571,7 +589,12 @@ public class PanelSlotManager : MonoBehaviour
                 Vector3 widthDir = (lowB - lowA).normalized;
                 float width = Vector3.Distance(lowA, lowB);
                 float height = Vector3.Distance(lowA, highA);
-                if (width < 0.05f || height < 0.05f) continue;
+
+                float qSize = Mathf.Max(0.0001f, nodeQuantize);
+                width = Mathf.Round(width / qSize) * qSize;
+                height = Mathf.Round(height / qSize) * qSize;
+
+                if (width < minWallSlotSize || height < minWallSlotSize) continue;
 
                 Vector3 normal = Vector3.Cross(widthDir, Vector3.up).normalized;
                 if (normal.sqrMagnitude < 0.001f) continue;
@@ -651,7 +674,7 @@ public class PanelSlotManager : MonoBehaviour
 
             // Only consider spans that are basically horizontal (floor-ish).
             // If you later support sloped roofs, remove this filter.
-            if (Mathf.Abs(s.dir.y) > 0.15f) continue;
+            if (Mathf.Abs(s.dir.y) > maxFloorSpanDirY) continue;
 
             int bucket = Mathf.RoundToInt(s.avgY / tolY);
             if (!buckets.TryGetValue(bucket, out var list))
@@ -821,6 +844,8 @@ public class PanelSlotManager : MonoBehaviour
             }
 
             // Build shortcut edges: from each node, for each neighbor direction, connect to farthest collinear endpoint.
+            // BUT: do NOT create shortcuts that skip over a branch node (degree >= 3), as that would
+            // merge multiple adjacent rectangles into one big overlapping slot.
             foreach (var kvDir in baseNeighbors)
             {
                 var u = kvDir.Key;
@@ -830,6 +855,14 @@ public class PanelSlotManager : MonoBehaviour
                 for (int i = 0; i < nu.Count; i++)
                 {
                     var v = nu[i];
+                    // Only walk if v is a simple pass-through node (degree == 2)
+                    if (!baseNeighbors.TryGetValue(v, out var nv) || nv == null || nv.Count != 2)
+                    {
+                        // v is a branch or endpoint, so stop here (do not skip over it)
+                        AddWalkEdge(u, v);
+                        continue;
+                    }
+
                     var far = WalkFarthestCollinear(u, v);
                     AddWalkEdge(u, far);
                 }
@@ -1050,8 +1083,8 @@ public class PanelSlotManager : MonoBehaviour
 
                             float par1 = Mathf.Abs(Vector3.Dot(ab, dc));
                             float par2 = Mathf.Abs(Vector3.Dot(ad, bc));
-                            if (par1 < parallelDotThreshold) continue;
-                            if (par2 < parallelDotThreshold) continue;
+                            // if (par1 < parallelDotThreshold) continue;
+                            // if (par2 < parallelDotThreshold) continue;
 
                             // stable corners
                             CanonicalizeFloorRectDeterministic(aPos, bPos, cPos, dPos,
@@ -1060,21 +1093,38 @@ public class PanelSlotManager : MonoBehaviour
 
                             // FLOOR rotation is forced deterministic in world (normal=+Y, upAxis=+Z).
                             // Therefore, also make FLOOR geometry/size axis-aligned so panel scaling matches rotation.
-                            float yFlat = (c0.y + c1.y + c2.y + c3.y) * 0.25f;
-                            float minX = Mathf.Min(c0.x, c1.x, c2.x, c3.x);
-                            float maxX = Mathf.Max(c0.x, c1.x, c2.x, c3.x);
-                            float minZ = Mathf.Min(c0.z, c1.z, c2.z, c3.z);
-                            float maxZ = Mathf.Max(c0.z, c1.z, c2.z, c3.z);
+                            float yFlat = bucketAvg[bucketKey];
+
+                            // Use quantized corner keys directly so equal grid spans always produce equal sizeXY.
+                            int minXKey = Mathf.Min(Mathf.Min(aKey.x, bKey.x), Mathf.Min(cKey.x, dKey.x));
+                            int maxXKey = Mathf.Max(Mathf.Max(aKey.x, bKey.x), Mathf.Max(cKey.x, dKey.x));
+                            int minZKey = Mathf.Min(Mathf.Min(aKey.z, bKey.z), Mathf.Min(cKey.z, dKey.z));
+                            int maxZKey = Mathf.Max(Mathf.Max(aKey.z, bKey.z), Mathf.Max(cKey.z, dKey.z));
+
+                            float q = Mathf.Max(0.0001f, nodeQuantize);
+                            float minX = minXKey * q;
+                            float maxX = maxXKey * q;
+                            float minZ = minZKey * q;
+                            float maxZ = maxZKey * q;
 
                             c0 = new Vector3(minX, yFlat, minZ);
                             c1 = new Vector3(maxX, yFlat, minZ);
                             c2 = new Vector3(maxX, yFlat, maxZ);
                             c3 = new Vector3(minX, yFlat, maxZ);
 
-                            width = Mathf.Abs(maxX - minX);
-                            height = Mathf.Abs(maxZ - minZ);
+                            width = Mathf.Abs(maxXKey - minXKey) * q;
+                            height = Mathf.Abs(maxZKey - minZKey) * q;
 
-                            if (width < 0.05f || height < 0.05f) continue;
+                            if (debug)
+                            {
+                                Debug.Log(
+                                    $"[PanelSlot][FLOOR-SIZE] bucket={bucketKey} keys=({aKey.x},{aKey.z})|({bKey.x},{bKey.z})|({cKey.x},{cKey.z})|({dKey.x},{dKey.z}) " +
+                                    $"xKey=[{minXKey}..{maxXKey}] zKey=[{minZKey}..{maxZKey}] q={q:0.###} " +
+                                    $"boundsX=[{minX:0.###}..{maxX:0.###}] boundsZ=[{minZ:0.###}..{maxZ:0.###}] sizeXY=({width:0.###},{height:0.###})"
+                                );
+                            }
+
+                            if (width < minFloorSlotSize || height < minFloorSlotSize) continue;
 
                             string K(Vector3Int kk) => $"{kk.x},{kk.y},{kk.z}";
                             string[] parts = new string[]
@@ -1087,7 +1137,7 @@ public class PanelSlotManager : MonoBehaviour
                             seenRects.Add(norm);
 
                             // Reject the outer big rectangle when there is an internal splitter chord.
-                            float eps2 = Mathf.Max(0.01f, nodeQuantize * 2.0f);
+                            float eps2 = Mathf.Max(splitterEpsilonMin, nodeQuantize * splitterEpsilonScale);
                             if (HasSplitterChord(c0, c1, c3, width, height, spansAtY, eps2))
                                 continue;
 
@@ -1139,8 +1189,10 @@ public class PanelSlotManager : MonoBehaviour
         Quaternion rot = (slot.slotTrigger != null) ? slot.slotTrigger.rotation : Quaternion.LookRotation(slot.normal, slot.upAxis);
         Vector3 n = (slot.normal.sqrMagnitude > 1e-6f) ? slot.normal.normalized : (rot * Vector3.forward);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 2f * (frameThickness + panelInsetX));
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 2f * (frameThickness + panelInsetY));
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 1f * (frameThickness + panelInsetX));
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y + 0.5f * (frameThickness + panelInsetY));
+
+        Debug.Log($"1innerW={innerW} innerH={innerH}  slot.sizeXY={slot.sizeXY}  frameThick={frameThickness} insetX={panelInsetX} insetY={panelInsetY}");
 
         float offset = panelOutset + panelGap + (panelThickness * 0.5f);
         Vector3 pos = slot.center + n * (side > 0 ? offset : -offset);

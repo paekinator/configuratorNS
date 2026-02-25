@@ -125,8 +125,8 @@ public class PanelGhostController : MonoBehaviour
 
         bool canPlace = slotManager.CanPlacePanel(slot, side);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - slotManager.frameThickness - slotManager.panelInsetX);
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - slotManager.frameThickness - slotManager.panelInsetY);
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x );
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y );
 
         float offset = (slotManager.frameThickness * 0.5f) +
                        (slotManager.panelThickness * 0.5f) +
