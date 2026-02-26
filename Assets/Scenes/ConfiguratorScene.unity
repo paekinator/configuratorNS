@@ -1141,10 +1141,10 @@ MonoBehaviour:
   slotTriggerLayer: 10
   panelLayer: 11
   panelBlockerLayer: 12
-  frameThickness: 0.05
-  panelThickness: 0.1
-  panelGap: 0.001
-  panelOutset: 0.15
+  frameThickness: 0.01
+  panelThickness: 0.01
+  panelGap: 0.03
+  panelOutset: 0.01
   panelInsetX: 0
   panelInsetY: 0.2
   parallelDotThreshold: 0.985

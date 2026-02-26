@@ -38,96 +38,105 @@ public class VeneerManager : MonoBehaviour
     [ContextMenu("Apply Veneers")]
     public void ApplyVeneers()
     {
-        if (library == null)
+        SelectableBeam[] beams = FindAllObjects<SelectableBeam>();
+
+        foreach (SelectableBeam sb in beams)
         {
-            Debug.LogError("[VeneerManager] No VeneerPrefabLibrary assigned.");
-            return;
+            if (sb == null) continue;
+
+            foreach (GameObject strip in sb.veneerStrips)
+                if (strip != null) strip.SetActive(true);
         }
+    //     if (library == null)
+    //     {
+    //         Debug.LogError("[VeneerManager] No VeneerPrefabLibrary assigned.");
+    //         return;
+    //     }
 
-        EnsureRoot();
-        ClearVeneersInternal();
+    //     EnsureRoot();
+    //     ClearVeneersInternal();
 
-        List<GameObject> beams = CollectPlacedBeams();
-        List<PanelOBB> panels = excludePanelFacingSides ? CollectPanels() : new List<PanelOBB>();
+    //     List<GameObject> beams = CollectPlacedBeams();
+    //     List<PanelOBB> panels = excludePanelFacingSides ? CollectPanels() : new List<PanelOBB>();
 
-        if (beams.Count == 0)
-            Debug.LogWarning("[VeneerManager] No beams found. Check CollectPlacedBeams() filters (BeamConnections, names V/H, Ghost layer).");
+    //     if (beams.Count == 0)
+    //         Debug.LogWarning("[VeneerManager] No beams found. Check CollectPlacedBeams() filters (BeamConnections, names V/H, Ghost layer).");
 
-        int stripsPlaced = 0;
+    //     int stripsPlaced = 0;
 
-        foreach (GameObject beam in beams)
-        {
-            if (beam == null) continue;
+    //     foreach (GameObject beam in beams)
+    //     {
+    //         if (beam == null) continue;
 
-            Bounds rootLocalBounds;
-            if (!TryGetRootLocalBounds(beam.transform, out rootLocalBounds))
-                continue;
+    //         Bounds rootLocalBounds;
+    //         if (!TryGetRootLocalBounds(beam.transform, out rootLocalBounds))
+    //             continue;
 
-            Vector3 size = rootLocalBounds.size;
+    //         Vector3 size = rootLocalBounds.size;
 
-            Vector3 lengthAxisLocal = Vector3.right;
-            float length = size.x;
-            if (size.y >= size.x && size.y >= size.z) { lengthAxisLocal = Vector3.up; length = size.y; }
-            else if (size.z >= size.x && size.z >= size.y) { lengthAxisLocal = Vector3.forward; length = size.z; }
+    //         Vector3 lengthAxisLocal = Vector3.right;
+    //         float length = size.x;
+    //         if (size.y >= size.x && size.y >= size.z) { lengthAxisLocal = Vector3.up; length = size.y; }
+    //         else if (size.z >= size.x && size.z >= size.y) { lengthAxisLocal = Vector3.forward; length = size.z; }
 
-            Vector3 lengthAxisWorld = beam.transform.TransformDirection(lengthAxisLocal).normalized;
+    //         Vector3 lengthAxisWorld = beam.transform.TransformDirection(lengthAxisLocal).normalized;
 
-            float halfLenTarget = Mathf.Max(0.0001f, length * 0.5f);
+    //         float halfLenTarget = Mathf.Max(0.0001f, length * 0.5f);
 
-            int bestExteriorIndex = library.FindBestIndex(true, halfLenTarget);
-            GameObject stripPrefab = library.GetStrip(true, bestExteriorIndex);
-            float stripLen = library.GetStripLength(true, bestExteriorIndex);
+    //         int bestExteriorIndex = library.FindBestIndex(true, halfLenTarget);
+    //         GameObject stripPrefab = library.GetStrip(true, bestExteriorIndex);
+    //         float stripLen = library.GetStripLength(true, bestExteriorIndex);
 
-            if (stripPrefab == null || stripLen <= 0f)
-            {
-                Debug.LogWarning(string.Format("[VeneerManager] Missing/invalid strip prefab length. best={0} prefab={1} len={2}",
-                    bestExteriorIndex, stripPrefab ? stripPrefab.name : "NULL", stripLen));
-                continue;
-            }
+    //         if (stripPrefab == null || stripLen <= 0f)
+    //         {
+    //             Debug.LogWarning(string.Format("[VeneerManager] Missing/invalid strip prefab length. best={0} prefab={1} len={2}",
+    //                 bestExteriorIndex, stripPrefab ? stripPrefab.name : "NULL", stripLen));
+    //             continue;
+    //         }
 
-            Vector3[] faceNormalsLocal =
-            {
-                Vector3.right, Vector3.left,
-                Vector3.up, Vector3.down,
-                Vector3.forward, Vector3.back
-            };
+    //         Vector3[] faceNormalsLocal =
+    //         {
+    //             Vector3.right, Vector3.left,
+    //             Vector3.up, Vector3.down,
+    //             Vector3.forward, Vector3.back
+    //         };
 
-            for (int i = 0; i < faceNormalsLocal.Length; i++)
-            {
-                Vector3 nLocal = faceNormalsLocal[i];
-                Vector3 nWorld = beam.transform.TransformDirection(nLocal).normalized;
+    //         for (int i = 0; i < faceNormalsLocal.Length; i++)
+    //         {
+    //             Vector3 nLocal = faceNormalsLocal[i];
+    //             Vector3 nWorld = beam.transform.TransformDirection(nLocal).normalized;
 
-                if (excludeHorizontalFaces && Mathf.Abs(Vector3.Dot(nWorld, Vector3.up)) >= horizontalDotThreshold)
-                    continue;
+    //             if (excludeHorizontalFaces && Mathf.Abs(Vector3.Dot(nWorld, Vector3.up)) >= horizontalDotThreshold)
+    //                 continue;
 
-                if (excludeEndFaces && Mathf.Abs(Vector3.Dot(nWorld, lengthAxisWorld)) >= endFaceDotThreshold)
-                    continue;
+    //             if (excludeEndFaces && Mathf.Abs(Vector3.Dot(nWorld, lengthAxisWorld)) >= endFaceDotThreshold)
+    //                 continue;
 
-                Vector3 faceCenterWorld = beam.transform.TransformPoint(
-                    rootLocalBounds.center + Vector3.Scale(nLocal, rootLocalBounds.extents)
-                );
+    //             Vector3 faceCenterWorld = beam.transform.TransformPoint(
+    //                 rootLocalBounds.center + Vector3.Scale(nLocal, rootLocalBounds.extents)
+    //             );
 
-                if (excludePanelFacingSides && IsFacePanelExcluded(faceCenterWorld, nWorld, panels))
-                    continue;
+    //             if (excludePanelFacingSides && IsFacePanelExcluded(faceCenterWorld, nWorld, panels))
+    //                 continue;
 
-                if (!IsFaceExposed(beam.transform, faceCenterWorld, nWorld))
-                    continue;
+    //             if (!IsFaceExposed(beam.transform, faceCenterWorld, nWorld))
+    //                 continue;
 
-                Vector3 outWorld = nWorld;
-                Vector3 faceBase = faceCenterWorld + outWorld * outwardGap;
+    //             Vector3 outWorld = nWorld;
+    //             Vector3 faceBase = faceCenterWorld + outWorld * outwardGap;
 
-                Vector3 c1 = faceBase - lengthAxisWorld * (stripLen * 0.5f);
-                Vector3 c2 = faceBase + lengthAxisWorld * (stripLen * 0.5f);
+    //             Vector3 c1 = faceBase - lengthAxisWorld * (stripLen * 0.5f);
+    //             Vector3 c2 = faceBase + lengthAxisWorld * (stripLen * 0.5f);
 
-                PlaceStripHalf(stripPrefab, c1, -lengthAxisWorld, outWorld);
-                PlaceStripHalf(stripPrefab, c2, lengthAxisWorld, outWorld); // FIX: remove unary '+' (invalid for Vector3)
+    //             PlaceStripHalf(stripPrefab, c1, -lengthAxisWorld, outWorld);
+    //             PlaceStripHalf(stripPrefab, c2, lengthAxisWorld, outWorld); // FIX: remove unary '+' (invalid for Vector3)
 
-                stripsPlaced += 2;
-            }
-        }
+    //             stripsPlaced += 2;
+    //         }
+    //     }
 
-        if (logSummary)
-            Debug.Log(string.Format("[VeneerManager] Applied veneers. Beams={0}, Panels={1}, StripsPlaced={2}", beams.Count, panels.Count, stripsPlaced));
+    //     if (logSummary)
+    //         Debug.Log(string.Format("[VeneerManager] Applied veneers. Beams={0}, Panels={1}, StripsPlaced={2}", beams.Count, panels.Count, stripsPlaced));
     }
 
     [ContextMenu("Clear Veneers")]

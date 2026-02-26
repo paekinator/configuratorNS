@@ -622,9 +622,9 @@ public class BuildController : MonoBehaviour
 
         if (HasIllegalOverlap(instance, null, null, out string reason))
         {
-            if (debugLogs) Debug.Log($"Blocked REAL V placement: {reason}");
-            Destroy(instance);
-            return;
+            // if (debugLogs) Debug.Log($"Blocked REAL V placement: {reason}");
+            // Destroy(instance);
+            // return;
         }
 
         var conn = instance.GetComponent<BeamConnections>();

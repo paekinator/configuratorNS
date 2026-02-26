@@ -10,6 +10,7 @@ public class SelectableBeam : MonoBehaviour
     private Renderer[] _renderers;
     private readonly Dictionary<Renderer, Material[]> _originalMats = new Dictionary<Renderer, Material[]>();
 
+    public List<GameObject> veneerStrips = new List<GameObject>(); // populated by PanelSlotManager pairing rebuild (runtime)
     void Awake()
     {
         _renderers = GetComponentsInChildren<Renderer>(true);
