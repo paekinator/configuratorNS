@@ -9,11 +9,14 @@ public class AttachmentPoint : MonoBehaviour
     public PointRole role = PointRole.Hole;
 
     [Header("Occupancy (runtime)")]
-    [NonSerialized] public bool isOccupied;
-    [NonSerialized] public GameObject occupant;
+    // [NonSerialized] 
+    public bool isOccupied;
+    // [NonSerialized] 
+    public GameObject occupant;
 
     // Used by PanelSlotManager pairing rebuild (runtime)
-    [NonSerialized] public AttachmentPoint pairedWith;
+    // [NonSerialized] 
+    public AttachmentPoint pairedWith;
 
     // -----------------------------
     // Twist / Compatibility Metadata

@@ -129,6 +129,7 @@ public class BuildController : MonoBehaviour
 
         public Transform hostRoot; // root that owns the hole/peg we are snapping to
         public string chosenPegNameOnBeam;
+        public string chosenHoleNameOnBeam;
         public string debugInfo;
     }
 
@@ -371,16 +372,31 @@ public class BuildController : MonoBehaviour
         Vector3 clickPoint = hit.point;
 
         AttachmentPoint nearestHole = FindNearestFreeHole(clickPoint, h3MaxSnapDistance);
-        if (nearestHole == null)
-            return new GhostPlacementResult { hasPose = false, isValid = false, debugInfo = "No free hole nearby" };
+        AttachmentPoint nearestPeg = FindNearestFreePeg(clickPoint, h3MaxSnapDistance);
 
-        Transform hostRoot = nearestHole.transform.root;
+        if (nearestHole == null && nearestPeg == null)
+            return new GhostPlacementResult { hasPose = false, isValid = false, debugInfo = "No free hole/peg nearby" };
+
+        bool useHoleHost;
+        if (nearestHole != null && nearestPeg != null)
+        {
+            float dh = Vector3.Distance(nearestHole.transform.position, clickPoint);
+            float dp = Vector3.Distance(nearestPeg.transform.position, clickPoint);
+            useHoleHost = dh <= dp;
+        }
+        else
+        {
+            useHoleHost = nearestHole != null;
+        }
+
+        AttachmentPoint hostPoint = useHoleHost ? nearestHole : nearestPeg;
+        Transform hostRoot = hostPoint.transform.root;
         if (hostRoot == null)
-            return new GhostPlacementResult { hasPose = false, isValid = false, debugInfo = "Hole has no root" };
+            return new GhostPlacementResult { hasPose = false, isValid = false, debugInfo = "Connector has no root" };
 
         HostKind hostKind = InferHostKindFromRoot(hostRoot);
 
-        int faceIndex = FaceIndexFromHoleName(nearestHole.name);
+        int faceIndex = FaceIndexFromHoleName(hostPoint.name);
         if (faceIndex == 0) faceIndex = 2;
 
         Vector3 faceOutLocal = GetSideOutLocal(hostKind, faceIndex);
@@ -403,42 +419,148 @@ public class BuildController : MonoBehaviour
         }
 
         AttachmentPoint[] apOnH = ghost.GetComponentsInChildren<AttachmentPoint>(true);
-        List<AttachmentPoint> pegs = new List<AttachmentPoint>();
-        for (int i = 0; i < apOnH.Length; i++)
-            if (apOnH[i] != null && apOnH[i].role == AttachmentPoint.PointRole.Peg && !apOnH[i].isOccupied)
-                pegs.Add(apOnH[i]);
 
-        if (pegs.Count == 0)
+        List<AttachmentPoint> ownConnectors = new List<AttachmentPoint>();
+        AttachmentPoint.PointRole neededRole = useHoleHost ? AttachmentPoint.PointRole.Peg : AttachmentPoint.PointRole.Hole;
+        for (int i = 0; i < apOnH.Length; i++)
+            if (apOnH[i] != null && apOnH[i].role == neededRole && !apOnH[i].isOccupied)
+                ownConnectors.Add(apOnH[i]);
+
+        if (ownConnectors.Count == 0)
         {
             return new GhostPlacementResult
             {
                 hasPose = true,
                 isValid = false,
-                position = nearestHole.transform.position,
+                position = hostPoint.transform.position,
                 rotation = targetRot,
-                targetHoleInScene = nearestHole,
+                targetHoleInScene = useHoleHost ? nearestHole : null,
+                targetPegInScene = useHoleHost ? null : nearestPeg,
                 hostRoot = hostRoot,
-                debugInfo = "H/T ghost has no free pegs"
+                debugInfo = useHoleHost ? "H/T ghost has no free pegs" : "H/T ghost has no free holes"
             };
         }
 
         ghost.transform.rotation = targetRot;
         Physics.SyncTransforms();
 
-        pegs.Sort((a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
+        ownConnectors.Sort((a, b) =>
+        {
+            string ka = GetConnectorGroupKey(a != null ? a.name : null);
+            string kb = GetConnectorGroupKey(b != null ? b.name : null);
+
+            int groupCmp = string.Compare(ka, kb, StringComparison.Ordinal);
+            if (groupCmp != 0) return groupCmp;
+
+            int ia = GetConnectorOrderIndex(a != null ? a.name : null);
+            int ib = GetConnectorOrderIndex(b != null ? b.name : null);
+
+            int idxCmp = ia.CompareTo(ib);
+            if (idxCmp != 0) return idxCmp;
+
+            string na = a != null ? a.name : string.Empty;
+            string nb = b != null ? b.name : string.Empty;
+            return string.Compare(na, nb, StringComparison.Ordinal);
+        });
+        if (debugLogs)
+        {
+            string sortedNames = string.Join(", ", ownConnectors.ConvertAll(c => c != null ? c.name : "null"));
+            Debug.Log($"ComputeGhostH: sorted own connectors ({neededRole}) = [{sortedNames}]");
+
+            var indexed = ownConnectors.ConvertAll(c =>
+            {
+                string name = c != null ? c.name : "null";
+                return $"{name}->idx:{GetConnectorOrderIndex(name)}";
+            });
+            Debug.Log($"ComputeGhostH: parsed connector indexes = [{string.Join(", ", indexed)}]");
+        }
+
+        List<AttachmentPoint> trialConnectors = ownConnectors;
+        // When attaching H/T to a host PEG, prefer the middle hole of the nearest hole-group first
+        // (e.g. A1 group center before B1 group), not the middle of the entire merged list.
+        if (!useHoleHost && ownConnectors.Count > 1)
+        {
+            trialConnectors = new List<AttachmentPoint>(ownConnectors.Count);
+
+            var groups = new Dictionary<string, List<AttachmentPoint>>(StringComparer.Ordinal);
+            for (int i = 0; i < ownConnectors.Count; i++)
+            {
+                var connector = ownConnectors[i];
+                string key = GetConnectorGroupKey(connector != null ? connector.name : null);
+                if (!groups.TryGetValue(key, out List<AttachmentPoint> list))
+                {
+                    list = new List<AttachmentPoint>();
+                    groups[key] = list;
+                }
+                list.Add(connector);
+            }
+
+            var orderedGroups = new List<List<AttachmentPoint>>(groups.Values);
+            orderedGroups.Sort((g1, g2) =>
+            {
+                var c1 = g1[(g1.Count - 1) / 2];
+                var c2 = g2[(g2.Count - 1) / 2];
+
+                float d1 = c1 != null ? (c1.transform.position - hostPoint.transform.position).sqrMagnitude : float.MaxValue;
+                float d2 = c2 != null ? (c2.transform.position - hostPoint.transform.position).sqrMagnitude : float.MaxValue;
+
+                int cmp = d1.CompareTo(d2);
+                if (cmp != 0) return cmp;
+
+                string n1 = c1 != null ? c1.name : string.Empty;
+                string n2 = c2 != null ? c2.name : string.Empty;
+                return string.Compare(n1, n2, StringComparison.Ordinal);
+            });
+
+            for (int gi = 0; gi < orderedGroups.Count; gi++)
+            {
+                List<AttachmentPoint> group = orderedGroups[gi];
+                int mid = (group.Count - 1) / 2;
+                trialConnectors.Add(group[mid]);
+
+                for (int offset = 1; trialConnectors.Count < ownConnectors.Count; offset++)
+                {
+                    int left = mid - offset;
+                    if (left >= 0)
+                        trialConnectors.Add(group[left]);
+
+                    int right = mid + offset;
+                    if (right < group.Count)
+                        trialConnectors.Add(group[right]);
+
+                    if (left < 0 && right >= group.Count)
+                        break;
+                }
+            }
+
+            if (debugLogs)
+            {
+                var groupInfo = new List<string>();
+                foreach (var kv in groups)
+                    groupInfo.Add($"{kv.Key}:{kv.Value.Count}");
+                Debug.Log($"ComputeGhostH: grouped connectors = [{string.Join(", ", groupInfo)}]");
+            }
+        }
+
+        if (debugLogs)
+        {
+            string trialNames = string.Join(", ", trialConnectors.ConvertAll(c => c != null ? c.name : "null"));
+            Debug.Log($"ComputeGhostH: trial order (useHoleHost={useHoleHost}) = [{trialNames}]");
+        }
 
         bool placed = false;
         string lastReason = "";
         Vector3 bestPos = ghost.transform.position;
         string chosenPegName = "";
+        string chosenHoleName = "";
 
-        for (int i = 0; i < pegs.Count; i++)
+        for (int i = 0; i < trialConnectors.Count; i++)
         {
-            var peg = pegs[i];
+            var ownConnector = trialConnectors[i];
 
-            Vector3 pegWorld = peg.transform.position;
-            Vector3 offset = pegWorld - ghost.transform.position;
-            Vector3 basePos = nearestHole.transform.position - offset;
+            Vector3 ownConnectorWorld = ownConnector.transform.position;
+            Vector3 offset = ownConnectorWorld - ghost.transform.position;
+            Vector3 basePos = hostPoint.transform.position - offset;
 
             Vector3 depthAdjust = faceOut * h3DepthOffset;
             Vector3 lateralAdjust = beamDir * h3LateralOffset;
@@ -456,12 +578,18 @@ public class BuildController : MonoBehaviour
             {
                 placed = true;
                 bestPos = pos;
-                chosenPegName = peg.name;
+                if (useHoleHost) chosenPegName = ownConnector.name;
+                else chosenHoleName = ownConnector.name;
+
+                if (debugLogs)
+                    Debug.Log($"ComputeGhostH: SUCCESS with connector={ownConnector.name} at trialIndex={i}");
                 break;
             }
             else
             {
                 lastReason = reason;
+                if (debugLogs)
+                    Debug.Log($"ComputeGhostH: blocked connector={ownConnector.name} at trialIndex={i} reason={reason}");
             }
         }
 
@@ -473,9 +601,10 @@ public class BuildController : MonoBehaviour
                 isValid = false,
                 position = ghost.transform.position,
                 rotation = ghost.transform.rotation,
-                targetHoleInScene = nearestHole,
+                targetHoleInScene = useHoleHost ? nearestHole : null,
+                targetPegInScene = useHoleHost ? null : nearestPeg,
                 hostRoot = hostRoot,
-                debugInfo = $"H/T blocked face={faceIndex} host={hostKind}: {lastReason}"
+                debugInfo = $"H/T blocked via {(useHoleHost ? "hole" : "peg")} face={faceIndex} host={hostKind}: {lastReason}"
             };
         }
 
@@ -485,10 +614,14 @@ public class BuildController : MonoBehaviour
             isValid = true,
             position = bestPos,
             rotation = ghost.transform.rotation,
-            targetHoleInScene = nearestHole,
+            targetHoleInScene = useHoleHost ? nearestHole : null,
+            targetPegInScene = useHoleHost ? null : nearestPeg,
             hostRoot = hostRoot,
             chosenPegNameOnBeam = chosenPegName,
-            debugInfo = $"H/T OK face={faceIndex} host={hostKind} peg={chosenPegName}"
+            chosenHoleNameOnBeam = chosenHoleName,
+            debugInfo = useHoleHost
+                ? $"H/T OK via hole face={faceIndex} host={hostKind} peg={chosenPegName}"
+                : $"H/T OK via peg face={faceIndex} host={hostKind} hole={chosenHoleName}"
         };
     }
 
@@ -637,6 +770,8 @@ public class BuildController : MonoBehaviour
             conn.RegisterOccupiedScenePoint(res.targetPegInScene);
         }
 
+        QueuePromoteHostHToTByPegMix(res.hostRoot);
+
         if (panelSlotManager != null)
             panelSlotManager.RebuildConnectionsAndRescanSlots();
 
@@ -674,6 +809,13 @@ public class BuildController : MonoBehaviour
             conn.RegisterOccupiedScenePoint(res.targetHoleInScene);
         }
 
+        if (res.targetPegInScene != null)
+        {
+            res.targetPegInScene.isOccupied = true;
+            res.targetPegInScene.occupant = instance;
+            conn.RegisterOccupiedScenePoint(res.targetPegInScene);
+        }
+
         // Mark the chosen peg on the placed beam as occupied (so it can't be reused)
         if (!string.IsNullOrEmpty(res.chosenPegNameOnBeam))
         {
@@ -689,6 +831,23 @@ public class BuildController : MonoBehaviour
                 break;
             }
         }
+
+        if (!string.IsNullOrEmpty(res.chosenHoleNameOnBeam))
+        {
+            AttachmentPoint[] apOnH = instance.GetComponentsInChildren<AttachmentPoint>(true);
+            for (int i = 0; i < apOnH.Length; i++)
+            {
+                if (apOnH[i] == null) continue;
+                if (apOnH[i].role != AttachmentPoint.PointRole.Hole) continue;
+                if (apOnH[i].name != res.chosenHoleNameOnBeam) continue;
+
+                apOnH[i].isOccupied = true;
+                apOnH[i].occupant = instance;
+                break;
+            }
+        }
+
+        QueuePromoteHostHToTByPegMix(res.hostRoot);
 
         if (panelSlotManager != null)
             panelSlotManager.RebuildConnectionsAndRescanSlots();
@@ -844,10 +1003,14 @@ public class BuildController : MonoBehaviour
             if (hit.GetComponentInParent<AttachmentPoint>() != null)
                 continue;
 
+            // Broad-phase can report nearby colliders; only block on actual penetration.
+            if (!TryGetWorstPenetrationDepth(ownCols, hit, out float worstDepth))
+                continue;
+
             // Host tolerance: allow only tiny penetration with hostRoot
             if (toleranceRoot != null && hitRoot == toleranceRoot)
             {
-                if (PenetratesBeyondTolerance(ownCols, hit, hostPenetrationTolerance, out float worstDepth))
+                if (worstDepth > hostPenetrationTolerance)
                 {
                     reason = $"host penetration {worstDepth:F4} > tol {hostPenetrationTolerance:F4} on {hit.name}";
                     return true;
@@ -858,7 +1021,7 @@ public class BuildController : MonoBehaviour
                 }
             }
 
-            reason = $"own={instance.name} hit={hit.name} hitRoot={hitRoot.name}";
+            reason = $"own={instance.name}#{instanceRoot.GetInstanceID()} hit={hit.name} hitRoot={hitRoot.name}#{hitRoot.GetInstanceID()} depth={worstDepth:F4}";
             return true;
         }
 
@@ -889,6 +1052,169 @@ public class BuildController : MonoBehaviour
         }
 
         return false;
+    }
+
+    bool TryGetWorstPenetrationDepth(Collider[] ownCols, Collider other, out float worstDepth)
+    {
+        worstDepth = 0f;
+
+        if (ownCols == null || other == null) return false;
+
+        for (int i = 0; i < ownCols.Length; i++)
+        {
+            Collider a = ownCols[i];
+            if (a == null) continue;
+            if (!a.enabled) continue;
+
+            if (Physics.ComputePenetration(
+                    a, a.transform.position, a.transform.rotation,
+                    other, other.transform.position, other.transform.rotation,
+                    out Vector3 dir, out float dist))
+            {
+                worstDepth = Mathf.Max(worstDepth, dist);
+            }
+        }
+
+        return worstDepth > 0f;
+    }
+
+    static string GetConnectorGroupKey(string connectorName)
+    {
+        if (string.IsNullOrEmpty(connectorName)) return string.Empty;
+
+        int i = connectorName.IndexOf('(');
+        if (i < 0) return connectorName.Trim();
+
+        return connectorName.Substring(0, i).Trim();
+    }
+
+    static int GetConnectorOrderIndex(string connectorName)
+    {
+        if (string.IsNullOrEmpty(connectorName)) return int.MinValue;
+
+        int open = connectorName.LastIndexOf('(');
+        int close = connectorName.LastIndexOf(')');
+        if (open >= 0 && close > open)
+        {
+            string inside = connectorName.Substring(open + 1, close - open - 1).Trim();
+            if (int.TryParse(inside, out int parsedInParens))
+                return parsedInParens;
+        }
+
+        int end = connectorName.Length - 1;
+        while (end >= 0 && !char.IsDigit(connectorName[end])) end--;
+        if (end < 0) return 0;
+
+        int start = end;
+        while (start >= 0 && char.IsDigit(connectorName[start])) start--;
+        string digits = connectorName.Substring(start + 1, end - start);
+
+        if (int.TryParse(digits, out int parsedTail))
+            return parsedTail;
+
+        return 0;
+    }
+
+    void QueuePromoteHostHToTByPegMix(Transform hostRoot)
+    {
+        if (hostRoot == null) return;
+        StartCoroutine(TryPromoteHostHToTByPegMixDelayed(hostRoot.root));
+    }
+
+    System.Collections.IEnumerator TryPromoteHostHToTByPegMixDelayed(Transform hostRoot)
+    {
+        // Allow occupancy/pairing state to settle for this frame.
+        yield return null;
+        TryPromoteHostHToTByPegMix(hostRoot);
+    }
+
+    void TryPromoteHostHToTByPegMix(Transform hostRoot)
+    {
+        if (hostRoot == null)
+        {
+            if (debugLogs) Debug.Log("TryPromoteHostHToTByPegMix: hostRoot is null");
+            return;
+        }
+
+        hostRoot = hostRoot.root;
+        string hostName = hostRoot.name;
+        if (debugLogs) Debug.Log($"TryPromoteHostHToTByPegMix: host={hostName}");
+
+        if (string.IsNullOrEmpty(hostName))
+        {
+            if (debugLogs) Debug.Log("TryPromoteHostHToTByPegMix: host name is empty");
+            return;
+        }
+
+        if (!hostName.StartsWith("H", StringComparison.OrdinalIgnoreCase))
+        {
+            if (debugLogs) Debug.Log($"TryPromoteHostHToTByPegMix: skip, host is not H (host={hostName})");
+            return;
+        }
+
+        AttachmentPoint[] aps = hostRoot.GetComponentsInChildren<AttachmentPoint>(true);
+        bool hasVPegAttachment = false;
+        bool hasHPegAttachment = false;
+        int occupiedPegCount = 0;
+
+        for (int i = 0; i < aps.Length; i++)
+        {
+            AttachmentPoint ap = aps[i];
+            if (ap == null) continue;
+            if (ap.role != AttachmentPoint.PointRole.Peg) continue;
+            if (!ap.isOccupied) continue;
+            if (ap.occupant == null) continue;
+
+            occupiedPegCount++;
+
+            Transform occRoot = null;
+            if (ap.pairedWith != null && ap.pairedWith.transform != null)
+                occRoot = ap.pairedWith.transform.root;
+
+            if (debugLogs)
+                Debug.Log($"TryPromoteHostHToTByPegMix: found occupied peg {ap.name} on host {hostName}, occRoot={(occRoot != null ? occRoot.name : "null")}");
+
+            if (occRoot == null) continue;
+
+            // Ignore self-occupied pegs (internal lock on own connector),
+            // we only care about attached external beams.
+            if (occRoot.root == hostRoot.root)
+            {
+                if (debugLogs) Debug.Log($"TryPromoteHostHToTByPegMix: peg {ap.name} occupied by self, ignored");
+                continue;
+            }
+
+            string occName = occRoot.root.name;
+            if (debugLogs) Debug.Log($"TryPromoteHostHToTByPegMix: peg {ap.name} occupied by {occName}");
+
+            if (IsVertical(occName))
+                hasVPegAttachment = true;
+            else if (IsHorizontal(occName) || IsTwist(occName))
+                hasHPegAttachment = true;
+
+            if (hasVPegAttachment && hasHPegAttachment)
+                break;
+        }
+
+        if (debugLogs)
+            Debug.Log($"TryPromoteHostHToTByPegMix: host={hostName} occupiedPegs={occupiedPegCount} hasV={hasVPegAttachment} hasHOrT={hasHPegAttachment}");
+
+        if (!hasVPegAttachment || !hasHPegAttachment)
+        {
+            if (debugLogs) Debug.Log($"TryPromoteHostHToTByPegMix: no promotion for {hostName}");
+            return;
+        }
+
+        hostRoot.name = "T" + hostName.Substring(1);
+
+        for (int i = 0; i < aps.Length; i++)
+        {
+            if (aps[i] == null) continue;
+            aps[i].ownerBeamKind = BeamKind.TwistH;
+        }
+
+        if (debugLogs)
+            Debug.Log($"Promoted host beam to T due to mixed peg attachments: {hostName} -> {hostRoot.name}");
     }
 
     bool IsFloorLayer(int layer) => (floorMask.value & (1 << layer)) != 0;

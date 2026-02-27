@@ -1143,7 +1143,7 @@ MonoBehaviour:
   panelBlockerLayer: 12
   frameThickness: 0.01
   panelThickness: 0.01
-  panelGap: 0.03
+  panelGap: 0.19
   panelOutset: 0.01
   panelInsetX: 0
   panelInsetY: 0.2

@@ -120,7 +120,7 @@ public class SelectionManager : MonoBehaviour
                 }
                 else
                 {
-                    Destroy(sel.gameObject);
+                    Destroy(sel.gameObject.transform.root.gameObject);
                 }
                 continue;
             }
@@ -130,7 +130,7 @@ public class SelectionManager : MonoBehaviour
             var conn = sel.GetComponent<BeamConnections>();
             if (conn != null) conn.ReleaseAll();
 
-            Destroy(sel.gameObject);
+            Destroy(sel.gameObject.transform.root.gameObject);
         }
     }
 }
