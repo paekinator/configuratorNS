@@ -81,8 +81,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9101038907023255453}
-  - component: {fileID: 4393619681827333665}
-  - component: {fileID: 7509403931290917890}
   m_Layer: 8
   m_Name: mid(4)
   m_TagString: Untagged
@@ -105,45 +103,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 602460783766770748}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
---- !u!114 &4393619681827333665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1166747026516176859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &7509403931290917890
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1166747026516176859}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1903007823825819938
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,8 +184,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6053119599161935701}
-  - component: {fileID: 4364115609105685705}
-  - component: {fileID: 7144956075844493996}
   m_Layer: 8
   m_Name: mid(1)
   m_TagString: Untagged
@@ -249,45 +206,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 602460783766770748}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
---- !u!114 &4364115609105685705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2778483491201095578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &7144956075844493996
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2778483491201095578}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2943594353792495899
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,8 +287,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 991200065757673437}
-  - component: {fileID: 9174316278636547373}
-  - component: {fileID: 4317132786112424794}
   m_Layer: 8
   m_Name: mid(0)
   m_TagString: Untagged
@@ -393,45 +309,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 602460783766770748}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
---- !u!114 &9174316278636547373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3058833356940781253}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &4317132786112424794
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3058833356940781253}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3799003299015993185
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,8 +462,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8261853673019101794}
-  - component: {fileID: 8517194417086364981}
-  - component: {fileID: 8342069600540994626}
   m_Layer: 8
   m_Name: mid(3)
   m_TagString: Untagged
@@ -609,45 +484,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 602460783766770748}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
---- !u!114 &8517194417086364981
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3965128402446680014}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &8342069600540994626
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3965128402446680014}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3971984308168536132
 GameObject:
   m_ObjectHideFlags: 0
@@ -729,8 +565,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 156380011871829921}
-  - component: {fileID: 5099971903628211822}
-  - component: {fileID: 3375473629395951468}
   m_Layer: 8
   m_Name: mid(2)
   m_TagString: Untagged
@@ -753,45 +587,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 602460783766770748}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &5099971903628211822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4320524762474154178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &3375473629395951468
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4320524762474154178}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4599870855348522217
 GameObject:
   m_ObjectHideFlags: 0

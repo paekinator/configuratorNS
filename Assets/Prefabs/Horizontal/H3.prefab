@@ -153,8 +153,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3458118801453031666}
-  - component: {fileID: 6267320029435108260}
-  - component: {fileID: 3616858341977206139}
   m_Layer: 8
   m_Name: mid(0)
   m_TagString: Untagged
@@ -177,45 +175,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4397170288544101182}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &6267320029435108260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712441842574392252}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &3616858341977206139
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712441842574392252}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3288176868346342191
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,8 +289,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6491006998806051397}
-  - component: {fileID: 3187750263190294965}
-  - component: {fileID: 7599099206006229390}
   m_Layer: 8
   m_Name: mid(0)
   m_TagString: Untagged
@@ -354,45 +311,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4397170288544101182}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
---- !u!114 &3187750263190294965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3520771928151381884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &7599099206006229390
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3520771928151381884}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5150210358736782808
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,8 +530,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2337700310525011001}
-  - component: {fileID: 7853852832674756458}
-  - component: {fileID: 1796450471986159911}
   m_Layer: 8
   m_Name: mid(0)
   m_TagString: Untagged
@@ -636,45 +552,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4397170288544101182}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 180}
---- !u!114 &7853852832674756458
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6244343635663899229}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c852328cdae244fbcad177ce47527012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
-  role: 0
-  isOccupied: 0
-  occupant: {fileID: 0}
-  pairedWith: {fileID: 0}
-  ownerBeamKind: 0
-  twistEndId: -1
---- !u!135 &1796450471986159911
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6244343635663899229}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.0002
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8165216714500103421
 GameObject:
   m_ObjectHideFlags: 0
