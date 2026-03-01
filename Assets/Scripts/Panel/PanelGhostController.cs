@@ -118,25 +118,25 @@ public class PanelGhostController : MonoBehaviour
         }
 
         // Determine side based on camera position relative to slot plane
-        Vector3 n = slot.normal.normalized;
+        Quaternion rot = (slot.slotTrigger != null)
+            ? slot.slotTrigger.rotation
+            : Quaternion.LookRotation(slot.normal, slot.upAxis);
+
+        Vector3 n = (slot.normal.sqrMagnitude > 1e-6f)
+            ? slot.normal.normalized
+            : (rot * Vector3.forward);
         Vector3 toCam = (cam.transform.position - slot.center);
         float d = Vector3.Dot(toCam, n);
         int side = (d >= 0f) ? +1 : -1;
 
         bool canPlace = slotManager.CanPlacePanel(slot, side);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x );
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y );
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 0.3f);
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 0.3f);
 
-        float offset = (slotManager.frameThickness * 0.5f) +
-                       (slotManager.panelThickness * 0.5f) +
-                       slotManager.panelGap +
-                       slotManager.panelOutset;
+        float offset = slotManager.panelOutset + slotManager.panelGap + (slotManager.panelThickness * 0.5f);
 
         Vector3 pos = slot.center + n * (side > 0 ? offset : -offset);
-
-        Vector3 yAxis = slot.upAxis.normalized;
-        Quaternion rot = Quaternion.LookRotation(n, (slot.corner3 - slot.corner0).normalized);
         
         _ghost.transform.SetPositionAndRotation(pos, rot);
 

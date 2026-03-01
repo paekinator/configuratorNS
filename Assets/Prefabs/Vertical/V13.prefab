@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8675515351454019050}
   - component: {fileID: 2393977229666123612}
   m_Layer: 8
-  m_Name: AP_Side2_04 (9)
+  m_Name: AP_Side2_04 (10)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,6 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2393977229666123612
@@ -115,6 +118,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4965408123038915283
@@ -184,6 +190,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2344597582220480544
@@ -253,6 +262,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2108295690512632930
@@ -322,6 +334,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &3552429562618055847
@@ -391,6 +406,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &463242793916554091
@@ -460,6 +478,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4174303067843573050
@@ -529,6 +550,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4880128766688212973
@@ -598,6 +622,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &3616320768093907024
@@ -667,6 +694,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &6007480529335333358
@@ -702,7 +732,7 @@ GameObject:
   - component: {fileID: 5162019147959679266}
   - component: {fileID: 8183903669868479416}
   m_Layer: 8
-  m_Name: AP_Side4_04 (9)
+  m_Name: AP_Side4_04 (12)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -736,6 +766,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8183903669868479416
@@ -771,7 +804,7 @@ GameObject:
   - component: {fileID: 5601333789277482443}
   - component: {fileID: 4952770571376802569}
   m_Layer: 8
-  m_Name: AP_Side3_04 (9)
+  m_Name: AP_Side3_04 (11)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -805,6 +838,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4952770571376802569
@@ -874,6 +910,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2160365099178147437
@@ -943,6 +982,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8609063591284633483
@@ -1012,6 +1054,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2445716495773816076
@@ -1081,6 +1126,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &6871698249228927818
@@ -1150,6 +1198,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &1539891060240060281
@@ -1219,6 +1270,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4824090271078615258
@@ -1288,6 +1342,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &1336677157807227653
@@ -1357,6 +1414,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &756620211653827682
@@ -1426,6 +1486,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &7245219142736896329
@@ -1495,6 +1558,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4674201043361767773
@@ -1564,6 +1630,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8533743551747738322
@@ -1666,6 +1735,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2514970484374021164
@@ -1735,6 +1807,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &3256572717650317677
@@ -1804,6 +1879,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &1261883780005312729
@@ -1906,6 +1984,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2418226788696320389
@@ -1975,6 +2056,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8975277297063857482
@@ -2044,6 +2128,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4841149813843393274
@@ -2113,6 +2200,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4473250466494156440
@@ -2182,6 +2272,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &6047103511342575128
@@ -2251,6 +2344,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2460306162367225969
@@ -2386,6 +2482,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &9080709291050276094
@@ -2455,6 +2554,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &5283219407896127364
@@ -2524,6 +2626,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8776859290563585025
@@ -2593,6 +2698,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &7260002506394834154
@@ -2662,6 +2770,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2408225025647140402
@@ -2731,6 +2842,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2357576350948212113
@@ -2800,6 +2914,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2723458088069761192
@@ -2869,6 +2986,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &6727849697388353242
@@ -2938,6 +3058,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8072894812746607322
@@ -3007,6 +3130,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &1360607736481116356
@@ -3076,6 +3202,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8918562185564900692
@@ -3145,6 +3274,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &9019957861307254783
@@ -3214,6 +3346,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &1165000907619916642
@@ -3283,6 +3418,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &5419318807427346481
@@ -3352,6 +3490,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4438807212056710298
@@ -3421,6 +3562,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &9027594780637368262
@@ -3490,6 +3634,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4448821163887880426
@@ -3559,6 +3706,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &8787740216577480041
@@ -3628,6 +3778,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &4522669365900111284
@@ -3697,6 +3850,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2808915075008706273

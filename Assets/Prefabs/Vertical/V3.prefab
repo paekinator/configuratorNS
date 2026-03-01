@@ -46,6 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &3408015112605170072
@@ -148,6 +151,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &5342391207645249050
@@ -250,6 +256,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &7683073996927061802
@@ -319,6 +328,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &5744165112811987197
@@ -388,6 +400,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &351038969396601403
@@ -457,6 +472,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &213498296191287048
@@ -592,6 +610,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2713375283893361264
@@ -661,6 +682,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &419662532212206875
@@ -730,6 +754,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2630465324956716796
@@ -799,6 +826,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &9026776652247794070
@@ -868,6 +898,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &7522682426404596465
@@ -937,6 +970,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttachmentPoint
   role: 0
+  isOccupied: 0
+  occupant: {fileID: 0}
+  pairedWith: {fileID: 0}
   ownerBeamKind: 0
   twistEndId: -1
 --- !u!135 &2891530850897251563
@@ -1500,6 +1536,10 @@ PrefabInstance:
     - target: {fileID: 918650178495192230, guid: 7d117488eca7d43f69b677f76b8ef2b2, type: 3}
       propertyPath: m_Name
       value: H2 exterior veneer
+      objectReference: {fileID: 0}
+    - target: {fileID: 918650178495192230, guid: 7d117488eca7d43f69b677f76b8ef2b2, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

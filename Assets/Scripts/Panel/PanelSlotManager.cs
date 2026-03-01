@@ -133,8 +133,8 @@ public class PanelSlotManager : MonoBehaviour
 
         Vector3 n = (slot.normal.sqrMagnitude > 1e-6f) ? slot.normal.normalized : (rot * Vector3.forward);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x);
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y);
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 0.3f);
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 0.3f);
 
         Debug.Log($"2innerW={innerW} innerH={innerH}  slot.sizeXY={slot.sizeXY}  frameThick={frameThickness} insetX={panelInsetX} insetY={panelInsetY}");
 
@@ -331,6 +331,43 @@ public class PanelSlotManager : MonoBehaviour
     static bool IsHRoot(Transform t) =>
         t != null && t.name.StartsWith("H", StringComparison.OrdinalIgnoreCase);
 
+    static string ExtractParenToken(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+
+        int open = name.LastIndexOf('(');
+        int close = name.LastIndexOf(')');
+        if (open < 0 || close <= open) return null;
+
+        string token = name.Substring(open + 1, close - open - 1).Trim();
+        return string.IsNullOrEmpty(token) ? null : token;
+    }
+
+    Dictionary<string, Vector3> BuildMidTokenMap(Transform beamRoot)
+    {
+        var map = new Dictionary<string, Vector3>(StringComparer.OrdinalIgnoreCase);
+        if (beamRoot == null) return map;
+
+        var all = beamRoot.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < all.Length; i++)
+        {
+            var t = all[i];
+            if (t == null) continue;
+
+            string n = t.name;
+            if (string.IsNullOrEmpty(n)) continue;
+            if (!n.StartsWith("mid", StringComparison.OrdinalIgnoreCase)) continue;
+
+            string token = ExtractParenToken(n);
+            if (string.IsNullOrEmpty(token)) continue;
+
+            if (!map.ContainsKey(token))
+                map[token] = t.position;
+        }
+
+        return map;
+    }
+
     Vector3Int KeyFromWorld(Vector3 p)
     {
         float q = Mathf.Max(0.0001f, nodeQuantize);
@@ -397,6 +434,43 @@ public class PanelSlotManager : MonoBehaviour
         }
 
         var spans = new List<HSpan>();
+        var midTokenMapByRoot = new Dictionary<Transform, Dictionary<string, Vector3>>();
+
+        Vector3 ResolveApPoint(AttachmentPoint ap)
+        {
+            if (ap == null) return Vector3.zero;
+
+            Vector3 pos = ap.transform.position;
+            Transform root = ap.transform.root;
+            if (root == null) return pos;
+
+            string token = ExtractParenToken(ap.transform.name);
+            if (string.IsNullOrEmpty(token)) return pos;
+
+            if (!midTokenMapByRoot.TryGetValue(root, out var map))
+            {
+                map = BuildMidTokenMap(root);
+                midTokenMapByRoot[root] = map;
+            }
+
+            if (map.TryGetValue(token, out var midPos))
+                return midPos;
+
+            return pos;
+        }
+
+        AttachmentPoint ResolveHoleApForCorner(AttachmentPoint ap)
+        {
+            if (ap == null || ap.pairedWith == null) return null;
+
+            if (ap.role == AttachmentPoint.PointRole.Hole)
+                return ap;
+
+            if (ap.role == AttachmentPoint.PointRole.Peg && ap.pairedWith.role == AttachmentPoint.PointRole.Hole)
+                return ap.pairedWith;
+
+            return null;
+        }
 
         foreach (var kv in hApsByHRoot)
         {
@@ -415,11 +489,16 @@ public class PanelSlotManager : MonoBehaviour
                 if (!ap.isOccupied) continue;
                 if (ap.pairedWith == null) continue;
 
+                var holeAp = ResolveHoleApForCorner(ap);
+                if (holeAp == null) continue;
+
                 Transform otherRoot = ap.pairedWith.transform.root;
                 if (otherRoot == null) continue;
                 if (otherRoot == hRoot) continue;
 
-                Vector3 join = (ap.transform.position + ap.pairedWith.transform.position) * 0.5f;
+                // Use HOLE-only position for corner generation (never peg position).
+                // If a matching mid(token) exists, ResolveApPoint() will use that midpoint object.
+                Vector3 join = ResolveApPoint(holeAp);
 
                 // If this endpoint connects to a V post, snap XZ to the V post pivot.
                 // This merges face-offset joins (front/back vs left/right) into a single logical corner.
@@ -884,6 +963,8 @@ public class PanelSlotManager : MonoBehaviour
                                                     out Vector3 c0, out Vector3 c1, out Vector3 c2, out Vector3 c3,
                                                     out float width, out float height, out Vector3 upAxis)
             {
+                string FVec(Vector3 v) => $"({v.x:F4},{v.y:F4},{v.z:F4})";
+
                 Vector3[] pts = new Vector3[] { p0, p1, p2, p3 };
 
                 // Flatten Y to remove drift
@@ -917,6 +998,14 @@ public class PanelSlotManager : MonoBehaviour
                     width = Vector3.Distance(c0, c1);
                     height = Vector3.Distance(c0, c3);
                     upAxis = Vector3.forward;
+                    if (debug)
+                    {
+                        Debug.Log(
+                            $"[PanelSlot][CANON-FLOOR][DEGEN] p0={FVec(p0)} p1={FVec(p1)} p2={FVec(p2)} p3={FVec(p3)} " +
+                            $"-> c0={FVec(c0)} c1={FVec(c1)} c2={FVec(c2)} c3={FVec(c3)} w={width:F4} h={height:F4}"
+                        );
+                    }
+                    
                     return;
                 }
 
@@ -1037,6 +1126,14 @@ public class PanelSlotManager : MonoBehaviour
 
                 // KEY: upAxis is the true geometric height direction of the rectangle (in-plane), not derived from corner labels.
                 upAxis = heightDir;
+
+                if (debug)
+                {
+                    Debug.Log(
+                        $"[PanelSlot][CANON-FLOOR] p0={FVec(p0)} p1={FVec(p1)} p2={FVec(p2)} p3={FVec(p3)} " +
+                        $"-> c0={FVec(c0)} c1={FVec(c1)} c2={FVec(c2)} c3={FVec(c3)} w={width:F4} h={height:F4} up={FVec(upAxis)}"
+                    );
+                }
             }
 
             foreach (var kvN in neighbors)
@@ -1296,7 +1393,11 @@ public class PanelSlotManager : MonoBehaviour
 
         h.normal = g.normal.sqrMagnitude > 1e-6f ? g.normal.normalized : Vector3.up;
         h.center = g.center;
-        h.sizeXY = g.sizeXY;
+        var minRectSize = GetMinRectSize(g.c0, g.c1, g.c2, g.c3);
+        h.sizeXY = new Vector2(
+            Mathf.Max(0.01f, minRectSize.x),
+            Mathf.Max(0.01f, minRectSize.y)
+        );
         h.upAxis = g.upAxis.sqrMagnitude > 1e-6f ? g.upAxis.normalized : Vector3.forward;
 
         // FLOOR/ROOF slots: keep rotation deterministic in-world to avoid flip/jitter and
@@ -1331,6 +1432,22 @@ public class PanelSlotManager : MonoBehaviour
         }
 
         if (h.blocker != null) h.blocker.gameObject.SetActive(h.HasAnyPanel());
+    }
+
+    static Vector2 GetMinRectSize(Vector3 c0, Vector3 c1, Vector3 c2, Vector3 c3)
+    {
+        float w0 = Vector3.Distance(c0, c1);
+        float w1 = Vector3.Distance(c3, c2);
+        float h0 = Vector3.Distance(c0, c3);
+        float h1 = Vector3.Distance(c1, c2);
+        Debug.Log($"[PanelSlot][MIN-SIZE] c0={c0:F4} c1={c1:F4} c2={c2:F4} c3={c3:F4}");
+        
+        float minWidth = Mathf.Min(w0, w1);
+        float minHeight = Mathf.Min(h0, h1);
+
+        Debug.Log($"[PanelSlot][MIN-SIZE] w0={w0:F4} w1={w1:F4} h0={h0:F4} h1={h1:F4} -> minW={minWidth:F4} minH={minHeight:F4}");
+
+        return new Vector2(minWidth, minHeight);
     }
 
     void RemoveUnseenSlots()
