@@ -131,13 +131,13 @@ public class PanelGhostController : MonoBehaviour
 
         bool canPlace = slotManager.CanPlacePanel(slot, side);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 0.3f);
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 0.3f);
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 0.4f);
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 0.4f);
 
         float offset = slotManager.panelOutset + slotManager.panelGap + (slotManager.panelThickness * 0.5f);
 
         Vector3 pos = slot.center + n * (side > 0 ? offset : -offset);
-        
+
         _ghost.transform.SetPositionAndRotation(pos, rot);
 
         // Visual thickness only if your ghost prefab has depth

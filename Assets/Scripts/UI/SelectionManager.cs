@@ -15,6 +15,12 @@ public class SelectionManager : MonoBehaviour
     // Multi-selection list (works for beams + panels because both use SelectableBeam)
     private readonly List<SelectableBeam> _selected = new List<SelectableBeam>();
 
+    // Drag cycling
+    private Vector3 _dragStartPos = Vector3.zero;
+    private bool _isDragging = false;
+    private bool _dragConsumed = false;
+    private float _dragThreshold = 20f; // pixels
+
     void Update()
     {
         if (UIInteractionState.CurrentMode != UIInteractionState.Mode.Select)
@@ -23,11 +29,52 @@ public class SelectionManager : MonoBehaviour
         // Click to select
         if (Input.GetMouseButtonDown(0))
         {
+            _dragStartPos = Input.mousePosition;
+            _isDragging = true;
+            _dragConsumed = false;
+
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
 
             bool additive = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             TrySelectUnderCursor(additive);
+        }
+
+        // Drag cycling on mouse hold
+        if (Input.GetMouseButton(0) && _isDragging && !_dragConsumed)
+        {
+            Vector3 currentPos = Input.mousePosition;
+            Vector3 dragDelta = currentPos - _dragStartPos;
+
+            if (dragDelta.magnitude > _dragThreshold)
+            {
+                if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
+                {
+                    // Determine which axis has more movement
+                    if (Mathf.Abs(dragDelta.x) > Mathf.Abs(dragDelta.y))
+                    {
+                        // Horizontal drag: right = +1 (next), left = -1 (previous)
+                        int direction = dragDelta.x > 0 ? 1 : -1;
+                        _dragStartPos = Input.mousePosition;
+                        TryCycleSelectedHSingleHoleConnection(direction);
+                    }
+                    else
+                    {
+                        // Vertical drag: up = +1 (next), down = -1 (previous)
+                        int direction = dragDelta.y > 0 ? 1 : -1;
+                        _dragStartPos = Input.mousePosition;
+                        // Horizontal Drag
+                        TryCycleSelectedHSingleHoleConnection(direction);
+                    }
+                    // _dragConsumed = true;
+                }
+            }
+        }
+
+        // Reset drag on mouse release
+        if (Input.GetMouseButtonUp(0))
+        {
+            _isDragging = false;
         }
 
         // Delete selected
@@ -36,9 +83,13 @@ public class SelectionManager : MonoBehaviour
 
         // Adjust selected H hole assignment
         if (Input.GetKeyDown(KeyCode.E))
+        {
             TryCycleSelectedHSingleHoleConnection(+1);
+        }
         else if (Input.GetKeyDown(KeyCode.Q))
+        {
             TryCycleSelectedHSingleHoleConnection(-1);
+        }
 
         // Same behavior on mouse wheel: up = next, down = previous.
         // Ignore when pointer is over UI to avoid conflicts with scrolling UI panels.
@@ -183,6 +234,13 @@ public class SelectionManager : MonoBehaviour
                n.StartsWith("T", StringComparison.OrdinalIgnoreCase);
     }
 
+    static bool IsVLikeRoot(Transform t)
+    {
+        if (t == null) return false;
+        string n = t.name;
+        return n.StartsWith("V", StringComparison.OrdinalIgnoreCase);
+    }
+
     static int CompareAttachmentPointsByConnectorName(AttachmentPoint a, AttachmentPoint b)
     {
         string na = a != null ? a.name : string.Empty;
@@ -205,8 +263,8 @@ public class SelectionManager : MonoBehaviour
     static int WrapIndex(int idx, int count)
     {
         if (count <= 0) return 0;
-        while (idx < 0) idx += count;
-        while (idx >= count) idx -= count;
+        while (idx < 0) idx = 0;
+        while (idx >= count) idx = count - 1;
         return idx;
     }
 

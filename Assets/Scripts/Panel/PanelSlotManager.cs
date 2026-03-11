@@ -133,8 +133,8 @@ public class PanelSlotManager : MonoBehaviour
 
         Vector3 n = (slot.normal.sqrMagnitude > 1e-6f) ? slot.normal.normalized : (rot * Vector3.forward);
 
-        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 0.3f);
-        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 0.3f);
+        float innerW = Mathf.Max(0.01f, slot.sizeXY.x - 0.4f);
+        float innerH = Mathf.Max(0.01f, slot.sizeXY.y - 0.4f);
 
         Debug.Log($"2innerW={innerW} innerH={innerH}  slot.sizeXY={slot.sizeXY}  frameThick={frameThickness} insetX={panelInsetX} insetY={panelInsetY}");
 
@@ -1005,7 +1005,7 @@ public class PanelSlotManager : MonoBehaviour
                             $"-> c0={FVec(c0)} c1={FVec(c1)} c2={FVec(c2)} c3={FVec(c3)} w={width:F4} h={height:F4}"
                         );
                     }
-                    
+
                     return;
                 }
 
@@ -1441,7 +1441,7 @@ public class PanelSlotManager : MonoBehaviour
         float h0 = Vector3.Distance(c0, c3);
         float h1 = Vector3.Distance(c1, c2);
         Debug.Log($"[PanelSlot][MIN-SIZE] c0={c0:F4} c1={c1:F4} c2={c2:F4} c3={c3:F4}");
-        
+
         float minWidth = Mathf.Min(w0, w1);
         float minHeight = Mathf.Min(h0, h1);
 
