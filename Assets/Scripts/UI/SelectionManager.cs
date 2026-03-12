@@ -63,8 +63,10 @@ public class SelectionManager : MonoBehaviour
                         // Vertical drag: up = +1 (next), down = -1 (previous)
                         int direction = dragDelta.y > 0 ? 1 : -1;
                         _dragStartPos = Input.mousePosition;
-                        // Horizontal Drag
-                        TryCycleSelectedHSingleHoleConnection(direction);
+                        // Vertical Drag
+                        if (!TryCycleSelectedVSingleHoleConnection(direction))
+                            TryCycleSelectedHSingleHoleConnection(direction);
+
                     }
                     // _dragConsumed = true;
                 }
@@ -84,23 +86,25 @@ public class SelectionManager : MonoBehaviour
         // Adjust selected H hole assignment
         if (Input.GetKeyDown(KeyCode.E))
         {
-            TryCycleSelectedHSingleHoleConnection(+1);
+            if (!TryCycleSelectedVSingleHoleConnection(1))
+                TryCycleSelectedHSingleHoleConnection(1);
         }
         else if (Input.GetKeyDown(KeyCode.Q))
         {
-            TryCycleSelectedHSingleHoleConnection(-1);
+            if (!TryCycleSelectedVSingleHoleConnection(-1))
+                TryCycleSelectedHSingleHoleConnection(-1);
         }
 
         // Same behavior on mouse wheel: up = next, down = previous.
         // Ignore when pointer is over UI to avoid conflicts with scrolling UI panels.
-        if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
-        {
-            float wheel = Input.mouseScrollDelta.y;
-            if (wheel > 0f)
-                TryCycleSelectedHSingleHoleConnection(+1);
-            else if (wheel < 0f)
-                TryCycleSelectedHSingleHoleConnection(-1);
-        }
+        // if (EventSystem.current == null || !EventSystem.current.IsPointerOverGameObject())
+        // {
+        //     float wheel = Input.mouseScrollDelta.y;
+        //     if (wheel > 0f)
+        //         TryCycleSelectedHSingleHoleConnection(+1);
+        //     else if (wheel < 0f)
+        //         TryCycleSelectedHSingleHoleConnection(-1);
+        // }
     }
 
     bool TryCycleSelectedHSingleHoleConnection(int direction)
@@ -157,6 +161,130 @@ public class SelectionManager : MonoBehaviour
                 return false;
 
             // Requirement: only when connected to another H peg.
+            if (!IsHLikeRoot(otherRoot))
+                return false;
+
+            connectedHole = ap;
+            connectedPeg = pair;
+        }
+
+        if (connectedHole == null || connectedPeg == null) return false;
+        if (pairedHoleCount != 1) return false;
+
+        string connectedHoleGroup = GetConnectorGroupKey(connectedHole.name);
+        if (string.IsNullOrEmpty(connectedHoleGroup))
+            return false;
+
+        var candidateHoles = new List<AttachmentPoint>();
+        for (int i = 0; i < ownHoles.Count; i++)
+        {
+            AttachmentPoint hole = ownHoles[i];
+            if (hole == null) continue;
+
+            // Stay inside the same hole family (e.g. AP_Hole_A1 (...) only).
+            if (!string.Equals(GetConnectorGroupKey(hole.name), connectedHoleGroup, StringComparison.Ordinal))
+                continue;
+
+            if (hole == connectedHole || hole.pairedWith == null)
+                candidateHoles.Add(hole);
+        }
+
+        if (candidateHoles.Count <= 1)
+            return false;
+
+        candidateHoles.Sort(CompareAttachmentPointsByConnectorName);
+
+        int currentIndex = candidateHoles.IndexOf(connectedHole);
+        if (currentIndex < 0)
+            return false;
+
+        int step = direction > 0 ? 1 : -1;
+        int nextIndex = WrapIndex(currentIndex + step, candidateHoles.Count);
+        if (nextIndex == currentIndex)
+            return false;
+
+        AttachmentPoint nextHole = candidateHoles[nextIndex];
+        if (nextHole == null || nextHole == connectedHole)
+            return false;
+
+        Vector3 targetPegPos = connectedPeg.transform.position;
+        Vector3 delta = targetPegPos - nextHole.transform.position;
+        selectedRoot.position += delta;
+        Physics.SyncTransforms();
+
+        connectedHole.pairedWith = null;
+        connectedHole.isOccupied = false;
+        connectedHole.occupant = null;
+
+        nextHole.pairedWith = connectedPeg;
+        nextHole.isOccupied = true;
+        nextHole.occupant = selectedRoot.gameObject;
+
+        connectedPeg.pairedWith = nextHole;
+        connectedPeg.isOccupied = true;
+        connectedPeg.occupant = connectedPeg.transform.root != null ? connectedPeg.transform.root.gameObject : null;
+
+        if (panelSlotManager != null)
+            panelSlotManager.RebuildConnectionsAndRescanSlots();
+
+        return true;
+    }
+
+
+    bool TryCycleSelectedVSingleHoleConnection(int direction)
+    {
+        if (direction == 0) return false;
+        if (_selected.Count != 1) return false;
+
+        var selected = _selected[0];
+        if (selected == null) return false;
+
+        Transform selectedRoot = selected.transform.root;
+        if (!IsVLikeRoot(selectedRoot)) return false;
+
+        AttachmentPoint[] aps = selectedRoot.GetComponentsInChildren<AttachmentPoint>(true);
+        if (aps == null || aps.Length == 0) return false;
+
+        var ownHoles = new List<AttachmentPoint>();
+        AttachmentPoint connectedHole = null;
+        AttachmentPoint connectedPeg = null;
+        int pairedHoleCount = 0;
+
+        for (int i = 0; i < aps.Length; i++)
+        {
+            AttachmentPoint ap = aps[i];
+            if (ap == null) continue;
+
+            if (ap.role == AttachmentPoint.PointRole.Peg)
+            {
+                // Requirement: own pegs must not be connected/paired.
+                if (ap.pairedWith != null)
+                    return false;
+
+                continue;
+            }
+
+            if (ap.role != AttachmentPoint.PointRole.Hole)
+                continue;
+
+            ownHoles.Add(ap);
+
+            if (ap.pairedWith == null)
+                continue;
+
+            pairedHoleCount++;
+            if (pairedHoleCount > 1)
+                return false;
+
+            AttachmentPoint pair = ap.pairedWith;
+            if (pair.role != AttachmentPoint.PointRole.Peg)
+                return false;
+
+            Transform otherRoot = pair.transform.root;
+            if (otherRoot == null || otherRoot == selectedRoot)
+                return false;
+
+            // Requirement: only when connected to another V peg.
             if (!IsHLikeRoot(otherRoot))
                 return false;
 
