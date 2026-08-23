@@ -10,6 +10,7 @@ public class SelectableBeam : MonoBehaviour
     private Renderer[] _renderers;
     private readonly Dictionary<Renderer, Material[]> _originalMats = new Dictionary<Renderer, Material[]>();
 
+    public List<GameObject> veneerStrips = new List<GameObject>(); // populated by PanelSlotManager pairing rebuild (runtime)
     void Awake()
     {
         _renderers = GetComponentsInChildren<Renderer>(true);
@@ -53,4 +54,23 @@ public class SelectableBeam : MonoBehaviour
     }
 
     public bool IsSelected() => _selected;
+
+    /// <summary>
+    /// Re-capture the current materials as the ones deselection restores.
+    /// The finish palette restyles panels at runtime; without this, a
+    /// selected-then-deselected panel would flash back to its pre-palette
+    /// materials.
+    /// </summary>
+    public void RefreshOriginalMaterials()
+    {
+        if (_selected)
+            return;
+        _renderers = GetComponentsInChildren<Renderer>(true);
+        _originalMats.Clear();
+        foreach (var r in _renderers)
+        {
+            if (r == null) continue;
+            _originalMats[r] = r.sharedMaterials;
+        }
+    }
 }

@@ -586,3 +586,32 @@ Edit workflow:
   - no colliders (or on ignored layers)
   - do not participate in selection
   - do not participate in overlap checks
+
+---
+
+## 13) Guided Template Tools (Additive)
+Faster NST-style templates for beginners. **Expert Build/Select is unchanged.**
+
+- Switch with the **Templates** / **Parts** tabs at the top of the left panel
+  (same scene; Parts is the original palette).
+- Tools: Posts (T1), Connectors (T2), Panel (T3). Connectors and Panel anchor
+  on **post holes only**: pick a hole on one post, then one on a second post at
+  the same height; the Panel's third pick goes **up/down** a post (vertical wall
+  panel, 2 beams + panels) or **sideways to a third post** (horizontal panel,
+  4-beam ring + panels — the fourth corner post must already exist).
+- World scale: prefabs are 1 unit = 100 mm; `NeospaceUnits` auto-calibrates
+  from a V prefab at startup so guides and math match true frame size.
+- Floor grid: **Tools → Configurator → Style Environment** regenerates the
+  floor with one cell per 88 mm module, bold line every 8 modules (704 mm).
+- Strict rules: connector picks snap to real free holes/pegs, spans must match
+  catalogue sizes, and every connector commits through the same
+  hole/peg + overlap pipeline as Expert placement (no freehand poses).
+- Measure line: while picking, a thick axis-locked guide line shows tick marks at
+  every catalogue length and labels the active snap (e.g. `H7 · 663 mm`). Post
+  height is the last click — aim up and the line snaps through V sizes. Styled
+  with the Evo UI kit (Inter font + accent colour) when present.
+- Pure catalogue math: `Assets/Scripts/NeospaceCore/`
+- Guided UX: `Assets/Scripts/Templates/` (see `GUIDED_TEMPLATES.md`)
+- Batch place API: `BuildController.TemplateBatch.cs` (new partial only)
+- Selftest: **Tools → Configurator → Run NeospaceCore Selftest**
+- Branch: `feature/guided-templates`

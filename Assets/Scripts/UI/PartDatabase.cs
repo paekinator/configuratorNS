@@ -19,9 +19,6 @@ public class PartDatabase : ScriptableObject
         [Tooltip("If enabled, this part will use these settings for first placement + snapping rotation/yaws.")]
         public bool overrideVPlacement = false;
 
-        [Tooltip("World Y position to use for first V placement (if override enabled).")]
-        public float vHeightOffset = 2.173f;
-
         [Tooltip("Base Euler rotation applied to V (if override enabled).")]
         public Vector3 vRotationEuler = new Vector3(90f, 0f, 0f);
 

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fde624987f7d0544c83d045385411960
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Evo UI/Demo Assets/Animations/SplashScreen_In.anim
+  uploadId: 957982

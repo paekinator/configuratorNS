@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: bdc1415be4e6c1143a836430dc0a4cd7
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Shared/Scripts/EvoDisableIfAttribute.cs
+  uploadId: 957982

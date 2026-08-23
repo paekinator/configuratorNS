@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 328fa5ebd25fda347b2eff6a9a381bb0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Evo UI/Demo Assets/Prefabs/Reorderable List Item.prefab
+  uploadId: 957982

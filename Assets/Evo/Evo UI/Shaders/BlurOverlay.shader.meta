@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: bfd535c3ef1aab045b9d607f753ff475
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Evo UI/Shaders/BlurOverlay.shader
+  uploadId: 957982

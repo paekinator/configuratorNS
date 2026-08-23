@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3005579733732680989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4514135731524789115}
+  - component: {fileID: 8028708466207405106}
+  m_Layer: 5
+  m_Name: Horizontal Chart
+  m_TagString: Untagged
+  m_Icon: {fileID: 2800000, guid: 380907abf11e0064dbbf58e43b618a25, type: 3}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4514135731524789115
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3005579733732680989}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1000, y: 500}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8028708466207405106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3005579733732680989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa9d8fbb603263f4396961628d8217b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dataPoints:
+  - label: Product A
+    value: 75
+    tableKey: 
+  - label: Product B
+    value: 45
+    tableKey: 
+  - label: Product C
+    value: 90
+    tableKey: 
+  - label: Product D
+    value: 60
+    tableKey: 
+  - label: Product E
+    value: 30
+    tableKey: 
+  - label: Product F
+    value: 85
+    tableKey: 
+  - label: Product G
+    value: 55
+    tableKey: 
+  padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 10
+    m_Bottom: 30
+  gridToBarsOffset: 15
+  barSpacing: 15
+  barCornerRadius: 6
+  barSprite: {fileID: 21300000, guid: 0b99db17ce585f043a754deccdf1d434, type: 3}
+  showGrid: 1
+  verticalGridLines: 5
+  gridLineThickness: 1
+  showAxis: 1
+  axisThickness: 2
+  showValues: 1
+  valueWidth: 70
+  valueFontSize: 22
+  stylingSource: 2
+  stylerPreset: {fileID: 11400000, guid: 62d3d5000dc484241a42d255128f3aa7, type: 2}
+  gridColor:
+    stylerID: Primary (Soft)
+    color: {r: 1, g: 1, b: 1, a: 0.09803922}
+  axisColor:
+    stylerID: Primary
+    color: {r: 1, g: 1, b: 1, a: 1}
+  barColor:
+    stylerID: Accent
+    color: {r: 0, g: 0.60784316, b: 1, a: 1}
+  labelColor:
+    stylerID: Primary
+    color: {r: 1, g: 1, b: 1, a: 1}
+  valueFont:
+    stylerID: Inter - Regular
+    font: {fileID: 0}
+  labelFont:
+    stylerID: Inter - Regular
+    font: {fileID: 0}
+  labelWidth: 120
+  labelFontSize: 22
+  enableLocalization: 1
+  localizedObject: {fileID: 0}
+  dataFoldout: 1
+  settingsFoldout: 0
+  stylingFoldout: 0

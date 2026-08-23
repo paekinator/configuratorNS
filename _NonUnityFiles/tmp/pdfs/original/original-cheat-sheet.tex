@@ -1,0 +1,1115 @@
+\documentclass[a4paper,8pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{enumitem}
+\usepackage[compact]{titlesec}
+\usepackage{microtype}
+\usepackage{tabularx,array}
+\usepackage{ragged2e}
+\usepackage{tikz}
+\usepackage{booktabs}
+
+% Compact double-sided A4 layout based on the supplied template.
+\geometry{margin=0.38in,top=0.34in,bottom=0.34in}
+\setlength{\columnsep}{0.18in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5pt}
+\renewcommand{\baselinestretch}{0.90}
+\setlist{nosep,leftmargin=*}
+\titlespacing{\section}{0pt}{1pt}{1pt}
+\pagestyle{empty}
+
+\definecolor{lightblue}{RGB}{205,226,246}
+\definecolor{classicalDot}{RGB}{36,112,190}
+\definecolor{pidDot}{RGB}{205,75,45}
+\definecolor{freqDot}{RGB}{30,150,125}
+\definecolor{stateDot}{RGB}{130,75,175}
+\definecolor{observerDot}{RGB}{215,145,25}
+\definecolor{optimalDot}{RGB}{35,145,70}
+\definecolor{examDot}{RGB}{80,80,80}
+
+\newcommand{\topicdot}[1]{\tikz[baseline=-0.6ex]\fill[#1] (0,0) circle (0.52ex);}
+\newcommand{\Cdot}{\topicdot{classicalDot}}
+\newcommand{\Pdot}{\topicdot{pidDot}}
+\newcommand{\Fdot}{\topicdot{freqDot}}
+\newcommand{\Sdot}{\topicdot{stateDot}}
+\newcommand{\Odot}{\topicdot{observerDot}}
+\newcommand{\Ldot}{\topicdot{optimalDot}}
+\newcommand{\Edot}{\topicdot{examDot}}
+
+\newcommand{\mybox}[2]{
+\begin{tcolorbox}[
+  enhanced,
+  colback=lightblue!7!white,
+  colframe=lightblue!78!black,
+  boxrule=0.38pt,
+  boxsep=0.7pt,
+  left=1.7pt,right=1.7pt,top=1.5pt,bottom=1.5pt,
+  arc=0.8pt,outer arc=0.8pt,
+  title={\small\textbf{#1}},
+  fonttitle=\bfseries,
+  coltitle=black,
+  before skip=1.5pt,after skip=1.5pt,
+  fontupper=\fontsize{5.55pt}{6.30pt}\selectfont\RaggedRight
+]
+#2
+\end{tcolorbox}}
+
+\newcommand{\frow}[2]{%
+\begin{tabularx}{\linewidth}{@{}>{$\displaystyle}l<{$}@{\hspace{3pt}}X@{}}
+#1 & #2
+\end{tabularx}\vspace{0.3pt}}
+
+\newcommand{\qrow}[2]{%
+\textbf{#1} #2\par}
+
+\newcommand{\tinyhead}[1]{\textbf{#1}\;}
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}
+
+\begin{document}
+\sloppy
+\emergencystretch=2em
+\fontsize{5.95pt}{6.75pt}\selectfont
+
+\begin{center}
+{\Large\textbf{ENG373 Dynamic Systems \& Control --- Exam A4 Sheet}}\\[-2pt]
+{\scriptsize Weeks 1--2 draft; organised around Q1--Q6 and the stated exam preparation guide}
+\end{center}
+\vspace{-5pt}
+\begin{center}
+{\scriptsize
+\Cdot\ Classical/Modelling\quad
+\Pdot\ PID\quad
+\Fdot\ Frequency\quad
+\Sdot\ State Space\quad
+\Odot\ Observer\quad
+\Ldot\ LQR\quad
+\Edot\ Exam Logic}
+\end{center}
+\vspace{-5pt}
+
+\begin{multicols}{3}
+\raggedcolumns
+
+\mybox{Exam Map \& Answer Strategy \Edot}{
+\tinyhead{Format:} 2 h, 100 marks, answer all; diagrams encouraged. Current coverage:
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+Q1 & Modelling/stability: DC motor TF, poles, step response.\\
+Q2 & PID/robustness: advantages, margins, nonlinear limits.\\
+Q3 & Frequency domain: GM/PM definitions and robustness.\\
+Q4 & Controllability/observability: tests and limitations.\\
+Q5 & State feedback: pole placement, observer, practicality.\\
+Q6 & LQR: effect of $R$, optimality, advantage over PID.\\
+\end{tabularx}
+\tinyhead{For ``explain'':} definition $\to$ physical cause $\to$ consequence. One clear sentence is better than an unexplained formula. Label axes, poles, zeros and feedback signs on sketches.
+}
+
+\mybox{Control Foundations \Cdot}{
+\frow{e(t)=r(t)-y(t)}{tracking error; controller acts to reduce it.}
+\tinyhead{Open loop:} output is not measured; simple/cheap, but cannot correct disturbances, uncertainty or calibration error.\\
+\tinyhead{Closed loop:} measured output is fed back; improves tracking/disturbance rejection and reduces parameter sensitivity, but bad design can oscillate or destabilise.
+\frow{T(s)=\frac{G_cG}{1+G_cGH}}{negative-feedback closed-loop TF.}
+\tinyhead{Robustness:} acceptable stability/performance despite model error, parameter variation, disturbances and noise. Robust stability only guarantees stability; robust performance also preserves specifications.
+}
+
+\mybox{Transfer Functions, Blocks \& Laplace \Cdot}{
+\frow{G(s)=\frac{Y(s)}{U(s)}}{LTI input-output model with zero initial conditions.}
+\frow{G=C(sI-A)^{-1}B+D}{state-space to transfer function.}
+\tinyhead{TF gives:} poles, zeros, order, input-output dynamics. \tinyhead{TF hides:} internal states/physical realisation and nonzero initial energy.
+\frow{G_{series}=G_1G_2}{valid only with no loading interaction.}
+\frow{G_{parallel}=G_1+G_2}{outputs add.}
+\frow{G_{fb}=\frac{G}{1\pm GH}}{use sign at summing junction.}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+$1$ & $1/s$; \quad $t$ $\leftrightarrow$ $1/s^2$; \quad $\delta(t)$ $\leftrightarrow$ $1$\\
+$e^{-at}$ & $1/(s+a)$; \quad $\sin\omega t$ $\leftrightarrow$ $\omega/(s^2+\omega^2)$\\
+$\cos\omega t$ & $s/(s^2+\omega^2)$; \quad $\dot f$ $\leftrightarrow$ $sF-f(0)$
+\end{tabularx}
+\frow{y(\infty)=\lim_{s\to0}sY(s)}{final-value theorem; only when applicable/stable.}
+}
+
+\mybox{Q1: DC Motor Modelling \Cdot}{
+\frow{L\dot i+Ri+K_b\omega=v}{electrical equation; back EMF opposes voltage.}
+\frow{J\dot\omega+b\omega=K_ti-T_L}{mechanical equation; load torque is disturbance.}
+\[
+\frac{\Omega(s)}{V(s)}=\frac{K_t}{(Ls+R)(Js+b)+K_tK_b}
+\]
+If armature inductance $L$ is negligible, the fast electrical mode is removed:
+\[
+\frac{\Omega}{V}\approx\frac{K}{\tau s+1},\quad
+K=\frac{K_t}{Rb+K_tK_b},\quad
+\tau=\frac{RJ}{Rb+K_tK_b}.
+\]
+\tinyhead{Logic:} higher speed $\Rightarrow$ larger back EMF $\Rightarrow$ lower current/torque, so back EMF behaves like additional damping. Model assumptions must match the operating range.
+}
+
+
+
+\mybox{Modelling Assumptions \& Linearisation \Cdot}{
+A model is useful only over the conditions for which its assumptions are valid. State neglected dynamics, small-angle assumptions, constant parameters, linear friction, no saturation/dead-zone and operating range when relevant.\\
+For nonlinear $\dot x=f(x,u)$, $y=h(x,u)$ around equilibrium $(x_0,u_0)$:
+\[
+\delta\dot x=A\delta x+B\delta u,\qquad
+\delta y=C\delta x+D\delta u,
+\]
+\[
+A=\left.\frac{\partial f}{\partial x}\right|_0,\ B=\left.\frac{\partial f}{\partial u}\right|_0,\
+C=\left.\frac{\partial h}{\partial x}\right|_0,\ D=\left.\frac{\partial h}{\partial u}\right|_0.
+\]
+\tinyhead{Limitation:} linearisation is local; large deviations or nonlinear constraints can invalidate the predicted stability/performance.
+}
+
+\mybox{Test Inputs, System Type \& Error Constants \Cdot}{
+\begin{tabularx}{\linewidth}{@{}lXX@{}}
+Input & $R(s)$ & what it tests\\\midrule
+step & $1/s$ & transient + final tracking\\
+ramp & $1/s^2$ & moving-reference tracking\\
+impulse & $1$ & natural modes\\
+sinusoid & $\omega/(s^2+\omega^2)$ & frequency response\\
+\end{tabularx}
+For unity feedback with loop $L(s)=G_c(s)G(s)$:
+\[
+K_p=\lim_{s\to0}L(s),\quad K_v=\lim_{s\to0}sL(s),\quad K_a=\lim_{s\to0}s^2L(s).
+\]
+\[
+e_{ss}^{step}=\frac{1}{1+K_p},\quad e_{ss}^{ramp}=\frac{1}{K_v},\quad e_{ss}^{parabolic}=\frac{1}{K_a}.
+\]
+System type $=$ number of pure integrators in $L(s)$. More integrators improve low-order tracking but add phase lag and reduce robustness.
+}
+
+\mybox{Time Response \& Pole Logic \Cdot}{
+\frow{c(t)=c_{tr}(t)+c_{ss}(t)}{transient decays; steady-state remains.}
+\frow{G_1(s)=\frac{1}{Ts+1}}{one stable pole at $-1/T$ for $T>0$.}
+\frow{c(t)=1-e^{-t/T}}{unit-step response: $63.2\%$ at $T$, $t_s(2\%)\approx4T$.}
+\frow{G_2(s)=\frac{\omega_n^2}{s^2+2\zeta\omega_ns+\omega_n^2}}{standard second order.}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+$\zeta=0$ & sustained oscillation; imaginary-axis poles.\\
+$0<\zeta<1$ & decaying oscillation; LHP complex pair.\\
+$\zeta=1$ & fastest non-oscillatory response.\\
+$\zeta>1$ & slow monotonic response.\\
+\end{tabularx}
+\frow{M_p=e^{-\pi\zeta/\sqrt{1-\zeta^2}}100\%}{overshoot depends mainly on $\zeta$.}
+\frow{t_s\approx\frac{4}{\zeta\omega_n}}{2\% criterion; real part controls decay.}
+\tinyhead{Poles:} LHP stable; RHP unstable; farther left faster. Poles nearest the imaginary axis dominate. RHP zero may cause inverse initial response.
+}
+
+\mybox{Q1: Stability \& Pole Interpretation \Cdot}{
+\tinyhead{Absolute stability:} asks whether the system is stable or unstable.\\
+\tinyhead{Relative stability:} asks how fast/well transients decay; indicated by damping, settling time, GM and PM.\\
+\tinyhead{BIBO stability:} every bounded input produces a bounded output; a rational continuous-time TF is BIBO stable only when all poles are strictly in the LHP.
+
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+$\Re(s)<0$ & decaying mode $\Rightarrow$ stable.\\
+$\Re(s)=0$ & sustained mode; marginal only if imaginary-axis poles are simple.\\
+$\Re(s)>0$ & growing mode $\Rightarrow$ unstable.\\
+$-\sigma\pm j\omega$ & $\sigma$ controls decay envelope; $\omega$ controls oscillation frequency.\\
+\end{tabularx}
+
+\frow{T(s)=\frac{G(s)}{1+G(s)H(s)}}{negative-feedback closed-loop transfer function.}
+\frow{1+G(s)H(s)=0}{characteristic equation; its roots are the closed-loop poles.}
+
+\qrow{Key exam sentence:}{Stability is determined by closed-loop poles, not by open-loop poles alone.}
+}
+
+\mybox{Routh--Hurwitz: Construction \& Decision \Cdot}{
+For
+\[
+a_ns^n+a_{n-1}s^{n-1}+\cdots+a_1s+a_0=0,
+\]
+place alternating coefficients in the first two rows:
+\[
+\begin{array}{c|cccc}
+s^n&a_n&a_{n-2}&a_{n-4}&\cdots\\
+s^{n-1}&a_{n-1}&a_{n-3}&a_{n-5}&\cdots\\
+s^{n-2}&b_1&b_2&b_3&\cdots
+\end{array}
+\]
+
+\[
+b_1=
+\frac{a_{n-1}a_{n-2}-a_na_{n-3}}
+{a_{n-1}},
+\qquad
+b_2=
+\frac{a_{n-1}a_{n-4}-a_na_{n-5}}
+{a_{n-1}}.
+\]
+
+Continue using the same two-row determinant pattern.
+
+\tinyhead{Main rule:} number of sign changes in the first column $=$ number of RHP roots. With positive leading coefficient, asymptotic stability requires every first-column term to be positive.
+
+\tinyhead{Fast pre-check:} all polynomial coefficients must be present and have the same sign; this is necessary but not sufficient.
+
+For
+\[
+s^3+a_1s^2+a_2s+a_3,
+\]
+stability requires
+\[
+a_1>0,\qquad
+a_2>0,\qquad
+a_3>0,\qquad
+a_1a_2>a_3.
+\]
+}
+
+\mybox{Routh Special Cases \& Gain Range \Cdot}{
+\tinyhead{Zero first-column entry, row not zero:}
+replace the zero by $\varepsilon>0$, complete the array, take $\varepsilon\to0^+$, then count sign changes. Never divide by the original zero.
+
+\tinyhead{Entire row of zeros:}
+roots occur symmetrically about the origin, such as $\pm\sigma$, $\pm j\omega$, or complex quadruplets. Form the auxiliary polynomial $A(s)$ from the row above, replace the zero row by the coefficients of $dA/ds$, and continue.
+
+Roots of $A(s)=0$ identify the symmetric roots or imaginary-axis crossing.
+
+\tinyhead{Gain-range workflow:}
+
+1. Form $1+KG(s)H(s)=0$.
+
+2. Build the Routh array symbolically.
+
+3. Require every first-column entry to be positive.
+
+4. Solve the resulting inequalities for $K$.
+
+Equality gives a marginal-stability boundary.
+
+\tinyhead{Crossing frequency:}
+at the limiting gain, use the auxiliary equation from the row above the zero row and solve for $s=\pm j\omega$.
+
+\tinyhead{Relative stability test:}
+to require poles to lie left of $\Re(s)=-\alpha$, substitute
+\[
+s=z-\alpha
+\]
+and apply Routh to the polynomial in $z$.
+}
+
+\mybox{Root Locus: Recognition \& Design \Cdot}{
+\frow{1+KG(s)H(s)=0}{closed-loop characteristic equation.}
+\frow{\angle GH=(2k+1)180^\circ}{angle condition gives locus geometry.}
+\frow{K=1/|GH|}{magnitude condition gives gain at a point.}
+\tinyhead{Rules:} branches $=$ number of OL poles; start at poles ($K=0$), end at zeros/infinity; real-axis locus lies left of an odd number of real poles+zeros; symmetric about real axis.
+\frow{\sigma_a=\frac{\sum p-\sum z}{n-m}}{asymptote centroid.}
+\frow{\phi_a=\frac{(2k+1)180^\circ}{n-m}}{asymptote angles.}
+\frow{\frac{dK}{ds}=0}{candidate breakaway/break-in; retain only points on locus.}
+$j\omega$ crossing comes from Routh.\\
+\tinyhead{Lead:} zero closer to origin than pole; adds phase, pulls locus left, improves transient response/PM but can amplify HF noise.\\
+\tinyhead{Lag:} pole closer to origin; raises low-frequency gain, reduces $e_{ss}$, adds phase lag and may slow response. Use lag-lead if both are needed.
+}
+
+\mybox{Q2: PID Essentials \Pdot}{
+\[
+u=K_pe+K_i\!\int e\,dt+K_d\dot e,
+\qquad G_c=K_p+\frac{K_i}{s}+K_ds
+\]
+\begin{tabular}{@{}lcccc@{}}
+ & $t_r$ & $M_p$ & $t_s$ & $e_{ss}$\\\midrule
+$K_p\uparrow$ & $\downarrow$ & $\uparrow$ & var. & $\downarrow$\\
+$K_i\uparrow$ & $\downarrow$ & $\uparrow$ & $\uparrow$ & step $\to0$\\
+$K_d\uparrow$ & small & $\downarrow$ & $\downarrow$ & none\\
+\end{tabular}
+\tinyhead{P:} current error, faster but may destabilise. \tinyhead{I:} accumulated error, increases type and removes step error but adds phase lag. \tinyhead{D:} anticipates trend, adds damping/phase lead but amplifies noise.
+}
+
+\mybox{PID Nonlinear/Practical Limits \Pdot}{
+\qrow{Integrator windup:}{during saturation, commanded $u$ cannot be delivered but the integral keeps growing, causing delayed recovery and overshoot. Use clamping, conditional integration or back-calculation.}
+\qrow{Derivative kick:}{a step in setpoint makes $\dot e$ very large. Apply derivative to measured output rather than the setpoint error.}
+\qrow{Noise:}{ideal derivative has high-frequency gain; use $K_ds/(1+s/N)$ or equivalent low-pass filter.}
+\qrow{Saturation:}{controller is linear but actuator limits are nonlinear; performance and stability predictions may fail.}
+\qrow{2DOF PID:}{$P,D$ setpoint weights separate tracking from disturbance rejection; integral still acts on $r-y$.}
+\qrow{Sampling:}{sample much faster than closed-loop bandwidth; too slow adds delay, too fast may reveal/amplify noise.}
+}
+
+\mybox{Ziegler--Nichols Tables \Pdot}{
+\tinyhead{Method 1 --- open-loop reaction curve:} approximate $G(s)\approx K e^{-Ls}/(Ts+1)$.
+\begin{tabularx}{\linewidth}{@{}lXXX@{}}
+&$K_p$&$T_i$&$T_d$\\\midrule
+P&$T/(KL)$&--&--\\
+PI&$0.9T/(KL)$&$L/0.3$&--\\
+PID&$1.2T/(KL)$&$2L$&$0.5L$\\
+\end{tabularx}
+\tinyhead{Method 2 --- closed loop:} P-only gain at sustained oscillation $=K_u$; period $=P_u$.
+\begin{tabularx}{\linewidth}{@{}lXXX@{}}
+&$K_p$&$T_i$&$T_d$\\\midrule
+P&$0.5K_u$&--&--\\
+PI&$0.45K_u$&$P_u/1.2$&--\\
+PID&$0.6K_u$&$P_u/2$&$P_u/8$\\
+\end{tabularx}
+$K_i=K_p/T_i$, $K_d=K_pT_d$. ZN is a heuristic starting point (quarter-amplitude decay), commonly aggressive and requiring refinement.
+}
+
+\mybox{Q3: Frequency Response \& Bode Rules \Fdot}{
+For stable $G(s)$ and
+\[
+u(t)=A\sin\omega t,
+\]
+the steady-state output is
+\[
+y_{ss}(t)=
+A|G(j\omega)|
+\sin\!\left(
+\omega t+\angle G(j\omega)
+\right).
+\]
+
+\frow{M_{dB}=20\log_{10}|G(j\omega)|}{magnitude ratio in decibels.}
+
+\frow{|G_1G_2|_{dB}=|G_1|_{dB}+|G_2|_{dB}}
+{products become sums on a Bode plot.}
+
+\begin{tabularx}{\linewidth}{@{}lXX@{}}
+Factor & magnitude slope & phase\\\midrule
+$K>0$ & constant $20\log_{10}K$ & $0^\circ$\\
+$1/s$ & $-20$ dB/dec & $-90^\circ$\\
+$s$ & $+20$ dB/dec & $+90^\circ$\\
+$1/(1+s/\omega_p)$ & add $-20$ after $\omega_p$ & $0\to-90^\circ$\\
+$1+s/\omega_z$ & add $+20$ after $\omega_z$ & $0\to+90^\circ$\\
+2nd-order pole & add $-40$ after $\omega_n$ & $0\to-180^\circ$\\
+\end{tabularx}
+
+At a first-order corner, the exact magnitude differs from the asymptote by $3$ dB and the phase contribution is $\pm45^\circ$.
+
+A second-order resonance peak occurs when
+\[
+\zeta<\frac{1}{\sqrt2}.
+\]
+
+\tinyhead{Sketch workflow:}
+factor $G$; list corner frequencies; set initial level and slope; change slope at each corner; add all phase contributions.
+}
+
+\mybox{GM, PM, Nyquist \& Robustness \Fdot}{
+Let
+\[
+L(s)=G_c(s)G(s)H(s).
+\]
+
+\frow{|L(j\omega_{gc})|=1\;(0\,\mathrm{dB})}
+{gain crossover frequency.}
+
+\frow{PM=180^\circ+\angle L(j\omega_{gc})}
+{additional phase lag before marginal stability.}
+
+\frow{\angle L(j\omega_{pc})=-180^\circ}
+{phase crossover frequency.}
+
+\frow{GM=\frac{1}{|L(j\omega_{pc})|}}
+{gain multiplication allowed before marginal stability.}
+
+\frow{GM_{dB}=-20\log_{10}|L(j\omega_{pc})|}
+{distance from the magnitude curve to $0$ dB at $\omega_{pc}$.}
+
+\tinyhead{Lecture targets:}
+typically
+\[
+PM\approx45^\circ\text{--}60^\circ,
+\qquad
+GM\geq6\text{ dB}.
+\]
+
+Positive and larger margins usually indicate better tolerance to gain error, neglected dynamics and delay.
+
+\tinyhead{Nyquist convention used in the slides:}
+\[
+Z=N+P,
+\]
+where:
+
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+$P$ & number of open-loop RHP poles.\\
+$N$ & net clockwise encirclements of $-1+j0$.\\
+$Z$ & number of closed-loop RHP poles.\\
+\end{tabularx}
+
+Closed-loop stability requires
+\[
+Z=0
+\quad\Rightarrow\quad
+N=-P.
+\]
+
+For an open-loop stable system, $P=0$, so the Nyquist plot must not encircle $-1$.
+
+\tinyhead{Why is $-1$ critical?}
+$L(j\omega)=-1$ makes
+\[
+1+L(j\omega)=0,
+\]
+placing the closed loop at marginal stability.
+
+A Nyquist curve close to $-1$ indicates weak robustness.
+
+\tinyhead{Delay and bandwidth:}
+pure delay $e^{-sT}$ leaves magnitude unchanged but adds phase
+\[
+-\omega T.
+\]
+
+Approximate delay margin:
+\[
+T_{\max}\approx
+\frac{PM\;(\mathrm{rad})}{\omega_{gc}}.
+\]
+
+Higher bandwidth gives faster response, but increases sensitivity to noise, delay and unmodelled high-frequency dynamics. A $-40$ dB/dec slope near crossover is a warning sign.
+}
+
+\end{multicols}
+
+\newpage
+\begin{center}
+{\Large\textbf{ENG373 Exam A4 Sheet --- State-Space \& Optimisation}}\\[-2pt]
+{\scriptsize Matrix workflows, design limitations, observers and LQR}
+\end{center}
+\vspace{-5pt}
+
+\begin{multicols}{3}
+\raggedcolumns
+
+\mybox{State-Space Meaning \Sdot}{
+\[
+\dot x=Ax+Bu,\qquad y=Cx+Du
+\]
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+$x\in\mathbb R^n$ & minimum internal memory/state vector.\\
+$A\;(n\times n)$ & natural dynamics; eigenvalues are system poles.\\
+$B\;(n\times m)$ & how inputs affect state derivatives.\\
+$C\;(p\times n)$ & how states produce measured outputs.\\
+$D\;(p\times m)$ & direct input-output feedthrough.\\
+\end{tabularx}
+\tinyhead{Why state space?} internal dynamics, MIMO, initial conditions, pole placement, observers and LQR. It is not unique: $z=Tx$ gives $A'=TAT^{-1}$, $B'=TB$, $C'=CT^{-1}$.
+}
+\mybox{Eigenvalue \& Lyapunov Stability \Sdot}{
+For $\dot x=Ax$, the system poles are the eigenvalues of $A$:
+\[
+\det(sI-A)=0,
+\qquad
+\lambda_i=\operatorname{eig}(A).
+\]
+
+\tinyhead{Linear eigenvalue test:}
+
+\[
+\Re(\lambda_i)<0\;\forall i
+\quad\Rightarrow\quad
+\text{asymptotically stable}.
+\]
+
+Any eigenvalue with $\Re(\lambda_i)>0$ makes the system unstable.
+
+\tinyhead{Lyapunov direct method:}
+choose an energy-like scalar function $V(x)$ satisfying
+\[
+V(0)=0,\qquad
+V(x)>0\;(x\neq0),\qquad
+\dot V(x)<0.
+\]
+
+These conditions prove asymptotic stability without explicitly solving the differential equations.
+
+For a linear system, choose $Q=Q^T>0$ and solve
+\[
+A^TP+PA=-Q.
+\]
+
+A unique $P=P^T>0$ exists for every $Q>0$ if and only if $A$ is Hurwitz.
+
+\tinyhead{Which method?}
+
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+Routh & symbolic gain ranges and number of RHP roots.\\
+Eigenvalues & exact pole locations and numerical MIMO analysis.\\
+Lyapunov & energy-based proof; extends to nonlinear systems.\\
+\end{tabularx}
+}
+
+\mybox{TF $\rightarrow$ State Space \& Matrix Exponential \Sdot}{
+For
+\[
+G(s)=\frac{b_0s^{n-1}+\cdots+b_{n-1}}{s^n+a_1s^{n-1}+\cdots+a_n},
+\]
+controllable companion form:
+\[
+A=\begin{bmatrix}
+0&1&0&\cdots&0\\
+0&0&1&\cdots&0\\
+\vdots&&&\ddots&\vdots\\
+-a_n&-a_{n-1}&\cdots&-a_2&-a_1
+\end{bmatrix}.
+\]
+\[
+B=\begin{bmatrix}0&0&\cdots&1\end{bmatrix}^{T}
+\]
+\[
+C=\begin{bmatrix}b_{n-1}&b_{n-2}&\cdots&b_0\end{bmatrix},\qquad D=0.
+\]
+\[
+\begin{aligned}
+x(t)&=e^{At}x(0)\\
+&\quad+\int_0^t e^{A(t-\tau)}Bu(\tau)\,d\tau.
+\end{aligned}
+\]
+If $A=V\Lambda V^{-1}$, then $e^{At}=Ve^{\Lambda t}V^{-1}$. Also $e^{At}=\mathcal L^{-1}\{(sI-A)^{-1}\}$.
+}
+
+\mybox{Q4: Controllability \Sdot}{
+\[
+\mathcal C=\begin{bmatrix}B&AB&A^2B&\cdots&A^{n-1}B\end{bmatrix}
+\]
+\[
+\operatorname{rank}(\mathcal C)=n\iff\text{fully controllable.}
+\]
+\tinyhead{Meaning:} some input exists that can move the state between arbitrary points in finite time. Columns span the reachable subspace.\\
+\tinyhead{Exam workflow:} compute $AB,A^2B,\ldots$; assemble $\mathcal C$; row-reduce or use determinant for square SISO matrix; compare rank with $n$.\\
+\tinyhead{Design limitation:} if rank $<n$, arbitrary pole placement is impossible; uncontrollable modes cannot be moved by $K$. They must at least be stable for stabilisability.
+\frow{\operatorname{rank}[\lambda I-A\;B]=n}{PBH test for every $\lambda\in\operatorname{eig}(A)$.}
+}
+
+\mybox{Q4: Observability \Sdot}{
+\[
+\mathcal O=\begin{bmatrix}C\\CA\\CA^2\\\vdots\\CA^{n-1}\end{bmatrix}
+\]
+\[
+\operatorname{rank}(\mathcal O)=n\iff\text{fully observable.}
+\]
+\tinyhead{Meaning:} the initial/internal state can be reconstructed uniquely from known $u$ and measured $y$ over finite time.\\
+\tinyhead{Exam workflow:} compute $CA,CA^2,\ldots$; stack them; row-reduce/determinant; compare rank with $n$.\\
+\tinyhead{Design limitation:} if rank $<n$, hidden modes cannot be reconstructed by a full observer. They must at least be stable for detectability.\\
+\tinyhead{Duality:} $(A,C)$ observable $\Leftrightarrow(A^T,C^T)$ controllable.
+\frow{\operatorname{rank}\mat{\lambda I-A\\C}=n}{PBH observability test.}
+}
+
+\mybox{Controllable vs Observable: Logic \Edot}{
+\begin{tabularx}{\linewidth}{@{}lXX@{}}
+&Controllable?&Observable?\\\midrule
+Yes/Yes & place poles & estimate states; observer feedback feasible.\\
+Yes/No & poles placeable if true states measured & output cannot reveal all states; observer impossible for hidden modes.\\
+No/Yes & states can be estimated & some modes cannot be changed by input.\\
+No/No & hidden and unreachable modes & only acceptable if those modes are stable.\\
+\end{tabularx}
+\qrow{Can you place poles if controllable but not observable?}{Yes with full-state measurement; no observer can reconstruct all states from the available output.}
+\qrow{Can you estimate an uncontrollable system?}{Possibly; observability and controllability are separate properties.}
+}
+
+\mybox{Q5: State Feedback Pole Placement \Sdot}{
+\frow{u=-Kx+Nr}{state feedback plus reference prefilter.}
+\frow{\dot x=(A-BK)x+BNr}{closed-loop dynamics.}
+\tinyhead{Procedure:} (1) verify controllability; (2) choose desired poles; (3) expand desired polynomial $\alpha_c(s)$; (4) solve for $K$; (5) verify $\operatorname{eig}(A-BK)$.\\
+\tinyhead{Ackermann (SISO):}
+\[
+K=\begin{bmatrix}0&\cdots&0&1\end{bmatrix}\mathcal C^{-1}\phi(A),
+\]
+\[
+\phi(A)=A^n+\alpha_1A^{n-1}+\cdots+\alpha_nI.
+\]
+\tinyhead{Practicality:} poles too far left imply large gains, high actuator effort/saturation, noise sensitivity and model sensitivity. Pole placement has no built-in optimality or robustness objective.
+}
+
+\mybox{Reference Tracking / Integral Augmentation \Sdot}{
+Plain $u=-Kx$ regulates states toward zero; it does not automatically make $y$ track a nonzero reference or reject constant disturbances.\\
+For a step reference, choose prefilter
+\[
+N=\left[C(-A+BK)^{-1}B\right]^{-1}
+\]
+when applicable, so nominal DC gain is one. A prefilter does not reject unknown constant disturbances/model error.\\
+For zero steady-state error robustly, augment an integral state:
+\[
+\dot x_i=r-y,
+\qquad
+x_a=\begin{bmatrix}x\\x_i\end{bmatrix},
+\]
+then check controllability of the augmented system and design gains for all augmented states.
+}
+
+\mybox{Why an Observer? \Odot}{
+State feedback needs all components of $x$, but sensors may be unavailable, expensive, noisy or unreliable. An observer uses the model plus measured $u,y$ to estimate unmeasured states.\\
+\[
+\dot{\hat x}=A\hat x+Bu+L(y-C\hat x)
+\]
+The innovation $y-C\hat x$ corrects the model prediction. A full-order observer estimates all $n$ states; a minimum-order observer estimates only unmeasured states (order $n-\operatorname{rank}C$ under suitable coordinates).
+}
+
+\mybox{Observer Design \& Separation \Odot}{
+Let $e=x-\hat x$:
+\[
+\dot e=(A-LC)e.
+\]
+Choose $L$ so $A-LC$ is stable and suitably fast; observability is required for arbitrary observer pole placement. By duality,
+\[
+L=\operatorname{place}(A^T,C^T,p_{obs})^T.
+\]
+\tinyhead{Rule of thumb:} observer poles about 2--5 times faster than controller poles. Too slow $\to$ delayed/poor estimates. Too fast $\to$ large $L$, noise amplification, actuator activity and model-error sensitivity.\\
+\tinyhead{Separation principle:}
+\[
+\operatorname{eig}(A_{combined})=
+\operatorname{eig}(A-BK)\cup\operatorname{eig}(A-LC).
+\]
+Thus $K$ and $L$ may be designed independently, then combined with $u=-K\hat x+Nr$.
+}
+
+\mybox{Q6: LQR Core Workflow \Ldot}{
+\[
+J=\int_0^\infty\left(x^TQx+u^TRu\right)dt,
+\qquad u^*=-Kx
+\]
+\[
+A^TP+PA-PBR^{-1}B^TP+Q=0
+\]
+\[
+K=R^{-1}B^TP.
+\]
+Requirements for standard infinite-horizon result: $Q\succeq0$, $R\succ0$, $(A,B)$ stabilisable and penalised unstable modes detectable.\\
+\tinyhead{Matrix procedure:} choose $Q,R$; assume symmetric $P$ for hand calculation; substitute into ARE; equate matrix entries; select stabilising $P\succeq0$; calculate $K$; verify $\operatorname{eig}(A-BK)$.
+}
+
+\mybox{LQR Weight Logic / Bryson's Rule \Ldot}{
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+$Q_{ii}\uparrow$ & state $x_i$ is expensive: tighter/faster regulation, usually higher control effort.\\
+$R_{jj}\uparrow$ & input $u_j$ is expensive: smaller/conservative actuation, usually slower response.\\
+\end{tabularx}
+Only the relative scale of $Q$ and $R$ matters strongly. For systematic initial weights:
+\[
+Q_{ii}=\frac{1}{(x_{i,\max})^2},\qquad
+R_{jj}=\frac{1}{(u_{j,\max})^2}.
+\]
+Then tune iteratively. Increasing $R$ is the expected short-answer response to ``what reduces control effort?''
+}
+
+\mybox{LQR: Advantages, Robustness, Limits \Ldot}{
+\tinyhead{Why optimal?} $K$ minimises the stated quadratic cost among admissible controls. Closed-loop poles emerge from the performance/effort trade-off rather than being assigned directly.\\
+\tinyhead{Advantages over PID:} natural MIMO/state coupling; systematic matrix design; explicit control-effort trade-off; full-state SISO LQR guarantees at plant input: gain margin at least $[0.5,\infty)$ ($-6$ dB to $+\infty$) and phase margin at least $60^\circ$.\\
+\tinyhead{PID advantages:} simple, inexpensive, familiar, often needs less model/state information, easy for SISO loops.\\
+\tinyhead{LQR limitations:} linear model, full state required, $Q/R$ tuning still heuristic, no integral action by default, constraints/saturation not handled explicitly. Adding an observer gives LQG later, but the full-state LQR margin guarantees may be lost.
+}
+
+\mybox{Pole Placement vs LQR \Ldot}{
+\begin{tabularx}{\linewidth}{@{}lXX@{}}
+& Pole placement & LQR\\\midrule
+Design input & desired poles & $Q,R$ weights\\
+Result & exact poles & poles emerge optimally\\
+Cost & none explicit & minimises $J$\\
+MIMO & possible but choices awkward & natural matrix formulation\\
+Robustness & no inherent guarantee & full-state input-margin guarantees\\
+Main risk & aggressive arbitrary poles & model/state dependence; weight tuning\\
+\end{tabularx}
+\qrow{Why not always place poles very far left?}{The response may be fast mathematically but require unrealistic gains, saturate actuators and amplify noise/unmodelled dynamics.}
+}
+
+
+
+\mybox{$2\times2$ Matrix Mini-Example \Edot}{
+Given
+\[
+A=\mat{0&1\\-2&-3},\quad B=\mat{0\\1},\quad C=\mat{1&0}.
+\]
+\tinyhead{Controllability:} $AB=\mat{1\\-3}$,
+$\mathcal C=\mat{0&1\\1&-3}$, $\det\mathcal C=-1\neq0$.\\
+\tinyhead{Observability:} $CA=\mat{0&1}$,
+$\mathcal O=\mat{1&0\\0&1}$, rank $=2$.\\
+\tinyhead{Pole placement:} let $K=\mat{k_1&k_2}$. Then
+\[
+\det(sI-A+BK)=s^2+(3+k_2)s+(2+k_1).
+\]
+Desired poles $-4,-5$ give $s^2+9s+20$, hence $K=\mat{18&6}$.\\
+\tinyhead{Observer:} let $L=\mat{l_1\\l_2}$. Then
+\[
+\det(sI-A+LC)=s^2+(l_1+3)s+(3l_1+l_2+2).
+\]
+Desired poles $-8,-9$ give $s^2+17s+72$, hence $L=\mat{14\\28}$.
+}
+
+\mybox{$2\times2$ ARE Hand Pattern \Ldot}{
+For the double integrator
+\[
+A=\mat{0&1\\0&0},\quad B=\mat{0\\1},\quad
+Q=\mat{q_1&0\\0&q_2},\quad R=r,
+\]
+assume symmetric $P=\mat{p_{11}&p_{12}\\p_{12}&p_{22}}$. The ARE gives
+\[
+q_1-\frac{p_{12}^2}{r}=0,\qquad
+p_{11}-\frac{p_{12}p_{22}}{r}=0,
+\]
+\[
+q_2+2p_{12}-\frac{p_{22}^2}{r}=0.
+\]
+Choose the stabilising positive-semidefinite solution and then
+\[
+K=R^{-1}B^TP=\frac{1}{r}\mat{p_{12}&p_{22}}.
+\]
+This is the common hand-calculation pattern: substitute symmetric $P$, equate entries, select the physically valid/stabilising root.
+}
+
+\mybox{Matrix Calculation Checklist \Edot}{
+\textbf{Rank:} row-reduce; rank is number of pivots. For square matrices, nonzero determinant implies full rank.\\
+\textbf{Eigenvalues:} solve $\det(\lambda I-A)=0$. Continuous stability requires $\Re\lambda<0$; discrete stability requires $|\lambda|<1$.\\
+\textbf{$2\times2$ inverse:}
+\[
+\mat{a&b\\c&d}^{-1}=\frac{1}{ad-bc}\mat{d&-b\\-c&a}.
+\]
+\textbf{Matrix order:} $AB$ exists when inner dimensions match; generally $AB\neq BA$.\\
+\textbf{Controller check:} dimensions $K:m\times n$, so $BK:n\times n$.\\
+\textbf{Observer check:} $L:n\times p$, so $LC:n\times n$.\\
+\textbf{Always verify:} rank tests, desired eigenvalues, sign convention and physical reasonableness.
+}
+
+\mybox{High-Probability One-Sentence Answers \Edot}{
+\qrow{Why feedback?}{It compares measured output with the reference so disturbances and modelling errors can be corrected.}
+\qrow{Why integral action?}{It accumulates persistent error and raises system type, removing step steady-state error, but can reduce stability margins.}
+\qrow{Why derivative filtering?}{Derivative action amplifies high-frequency measurement noise, so a low-pass filter is required.}
+\qrow{Why controllability first?}{State feedback cannot move an uncontrollable mode.}
+\qrow{Why observability first?}{An observer cannot reconstruct an unobservable mode from the available outputs.}
+\qrow{Observer role?}{It estimates unavailable states so state-feedback control can be implemented from measured inputs and outputs.}
+\qrow{Large $R$ in LQR?}{Control effort is penalised more, so the controller becomes less aggressive and usually slower.}
+\qrow{Lead or lag?}{Use lead for transient response/phase margin; lag for steady-state accuracy/low-frequency gain.}
+}
+
+\mybox{Integrated Design Workflow \Edot}{
+1. Derive a model and state assumptions/valid range.\\
+2. Identify poles, stability and step-response limitations.\\
+3. For simple SISO: PID/lead-lag; check Bode/Nyquist margins and actuator nonlinearities.\\
+4. For state-space/MIMO: check controllability and observability.\\
+5. Choose pole placement for exact dynamics or LQR for a performance-effort optimum.\\
+6. Add an observer when states are not measured; avoid unnecessarily fast observer poles.\\
+7. Add prefilter/integral augmentation for tracking.\\
+8. Validate noise, delay, saturation, uncertainty and sampling---a controller that works only for the nominal linear model is not hardware-ready.
+}
+% ================================================================
+% ENG373 WEEK 3 INSERTIONS
+% Uses the existing \mybox, \frow, \qrow, \tinyhead,
+% \Cdot, \Fdot, \Sdot, \Odot, \Ldot and \Edot commands.
+% Prioritised for the stated exam structure:
+% Q7 Kalman/LQG/LTR, Q8 MPC/adaptation/RL, Q9 synthesis.
+% ================================================================
+
+% ----------------------------------------------------------------
+% HEADER UPDATE (replace the current subtitle only)
+% ----------------------------------------------------------------
+% {\scriptsize Weeks 1--3; organised around Q1--Q9 and the stated exam guide}
+
+% ----------------------------------------------------------------
+% EXAM MAP UPDATE
+% Add these rows after Q6 in your existing Exam Map box.
+% ----------------------------------------------------------------
+% Q7 & Kalman filter purpose, LQG robustness, LTR.\\
+% Q8 & MPC receding horizon, MPC vs LQR, RL benefits/risks.\\
+% Q9 & Choose classical + modern methods; justify practical integration.\\
+
+% ================================================================
+% WEEK 3 DAY 1: KALMAN FILTER / LQG / ROBUSTNESS
+% Best placed after your observer and LQR boxes on Page 2.
+% ================================================================
+
+\mybox{Q7: Kalman Filter --- Purpose \& Noise Logic \Odot}{
+Stochastic model:
+\[
+x_{k+1}=Ax_k+Bu_k+Gw_k,\qquad y_k=Cx_k+Du_k+v_k.
+\]
+Process noise $w$: disturbances/unmodelled dynamics. Measurement noise $v$: sensor noise/quantisation. Standard assumptions: zero-mean, white, Gaussian and mutually uncorrelated.
+\[
+Q_w=E[ww^T]\succeq0,\qquad R_v=E[vv^T]\succ0.
+\]
+\tinyhead{Purpose:} recursively estimate unmeasured states while minimising the estimation-error covariance
+\[
+P=E[(x-\hat x)(x-\hat x)^T].
+\]
+\tinyhead{Kalman vs Luenberger:} a Luenberger observer places poles deterministically; a Kalman filter chooses the gain optimally from model and noise covariances.\par
+\tinyhead{Trust rule:} larger $R_v$ $\Rightarrow$ trust sensors less/model more; larger $Q_w$ $\Rightarrow$ model is less trusted and measurements receive more weight.
+}
+
+\mybox{Kalman Matrix Workflow --- Predict then Update \Odot}{
+\tinyhead{1. Prediction (a priori):}
+\[
+\hat x_k^-=A\hat x_{k-1}+Bu_{k-1},
+\]
+\[
+P_k^-=AP_{k-1}A^T+GQ_wG^T.
+\]
+\tinyhead{2. Innovation and gain:}
+\[
+\tilde y_k=y_k-C\hat x_k^- -Du_k,
+\]
+\[
+S_k=CP_k^-C^T+R_v,\qquad
+L_k=P_k^-C^TS_k^{-1}.
+\]
+\tinyhead{3. Correction (a posteriori):}
+\[
+\hat x_k=\hat x_k^-+L_k\tilde y_k,
+\qquad
+P_k=(I-L_kC)P_k^-.
+\]
+\tinyhead{Meaning:} prediction propagates both state and uncertainty; the update corrects the model using the measurement residual. $P_k^-$ usually grows between measurements because process noise adds uncertainty.
+}
+
+\mybox{Steady-State Kalman Filter \& Duality \Odot \Ldot}{
+Continuous observer:
+\[
+\dot{\hat x}=A\hat x+Bu+L(y-C\hat x).
+\]
+Filter Riccati equation:
+\[
+AP+PA^T-PC^TR_v^{-1}CP+GQ_wG^T=0,
+\]
+\[
+L=PC^TR_v^{-1}.
+\]
+A stabilising steady-state filter requires $(A,G)$ stabilisable and $(A,C)$ detectable.\par
+\tinyhead{LQR--Kalman duality:}
+\[
+A\leftrightarrow A^T,\quad B\leftrightarrow C^T,
+\quad Q_{LQR}\leftrightarrow GQ_wG^T,
+\quad R_{LQR}\leftrightarrow R_v,
+\]
+\[
+K=R^{-1}B^TP\quad\leftrightarrow\quad L=PC^TR_v^{-1}.
+\]
+\qrow{Exam sentence:}{The Kalman filter is an optimal noisy-state estimator; it is the estimation dual of LQR.}
+}
+
+\mybox{LQG, Separation Principle \& LTR \Odot \Ldot}{
+\tinyhead{LQG:} LQR state feedback plus Kalman state estimation:
+\[
+u=-K\hat x,
+\qquad
+\dot{\hat x}=A\hat x+Bu+L(y-C\hat x).
+\]
+\tinyhead{Separation principle:} design $K$ and $L$ independently; nominal closed-loop poles are
+\[
+\operatorname{eig}(A-BK)\ \cup\ \operatorname{eig}(A-LC).
+\]
+This guarantees nominal stability under the usual controllability/detectability assumptions, but it does \textbf{not} preserve LQR's guaranteed gain/phase margins. The estimator adds dynamics and phase lag, so LQG can be fragile to model error.\par
+\tinyhead{Loop Transfer Recovery (input LTR):}
+(1) design LQR gain $K$; (2) choose fictitious process-noise channel $G=B$ and $Q_w=qI$; (3) increase $q$. As $q\to\infty$, the LQG input-loop approaches the LQR loop and robustness margins are recovered.\par
+\tinyhead{Trade-off:} aggressive recovery increases estimator bandwidth/gain and can amplify sensor noise or actuator activity.
+}
+
+\mybox{Robust-Control Backup: $H_\infty$ / Small Gain \Fdot}{
+\[
+S=(I+L)^{-1},\qquad T=L(I+L)^{-1},\qquad S+T=I.
+\]
+$S$: tracking/disturbance sensitivity at low frequency. $T$: noise/unmodelled-dynamics sensitivity at high frequency.
+\[
+\|M\|_\infty=\sup_\omega \bar\sigma\!\left(M(j\omega)\right).
+\]
+\tinyhead{Small-gain theorem:} feedback of stable $M$ and uncertainty $\Delta$ is robustly stable if
+\[
+\|M\|_\infty\,\|\Delta\|_\infty<1.
+\]
+Common weighted tests:
+\[
+\|W_mT\|_\infty<1\quad\text{(robust stability)},
+\qquad
+\|W_sS\|_\infty<1\quad\text{(performance)}.
+\]
+\tinyhead{Intuition:} robust design limits the worst-case amplification over all frequencies, rather than optimising only the nominal model.
+}
+
+% ================================================================
+% WEEK 3 DAY 2: MODEL PREDICTIVE CONTROL
+% Essential for Q8. Place near/after the LQR section.
+% ================================================================
+
+\mybox{Q8: MPC Receding-Horizon Workflow \Ldot}{
+Prediction model:
+\[
+x_{i+1}=Ax_i+Bu_i,\qquad y_i=Cx_i.
+\]
+At each sample:
+\begin{enumerate}[leftmargin=*,nosep]
+\item measure/estimate current state $x_k$;
+\item predict behaviour over $N$ future steps;
+\item minimise tracking error and control effort subject to constraints;
+\item apply only the first optimal input $u_0^*$;
+\item shift the horizon and solve again using new measurements.
+\end{enumerate}
+Typical finite-horizon cost:
+\[
+J=\sum_{i=0}^{N-1}
+\left(e_i^TQe_i+u_i^TRu_i\right)+e_N^TP_fe_N,
+\quad e_i=x_i-r_i.
+\]
+For smoother actuators, penalise $\Delta u_i$ instead of/in addition to $u_i$. Future references $r_{k+1:k+N}$ give \textbf{preview}, so MPC can anticipate turns or setpoint changes.
+}
+
+\mybox{MPC Quadratic Program \& Constraints \Ldot}{
+Stack future inputs:
+\[
+U=\begin{bmatrix}u_k^T&u_{k+1}^T&\cdots&u_{k+N_c-1}^T\end{bmatrix}^T.
+\]
+After substituting predictions into the quadratic cost:
+\[
+\min_U\ \frac12U^THU+f^TU
+\]
+subject to
+\[
+A_{ineq}U\le b_{ineq}.
+\]
+Constraints may represent
+\[
+u_{min}\le u_i\le u_{max},\quad
+\Delta u_{min}\le\Delta u_i\le\Delta u_{max},
+\]
+\[
+x_{min}\le x_i\le x_{max},\quad
+y_{min}\le y_i\le y_{max}.
+\]
+$H\succeq0$ gives a convex QP. Hard constraints must never be violated; soft constraints add slack variables and penalties to preserve feasibility.\par
+\tinyhead{Failure modes:} infeasible QP, excessive computation, model mismatch and delay. Use suitable horizon/sample time, terminal ingredients, warm starts and fallback control.
+}
+
+\mybox{MPC vs LQR --- Likely Comparison Question \Ldot \Edot}{
+\begin{tabularx}{\linewidth}{@{}lXX@{}}
+& LQR & MPC\\\midrule
+Horizon & infinite & finite, repeatedly shifted\\
+Constraints & not explicit & state/input/rate constraints\\
+Control & $u=-Kx$ & online optimisation\\
+Computation & offline; cheap online & QP every sample\\
+Model & normally LTI & LTI/LTV; NMPC possible\\
+Stability & Riccati guarantee & needs suitable terminal design\\
+Preview & limited & uses future references\\
+\end{tabularx}
+\tinyhead{Connection:} unconstrained MPC with a sufficiently long/infinite horizon and correct terminal cost approaches the LQR solution.\par
+\qrow{Why choose MPC?}{It explicitly handles physical constraints and predicts future behaviour/reference changes.}
+\qrow{Main disadvantage?}{Online optimisation increases computation and can become infeasible or too slow.}
+}
+
+% ================================================================
+% WEEK 3 DAY 3: ADAPTIVE AND LEARNING-BASED CONTROL
+% Prioritise the last box if space is tight because the exam explicitly
+% asks for RL benefits and risks.
+% ================================================================
+
+\mybox{Adaptive Control: Gain Scheduling, MRAC, STR \Edot}{
+\tinyhead{Gain scheduling:} measure an operating variable and switch/interpolate among predesigned controllers. Fast and practical for predictable variation, but essentially open-loop adaptation and transitions need validation.\par
+\tinyhead{MRAC:} choose a reference model with desired response and adapt controller parameters so plant output tracks it:
+\[
+e=y-y_m,\qquad u=\theta^T\phi,
+\]
+\[
+\dot\theta=-\gamma\frac{\partial e}{\partial\theta}e
+\quad\text{(MIT rule; Lyapunov laws give stronger guarantees).}
+\]
+Direct adaptation; no explicit plant identification.\par
+\tinyhead{Self-tuning regulator (STR):} repeatedly identify plant parameters online, then redesign the controller using certainty equivalence. Flexible and diagnostic, but computationally heavier and requires persistent excitation.\par
+\tinyhead{Selection:} predictable measured variation $\to$ gain scheduling; known desired model but uncertain plant $\to$ MRAC; explicit changing model required $\to$ STR.
+}
+
+\mybox{Reinforcement Learning \& ILC --- Benefits/Risks \Edot}{
+RL learns a policy from interaction to maximise discounted reward:
+\[
+\max_\pi E\!\left[\sum_{t=0}^{\infty}\gamma^tr_t\right].
+\]
+Q-learning update:
+\[
+Q(s,a)\leftarrow Q(s,a)+\alpha\left[r+\gamma\max_{a'}Q(s',a')-Q(s,a)\right].
+\]
+\tinyhead{Benefits:} can learn nonlinear policies without an accurate model, adapt to unknown/changing dynamics and optimise long-term behaviour.\par
+\tinyhead{Risks:} unsafe exploration, weak stability/constraint guarantees, large data demand, reward misspecification, poor interpretability and simulation-to-real mismatch. Use offline training, safety filters, constraints and a conventional fallback controller.\par
+\tinyhead{ILC:} for the same finite task repeated many times,
+\[
+u_{j+1}(t)=u_j(t)+L e_j(t).
+\]
+It improves trial-to-trial feedforward performance, but is not general online adaptation to arbitrary new tasks.
+}
+
+% ================================================================
+% WEEK 3 DAY 4: PLANNING / SAFETY / MULTI-AGENT
+% The exam-preparation slide explicitly asks for A*, CBF and consensus.
+% Keep this compact even though Q9 is mainly synthesis.
+% ================================================================
+
+\mybox{Planning Essentials: A*, RRT, Hierarchy \Cdot}{
+\tinyhead{Hierarchy:} mission goal $\to$ collision-free path $\to$ timed trajectory $\to$ feedback control. Plan slowly; control faster; safety filtering fastest.\par
+\tinyhead{A*:}
+\[
+f(n)=g(n)+h(n),
+\]
+where $g$ is actual cost-to-come and $h$ estimates cost-to-go. If $h(n)\le h^*(n)$ (admissible), A* is optimal; Dijkstra is A* with $h=0$. A consistent heuristic also satisfies
+\[
+h(n)\le c(n,n')+h(n').
+\]
+\tinyhead{RRT:} randomly sample, find nearest tree node, steer a fixed step and add the edge if collision-free. Probabilistically complete but not optimal. RRT* adds neighbour selection/rewiring and is asymptotically optimal.\par
+\tinyhead{Key distinction:} a path is geometric; a trajectory adds timing/velocity/acceleration and must be dynamically feasible.
+}
+
+\mybox{CBF Safety \& Multi-Agent Consensus \Cdot \Sdot}{
+Define safe set
+\[
+\mathcal C=\{x:h(x)\ge0\}.
+\]
+For $\dot x=f(x)+g(x)u$, enforce
+\[
+L_fh(x)+L_gh(x)u+\alpha h(x)\ge0.
+\]
+This is linear in $u$ and can be added to a QP safety filter that minimally modifies a nominal PID/LQR/MPC/RL command. If initially safe and feasible, the condition makes $\mathcal C$ forward invariant. Potential fields are simpler but may have local minima and no formal safety guarantee.\par
+\tinyhead{Consensus protocol:}
+\[
+\dot x_i=-\sum_j a_{ij}(x_i-x_j),
+\qquad
+\dot x=-\mathcal Lx,
+\]
+\[
+\mathcal L=D-A.
+\]
+For a connected undirected communication graph, agents converge to a common value. Formation control applies consensus to shifted states/desired relative offsets. Delays, switching topology and packet loss can degrade convergence/stability.
+}
+
+% ================================================================
+% Q9: INTEGRATION AND CRITICAL THINKING
+% This should be retained even if other Day 4 material is removed.
+% ================================================================
+
+\mybox{Q9: System-Synthesis Answer Framework \Edot}{
+Use this order for a design/justify question:
+\begin{enumerate}[leftmargin=*,nosep]
+\item \textbf{Requirements:} tracking, disturbance rejection, speed, safety, constraints, compute budget.
+\item \textbf{Model:} TF for simple SISO insight; state-space for MIMO/internal dynamics; state assumptions/uncertainty.
+\item \textbf{Feasibility:} check stability, controllability and observability; identify required sensors/actuators.
+\item \textbf{Classical baseline:} PID/lead-lag for transparent, low-cost SISO control; verify step response, GM and PM.
+\item \textbf{Modern layer:} LQR for MIMO regulation; Kalman/LQG for noisy unmeasured states; MPC for constraints/preview; adaptive/RL only when dynamics vary or are poorly known.
+\item \textbf{Safety/implementation:} saturation, anti-windup, filtering, sampling delay, rate limits, CBF/emergency fallback.
+\item \textbf{Validation:} nominal + uncertainty/noise/delay tests, worst cases, Monte Carlo, HIL and fail-safe behaviour.
+\end{enumerate}
+\qrow{Strong justification form:}{Use method X because requirement Y matches its main strength; mitigate limitation Z using safeguard W.}
+}
+
+\mybox{Method Selection --- One-Line Justifications \Edot}{
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+PID & simple SISO plant, low computation, easy commissioning; add anti-windup/filtering.\\
+Lead/lag & reshape transient response or steady-state accuracy with classical margins.\\
+Pole placement & direct transient design when states are available and system controllable.\\
+LQR & systematic MIMO state regulation with performance/effort trade-off.\\
+Kalman/LQG & states unmeasured and sensors noisy; then re-check robustness/LTR.\\
+MPC & hard constraints, rate limits and future reference preview are central.\\
+Adaptive & parameters vary predictably or online identification is required.\\
+RL & model is poor and nonlinear decision policy is valuable; requires safety supervision.\\
+CBF & hard safety set must remain invariant while preserving a nominal controller.\\
+\end{tabularx}
+\tinyhead{Never ignore:} actuator saturation/dead-zone, measurement noise, sampling/computation delay, nonlinear operating range, model uncertainty, sensor failure and communication loss.
+}
+
+% ----------------------------------------------------------------
+% OPTIONAL HIGH-PROBABILITY SHORT ANSWERS
+% ----------------------------------------------------------------
+
+\mybox{Week 3 High-Probability Answers \Edot}{
+\qrow{Purpose of a Kalman filter?}{To combine a model and noisy measurements into a minimum-variance estimate of unmeasured states.}
+\qrow{Why can LQG be less robust than LQR?}{The estimator adds dynamics and phase lag, so the full-state LQR margin guarantees no longer apply.}
+\qrow{What does LTR do?}{It tunes the estimator so the LQG loop approaches the robust LQR loop.}
+\qrow{What is receding horizon?}{Optimise several future inputs, apply only the first, then re-solve using new measurements.}
+\qrow{Main MPC strength?}{Explicit handling of state, input and rate constraints with prediction/reference preview.}
+\qrow{RL advantage and risk?}{It can learn without an accurate model, but exploration may violate safety and stability is usually not guaranteed.}
+\qrow{Why use a CBF?}{It converts a safety requirement into a control constraint that keeps the safe set forward invariant.}
+\qrow{Planning vs control?}{Planning selects a feasible route/reference; feedback control tracks it and rejects disturbances.}
+}
+
+\end{multicols}
+\end{document}

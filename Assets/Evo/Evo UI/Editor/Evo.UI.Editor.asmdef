@@ -1,0 +1,24 @@
+{
+    "name": "Evo.UI.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:1938c58277649b240a50fcbfa4f73618",
+        "GUID:7e25fe8f6fbbc15438270e00b77c4b12",
+        "GUID:e0be22c02e1bc314e86c8c9123dd75ca",
+        "GUID:e39842947943c974c96e0048c6854cca",
+        "GUID:f33588e8f4fb50344ad01eba3f0b9463",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

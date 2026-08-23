@@ -36,6 +36,20 @@ public class GhostController : MonoBehaviour
         if (buildController == null)
             return;
 
+        // Guided templates own input; Expert piece-by-piece ghost stays off.
+        if (UIInteractionState.CurrentExperience == UIInteractionState.Experience.Guided)
+        {
+            HideGhost();
+            return;
+        }
+
+        // A copied structure following the cursor (or a beam length scale) owns clicks.
+        if (StructureClipboard.StampingActive || BeamResizeSession.Busy)
+        {
+            HideGhost();
+            return;
+        }
+
         string partId = buildController.currentPartId;
 
         if (string.IsNullOrEmpty(partId))
@@ -47,53 +61,52 @@ public class GhostController : MonoBehaviour
 
         partId = partId.Trim();
 
+        // Esc disarms the part tool, like it clears a guided tool: back to a
+        // plain cursor so a click can select parts instead of placing them.
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            buildController.SetCurrentPart(null);
+            HideGhost();
+            return;
+        }
+
         EnsureGhostForPart(partId);
 
         if (_ghostInstance == null)
             return;
 
         var res = buildController.ComputeGhostPlacement(partId, _ghostInstance);
+        RefreshGhostVisual(res);
 
-        if (!res.hasPose)
-        {
-            _ghostInstance.SetActive(false);
-            ApplyGhostMaterial(false);
-            buildController.SetGhostResult(res, false);
-            return;
-        }
-
-        _ghostInstance.SetActive(true);
-        _ghostInstance.transform.SetPositionAndRotation(res.position, res.rotation);
-
-        bool isValid = res.isValid;
-        ApplyGhostMaterial(isValid);
-        buildController.SetGhostResult(res, isValid);
-
-        if (Input.GetMouseButtonDown(0))
+        // Click acts, drag selects: the placement commits on a clean click
+        // release so a left-drag can always start the selection marquee.
+        if (res.hasPose && res.isValid && LeftClickGesture.ClickReleased)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
 
-            if (isValid)
-            {
-                buildController.CommitPlacementFromGhost(partId, res);
+            buildController.CommitPlacementFromGhost(partId, res);
 
-                var post = buildController.ComputeGhostPlacement(partId, _ghostInstance);
-
-                if (!post.hasPose)
-                {
-                    _ghostInstance.SetActive(false);
-                    ApplyGhostMaterial(false);
-                    buildController.SetGhostResult(post, false);
-                    return;
-                }
-
-                _ghostInstance.SetActive(true);
-                _ghostInstance.transform.SetPositionAndRotation(post.position, post.rotation);
-                ApplyGhostMaterial(post.isValid);
-                buildController.SetGhostResult(post, post.isValid);
-            }
+            // Re-evaluate so the ghost immediately reflects the new scene state.
+            var post = buildController.ComputeGhostPlacement(partId, _ghostInstance);
+            RefreshGhostVisual(post);
         }
+    }
+
+    void RefreshGhostVisual(BuildController.GhostPlacementResult result)
+    {
+        if (!result.hasPose)
+        {
+            _ghostInstance.SetActive(false);
+            ApplyGhostMaterial(false);
+            buildController.SetGhostResult(result, false);
+            return;
+        }
+
+        _ghostInstance.SetActive(true);
+        _ghostInstance.transform.SetPositionAndRotation(result.position, result.rotation);
+        ApplyGhostMaterial(result.isValid);
+        buildController.SetGhostResult(result, result.isValid);
     }
 
     void EnsureGhostForPart(string partId)
@@ -104,8 +117,6 @@ public class GhostController : MonoBehaviour
             HideGhost();
             return;
         }
-
-        partDatabase.RebuildCache();
 
         GameObject desiredPrefab = partDatabase.GetGhostPrefabOrFallback(partId);
 
