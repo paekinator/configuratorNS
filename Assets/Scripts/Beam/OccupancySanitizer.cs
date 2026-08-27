@@ -2,25 +2,25 @@ using UnityEngine;
 
 public class OccupancySanitizer : MonoBehaviour
 {
-    [Tooltip("If true, runs every frame. If false, runs every N frames.")]
+    [Tooltip("Unused (legacy). Sanitizing is change-driven: stale occupancy can only appear when an occupant was destroyed, which bumps AttachmentPoint.StructureVersion.")]
     public bool runEveryFrame = true;
 
-    [Tooltip("If not running every frame, how often to run (in frames).")]
+    [Tooltip("Unused (see Run Every Frame).")]
     public int runEveryNFrames = 10;
 
-    int _frame;
+    int _seenVersion;
 
     void LateUpdate()
     {
-        if (!runEveryFrame)
-        {
-            _frame++;
-            if (_frame % Mathf.Max(1, runEveryNFrames) != 0)
-                return;
-        }
+        // A stale occupant reference can only appear when something was
+        // destroyed — and every destroyed part unregisters its attachment
+        // points, bumping the structure version. Idle frames cost one compare.
+        if (_seenVersion == AttachmentPoint.StructureVersion)
+            return;
+        _seenVersion = AttachmentPoint.StructureVersion;
 
-        var aps = FindObjectsByType<AttachmentPoint>(FindObjectsSortMode.None);
-        for (int i = 0; i < aps.Length; i++)
+        var aps = AttachmentPoint.Live;
+        for (int i = 0; i < aps.Count; i++)
         {
             var ap = aps[i];
             if (ap == null) continue;

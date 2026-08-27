@@ -1,0 +1,169 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5306452612930511
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6343784600276286444}
+  - component: {fileID: 4132676527485046560}
+  m_Layer: 5
+  m_Name: List View
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6343784600276286444
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5306452612930511}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 800, y: 248}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &4132676527485046560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5306452612930511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd7edf16217b48841bceccac2a41c5cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  columns:
+  - columnName: Date
+    columnIcon: {fileID: 21300000, guid: 0c8ef18bc96eb3840ab88b3775d51bdb, type: 3}
+    width: 150
+    useFlexibleWidth: 0
+    alignment: 4
+  - columnName: Title
+    columnIcon: {fileID: 21300000, guid: f8dd4f6cd41788448a23017cba2c219c, type: 3}
+    width: 300
+    useFlexibleWidth: 1
+    alignment: 3
+  - columnName: Developer
+    columnIcon: {fileID: 21300000, guid: c76c22ccccdc203478a2ec9fbfc92cfb, type: 3}
+    width: 93.58
+    useFlexibleWidth: 1
+    alignment: 3
+  rows:
+  - values:
+    - 2025
+    - Cyberpunk 2077
+    - CD Projekt RED
+    icons:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    customObjects:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+  - values:
+    - 2016
+    - Titanfall 2
+    - Respawn Entertainment
+    icons:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    customObjects:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+  - values:
+    - 1998
+    - Half-Life
+    - Valve Corporation
+    icons:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    customObjects:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+  style:
+    headerFont: {fileID: 11400000, guid: 6bdb9c1d8b3ace1408d2de12e30ae744, type: 2}
+    rowFont: {fileID: 11400000, guid: b9eaf5570922ec845b483eb8974e9cef, type: 2}
+    headerFontSize: 24
+    rowFontSize: 24
+    headerFontStyle: 0
+    rowFontStyle: 0
+    headerTextColor: {r: 1, g: 1, b: 1, a: 1}
+    rowTextColor: {r: 1, g: 1, b: 1, a: 1}
+    headerHeight: 60
+    rowHeight: 60
+    columnSpacing: 2
+    rowSpacing: 2
+    iconSize: 18
+    contentSpacing: 10
+    contentPadding:
+      m_Left: 20
+      m_Right: 20
+      m_Top: 0
+      m_Bottom: 0
+    headerBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+    rowBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+    useAlternatingRowColor: 0
+    alternatingRowColor: {r: 0.11698109, g: 0.11698109, b: 0.11698109, a: 1}
+    showBorder: 0
+    borderColor: {r: 0.5320754, g: 0.5320754, b: 0.5320754, a: 1}
+    borderWidth: 2
+    backgroundSprite: {fileID: 0}
+    ppuMultiplier: 1
+  stylingSource: 1
+  styleMapping:
+  - type: 0
+    colorID: 
+    fontID: Inter - Regular
+  - type: 1
+    colorID: 
+    fontID: 
+  - type: 2
+    colorID: Primary
+    fontID: 
+  - type: 3
+    colorID: Primary
+    fontID: 
+  - type: 4
+    colorID: Primary (Soft)
+    fontID: 
+  - type: 5
+    colorID: Background
+    fontID: 
+  - type: 6
+    colorID: Background (Dim)
+    fontID: 
+  - type: 7
+    colorID: Secondary
+    fontID: 
+  stylerPreset: {fileID: 11400000, guid: 62d3d5000dc484241a42d255128f3aa7, type: 2}
+  enableScrolling: 0
+  verticalScrollbar: {fileID: 0}
+  scrollSensitivity: 10
+  parentRect: {fileID: 6343784600276286444}
+  isDirty: 1
+  autoRefresh: 1
+  groupFoldout: 1
+  rowFoldout: 1
+  styleFoldout: 0
+  referencesFoldout: 0

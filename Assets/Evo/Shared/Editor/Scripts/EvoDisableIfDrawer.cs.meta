@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: b159d31bb40ca3f439503f300f8631a1
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Shared/Editor/Scripts/EvoDisableIfDrawer.cs
+  uploadId: 957982

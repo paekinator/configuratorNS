@@ -15,6 +15,8 @@ public class FlyCameraController : MonoBehaviour
 
     [Header("Look (RMB)")]
     public float lookSensitivity = 2.0f;
+    [Tooltip("WebGL feeds much larger mouse deltas than desktop; look input is multiplied by this in browser builds only.")]
+    public float webglLookScale = 0.5f;
     public bool invertY = false;
     public float pitchMin = -80f;
     public float pitchMax = 80f;
@@ -29,7 +31,16 @@ public class FlyCameraController : MonoBehaviour
 
     void Awake()
     {
-        // Initialize yaw/pitch from current rotation
+        SyncPoseFromTransform();
+    }
+
+    /// <summary>
+    /// Re-read yaw/pitch from the transform. Call after moving the rig from
+    /// outside (e.g. the start view bootstrap), or the next look input snaps
+    /// the camera back to the stale cached angles.
+    /// </summary>
+    public void SyncPoseFromTransform()
+    {
         Vector3 e = transform.eulerAngles;
         _yaw = e.y;
         _pitch = NormalizePitch(e.x);
@@ -51,6 +62,15 @@ public class FlyCameraController : MonoBehaviour
             float mx = Input.GetAxisRaw("Mouse X");
             float my = Input.GetAxisRaw("Mouse Y");
             float sy = invertY ? 1f : -1f;
+
+            // Pointer lock keeps mousePosition frozen, so the axes are the
+            // only delta source here — but on WebGL they carry raw browser
+            // deltas (device pixels, so high-DPI doubles them again), far
+            // hotter than the OS-scaled values desktop builds get.
+#if UNITY_WEBGL && !UNITY_EDITOR
+            mx *= webglLookScale;
+            my *= webglLookScale;
+#endif
 
             _yaw += mx * lookSensitivity;
             _pitch += my * lookSensitivity * sy;
@@ -91,9 +111,11 @@ public class FlyCameraController : MonoBehaviour
         if (Input.GetKey(KeyCode.W)) z += 1f;
         if (Input.GetKey(KeyCode.S)) z -= 1f;
 
+        // Q/E for vertical movement: Shift is reserved for multi-select
+        // (and sprint), Space stays free so it never fights browser fullscreen.
         float y = 0f;
-        if (Input.GetKey(KeyCode.Space)) y += 1f;
-        if (Input.GetKey(KeyCode.LeftShift)) y -= 1f;
+        if (Input.GetKey(KeyCode.Q)) y += 1f;
+        if (Input.GetKey(KeyCode.E)) y -= 1f;
 
         Vector3 input = new Vector3(x, y, z);
         if (input.sqrMagnitude > 1f) input.Normalize();

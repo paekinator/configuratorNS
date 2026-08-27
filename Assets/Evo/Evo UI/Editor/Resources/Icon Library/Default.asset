@@ -1,0 +1,2107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 32
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d2c51628fcf0414c80bfa27772f8772, type: 3}
+  m_Name: Default
+  m_EditorClassIdentifier: 
+  categories:
+  - AI
+  - Business
+  - Communication
+  - Design
+  - Development
+  - Device
+  - Editor
+  - Emoji
+  - File
+  - Food
+  - Logo
+  - Map
+  - Media
+  - Nature
+  - Navigation
+  - Shape
+  - Sports
+  - Status
+  - System
+  - Time
+  - Weather
+  icons:
+  - ID: Generative AI (Fill)
+    category: AI
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f57593857927c0940be5f29ec064d62f, type: 3}
+  - ID: Generative AI
+    category: AI
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e56e82399437f8940b208807fa24bd15, type: 3}
+  - ID: Picture AI (Fill)
+    category: AI
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c4dd52f293c767e4c929bd86192fefe4, type: 3}
+  - ID: Picture AI
+    category: AI
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b3a16edbff8315a40be866084788e259, type: 3}
+  - ID: Search AI (Fill)
+    category: AI
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8297303d6c952fc4a8e1cc7856c32217, type: 3}
+  - ID: Search AI
+    category: AI
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4dc52ecd8e171e34c98c6d78f175fcbf, type: 3}
+  - ID: Cash (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6fff217320c52204b8af3eb5c28410ea, type: 3}
+  - ID: Cash
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 26d59e0af5193dc4691dc4ced394bbed, type: 3}
+  - ID: Chart Horizontal
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 77a044e4c9cbc3243979c3129518c363, type: 3}
+  - ID: Chart Vertical
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8d111348ab0e4b34baf71251b06c900c, type: 3}
+  - ID: Chart Line
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fe81cfff8bf5d174dacc45039e9b7266, type: 3}
+  - ID: Chart Pie (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6f231d28d7574374db1106fa73ed2e77, type: 3}
+  - ID: Chart Pie
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2784a0c75a4dd464a9169b75474e7939, type: 3}
+  - ID: Coin (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c335f3f06ff1baf40a74cbafc91ca9fe, type: 3}
+  - ID: Coin
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fa4c45a39958ed84c9eee6b3c37f569f, type: 3}
+  - ID: Coupon (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a062efe1f6bca3d4b9d1243c755b44c5, type: 3}
+  - ID: Coupon
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9a048347bbca68240a65e329923bdeb8, type: 3}
+  - ID: Credit Card (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c92a1ffaacd1a0f4da4edcd29240ae4b, type: 3}
+  - ID: Credit Card
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 888a21c1c4597e74999bc36eaa1ab337, type: 3}
+  - ID: Diamond (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 684d18e1fbe72da49a1bb971a447381f, type: 3}
+  - ID: Diamond
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8f0ca04dee9c96d419284d0d8b8d60cf, type: 3}
+  - ID: Gift (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 926d2d566918aed4cb128d2a21d26d7e, type: 3}
+  - ID: Gift
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 18bae9d25da1508479dab64fbf549b54, type: 3}
+  - ID: Sale (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4bf14ac1860e70c48840c69cb2066c74, type: 3}
+  - ID: Sale
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 90aa6463ed7856a409dc493f2ec9b0ec, type: 3}
+  - ID: Shopping Bag (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 30d417b3fff72b04ca1d072329b00f5f, type: 3}
+  - ID: Shopping Bag
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: dc5cbcf78fa2bee4194b96618a770bd2, type: 3}
+  - ID: Stock (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9ec2d90f8619b4b40a9a706ce198a72e, type: 3}
+  - ID: Stock
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f4d680668355cd240836800a07e38454, type: 3}
+  - ID: Trophy (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: bb495334e9f486b49aa375e8af39c790, type: 3}
+  - ID: Trophy
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 95d509cdd22d0724a8e201915f4bf9f8, type: 3}
+  - ID: Wallet (Fill)
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 50c2d9a92d544604b987a2d9a7b87363, type: 3}
+  - ID: Wallet
+    category: Business
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 196e55ea34a7f914c90aa49f74e54c6a, type: 3}
+  - ID: Comment (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 7465d6a539315d541a99f02bab65d915, type: 3}
+  - ID: Comment
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5369080410e27d64a9660056e363bd1f, type: 3}
+  - ID: Group (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 077d119fb6559ac40871c5eeaa82fad7, type: 3}
+  - ID: Group
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c76c22ccccdc203478a2ec9fbfc92cfb, type: 3}
+  - ID: Mail (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1f009d72d0c3c5945999118daf4a7314, type: 3}
+  - ID: Mail
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 87d25f49eb5959f49b2968e2eb95b5d6, type: 3}
+  - ID: Message (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c0ea127475e7a6f47ae5765710e78aa6, type: 3}
+  - ID: Message
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b8ad7374bcc57ce42b0ce6327ac42bc5, type: 3}
+  - ID: Phone (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 33c2766f1d4df2a4fa9c58a9f90d8f62, type: 3}
+  - ID: Phone
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 44f8cab193bdea14fafe99f8c5409bc6, type: 3}
+  - ID: Send (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fb24fa5fad83e1348a9d444a2acb9598, type: 3}
+  - ID: Send
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 84fd579376742ed44a93549a61057691, type: 3}
+  - ID: Share (Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fcfc41efe1ef54a42aeb5c6a88e30e56, type: 3}
+  - ID: Share
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: de0d0e7449d70974ebfdd6c5c3502de6, type: 3}
+  - ID: User (Circle Fill)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d9e912e6b0dbd484183c58e8cf4eaec2, type: 3}
+  - ID: User (Circle)
+    category: Communication
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3c56e859ac02b4e46b10760296681bf3, type: 3}
+  - ID: Brightness
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: aa5d337382c224944adabe23f1bd7db4, type: 3}
+  - ID: Color Filter
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 37c9987270d6acd4bbb601708a65f4da, type: 3}
+  - ID: Color Picker
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 68e2f9ef75783ec4b87e5f7fe6117514, type: 3}
+  - ID: Layout (Fill)
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 76f6c2e3017651d4e82d6f4185ba8fc3, type: 3}
+  - ID: Layout
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a20d3fd97baec3840a44e5564e85bb53, type: 3}
+  - ID: Mark Pen (Fill)
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 15a382410b2fd574b83fefc61c57262f, type: 3}
+  - ID: Mark Pen
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: eba40857686e887478d4f9dda881cd92, type: 3}
+  - ID: Paint Brush (Fill)
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c86f14ff8424df44fa26fd62a519e403, type: 3}
+  - ID: Paint Brush
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4b19e4cbb30ac0c439a74de57feb1ba7, type: 3}
+  - ID: Palette (Fill)
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 72fd909ed4234314c87cbca8c9d53b39, type: 3}
+  - ID: Palette
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 05ebc6253b95c8a4e84e50e87f5b97d1, type: 3}
+  - ID: Spacing Horizontal
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 230ad398f174c7a47a78812626be1499, type: 3}
+  - ID: Spacing Vertical
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 333920613037d974ea5865bb1bed1c98, type: 3}
+  - ID: Sticker (Fill)
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4d823a2fc2b13ac4ca73e0c550f3b870, type: 3}
+  - ID: Sticker
+    category: Design
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f8dd4f6cd41788448a23017cba2c219c, type: 3}
+  - ID: Braces
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 76941f4022497f8499c379a9f6b67a1a, type: 3}
+  - ID: Brackets Angle
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8b736e6af82becc4a84a599619629650, type: 3}
+  - ID: Brackets
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 706c07dc504242b48afcf3ffdbd773e1, type: 3}
+  - ID: Bug (Filled)
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c026044d7375d1e4e906094b6a75000c, type: 3}
+  - ID: Bug
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c609c2004f2a14740b2ef1f0507b3ad0, type: 3}
+  - ID: Code
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9234de1118aac5749adb4244f3cf2efc, type: 3}
+  - ID: Terminal Box (Filled)
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a8c3f86cae42c474fa26b66d3caecd8f, type: 3}
+  - ID: Terminal Box
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 08bebb8ed60db7540be83ebbddeb2456, type: 3}
+  - ID: Terminal
+    category: Development
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 99f004010dc26d9448d05d880c4b0eee, type: 3}
+  - ID: Battery (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9bbd39c3c00104f469b87e5b6a767b67, type: 3}
+  - ID: Battery Charging (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c83018531923245408179ff33fe9ae85, type: 3}
+  - ID: Battery Charging
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 29be1b1a8d56abb428b4b8189fa0685d, type: 3}
+  - ID: Battery
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4ce34d41047bbd048ae3235975fba268, type: 3}
+  - ID: Bluetooth Off
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9aa7e66a6a8a8cf43a3abedbe4c4eac7, type: 3}
+  - ID: Bluetooth
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a83ca9a7aedc29d40b58f78718293e44, type: 3}
+  - ID: Bulb (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f0d786e8a6e92ce47b9fb10e6d8d698c, type: 3}
+  - ID: Bulb
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0e39d9c4eb98c534387700581acf914a, type: 3}
+  - ID: Controller (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 994b83ca4b83f554d82b5f301d3c95ed, type: 3}
+  - ID: Controller
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d02b354738a41644aab264f513a5eed9, type: 3}
+  - ID: Dashboard (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2f8637a005a1d714a8ed583620b13802, type: 3}
+  - ID: Dashboard
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e81e5bf0088fe8246873ebe42b3b5e45, type: 3}
+  - ID: Device (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3c03f2a34da6d1e46a778d9b16fa65ee, type: 3}
+  - ID: Device
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 98a59f7d3b68a8b419a058ecfc542b4b, type: 3}
+  - ID: Display (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: abad9722bbe61a74196f6d340f8e1c05, type: 3}
+  - ID: Display
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 52c2a9a1b9d53d54a9b3bd8a9e9577c3, type: 3}
+  - ID: Drone
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1f95adae44c3d62489e8f87fcbbf5fb6, type: 3}
+  - ID: Flashlight (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2baee4408f7047848943c6b4610a7008, type: 3}
+  - ID: Flashlight
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f150926fcb992364889d8f8568880d99, type: 3}
+  - ID: Laptop (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5336ed4cc7014cc47940bef762718ef0, type: 3}
+  - ID: Laptop
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ecbdbce80cc660d42bf630ff99b739e4, type: 3}
+  - ID: Mouse (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 175ce4678c4be7a4da8f75dee01237b9, type: 3}
+  - ID: Mouse
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 228889aa81880d84a96de6771bd789f8, type: 3}
+  - ID: Phone Vibration (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fa72480b7defb0d4e8ef9c1131518feb, type: 3}
+  - ID: Phone Vibration
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 461a87a939e60794b9276b435be6fbb4, type: 3}
+  - ID: RSS
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 419a745162d37ab438b89dc6447c61ae, type: 3}
+  - ID: Scan
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: efaf696559396274ea97112906938d0f, type: 3}
+  - ID: Speaker (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 603f38edd9090794680a9e36445f24a5, type: 3}
+  - ID: Speaker
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b4f35dbe5242e1a46af4ea236e6136ba, type: 3}
+  - ID: Webcam (Fill)
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fc81c6a72c040c345877403e1db4f343, type: 3}
+  - ID: Webcam
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: aa51317c26895fa4093b2585c75f973a, type: 3}
+  - ID: Wi-Fi Off
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1a12a1ce688ffcb47aa21029f11b1fd7, type: 3}
+  - ID: Wi-Fi
+    category: Device
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 421a982351c86ac4da2289b1b13f8155, type: 3}
+  - ID: Edit
+    category: Editor
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 12abb4b731c24f640806d1281a144ced, type: 3}
+  - ID: Eraser (Fill)
+    category: Editor
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: bbdec9d1c94fba04f844b6c36a6a1d20, type: 3}
+  - ID: Eraser
+    category: Editor
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 16342a04c0ebc444289b3feeb0fc8e9f, type: 3}
+  - ID: Pencil (Fill)
+    category: Editor
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2bef697af95f3914b912ec1f53607179, type: 3}
+  - ID: Pencil
+    category: Editor
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 63968149e634d8248905a591a96ce6d1, type: 3}
+  - ID: Translate
+    category: Editor
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: cc6d024618ef94b448f5cb8b34bcba42, type: 3}
+  - ID: Angel (Fill)
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3d95cb0f1148b7140b67784b0deacfac, type: 3}
+  - ID: Angel
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b2ae7cef5ea7a754584fc0a35ea6f41a, type: 3}
+  - ID: Angry (Fill)
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1bc0250efee46464b87c4b7da3291d2c, type: 3}
+  - ID: Angry
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e0fc168da18a4ff44a4f7d87616d2bac, type: 3}
+  - ID: Happy (Fill)
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a3db108d352ddfb4f9a07b9ec869ffb6, type: 3}
+  - ID: Happy
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5d42ac9a06eda7745abbcaf871fd4422, type: 3}
+  - ID: Sad (Fill)
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 42558080e833d6145af292fb30d606e1, type: 3}
+  - ID: Sad
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 607e758d1323bcd4d8e2a7209a4ac50e, type: 3}
+  - ID: Sob (Fill)
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ef2ebcb87fb49014aaa683828d183038, type: 3}
+  - ID: Sob
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8bd34f34375fcc94e9fe2492638844b7, type: 3}
+  - ID: Surprised (Fill)
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d4e4855bc2b2b8747b42fac7ab610433, type: 3}
+  - ID: Surprised
+    category: Emoji
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f02d0efba203f1e4b880c8c430b99d2d, type: 3}
+  - ID: Attachment
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 12f5c57fd2b0a314082234f6710b199e, type: 3}
+  - ID: Clipboard (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 23146b55090e00e44924e063ba593029, type: 3}
+  - ID: Clipboard
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2d67d9f1e3babdd4ab050192982db478, type: 3}
+  - ID: Copy (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c282ddf1435a62645b6b1200335e74db, type: 3}
+  - ID: Copy
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 44ee2d24cf8cc594890bb0ac35b5ca76, type: 3}
+  - ID: Document (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f54878c204a75084a9f872f0416901bc, type: 3}
+  - ID: Document
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f469b9398fcf77c45a71ba075d39b309, type: 3}
+  - ID: Download (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: dbce5229a8c7e1d42b6e543168320e55, type: 3}
+  - ID: Download
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 12742f2ca06fc1344bdf113933851c63, type: 3}
+  - ID: External Link
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 12ae72cf6eac3b749b221dc16d1a4204, type: 3}
+  - ID: File (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4dc1c452abbe80e46b5e0cc16c08353c, type: 3}
+  - ID: File
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 310f0d92b88c73e41a6bcc7d133cfc9b, type: 3}
+  - ID: Folder (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6abc11ad563223e478f7236b6c2f5c97, type: 3}
+  - ID: Folder Open (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 074e646bb96aff046ad548101c13707d, type: 3}
+  - ID: Folder Open
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d98352ea476d62b47aba8792b0b0031f, type: 3}
+  - ID: Folder
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e535a92be80f61045a95c4a0931eb90a, type: 3}
+  - ID: Link
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 15cf2ea18427822478469a9bcbe262b8, type: 3}
+  - ID: Paste (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a5a59f51bb2c9774bb0045388a1b2a99, type: 3}
+  - ID: Paste
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 826f4f4b7ea000545b08c6fa9ce24be6, type: 3}
+  - ID: Unlink
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 41d511c947e81ed4e8785f5f530be75a, type: 3}
+  - ID: Upload (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ec9afef7a1a7a224e8ba82ac5c92d5ee, type: 3}
+  - ID: Upload
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 61ac604c0abe46f478b83244216b33f6, type: 3}
+  - ID: Zoom In (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 30af55143f9b7a0419724aa08115974d, type: 3}
+  - ID: Zoom In
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5537ba63eb930414ba93d0a9757473bc, type: 3}
+  - ID: Zoom Out (Fill)
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8dbe1fbaf955a964d8f8dc68aed4072f, type: 3}
+  - ID: Zoom Out
+    category: File
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 34f27f5308e59aa4cb5759e2774d24d7, type: 3}
+  - ID: Birthday Cake (Fill)
+    category: Food
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6541e259c52f3344f9003f8d7391b5a1, type: 3}
+  - ID: Birthday Cake
+    category: Food
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4a1a626c02cf00948ae625ffbdd0f52c, type: 3}
+  - ID: Cookie (Fill)
+    category: Food
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: aeaf1ea425c86b641b24702a86ec25d7, type: 3}
+  - ID: Cookie
+    category: Food
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 541902dbf88594645a79e0d95bcc5f3e, type: 3}
+  - ID: Glass Cup (Fill)
+    category: Food
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6d967828f88482c4baa029a8b7c7490e, type: 3}
+  - ID: Glass Cup
+    category: Food
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9bdc75de71eb7c245ba18672aa92986a, type: 3}
+  - ID: Apple
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 96180cc25fb95674e96587e5f8259c10, type: 3}
+  - ID: Bluesky
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9ce38d3414b880e4e8993905e9f1aeca, type: 3}
+  - ID: Discord
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 97fb5871c0a89504e9fc579ab786ff05, type: 3}
+  - ID: Facebook (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fd82d4dbe22922a4b9061d925f0d291b, type: 3}
+  - ID: Facebook
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 244a99f5fcdd5cf4f946cce06402bb79, type: 3}
+  - ID: Github
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ec9ae7c9ba4f0a749adbc5c978997220, type: 3}
+  - ID: Google (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0d0db9244e5481f4eaf5f27276faa082, type: 3}
+  - ID: Google
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 80a54c27c3ce04a4aa25add8e16f9af3, type: 3}
+  - ID: Instagram (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a50fc1d7d2f03fe4fa32fffa17719633, type: 3}
+  - ID: Instagram
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8939692e72f106f43b0e745dfe452e51, type: 3}
+  - ID: PlayStation
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e3752e0b70b6a954da2e0ee01489e788, type: 3}
+  - ID: Reddit (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3f39b99ebe7bd704086cfcc422a978e9, type: 3}
+  - ID: Reddit
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8d57ad7b8a8111049973f878d05426f8, type: 3}
+  - ID: Steam (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9c3756816a630fc45af9b5d3cbd6c813, type: 3}
+  - ID: Steam
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 827846bd8ff06a84bb96564c24e1c2b6, type: 3}
+  - ID: TikTok (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 42c76bf4c1e56124a8ed07f953938526, type: 3}
+  - ID: TikTok
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f9702a5f01d36324d827acc0b3e74aeb, type: 3}
+  - ID: Twitch (Color)
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8e13b73d329b10343a17fc37eb13ef1e, type: 3}
+  - ID: Twitch
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e1c3494e1cd760b4cae2b6d74577479e, type: 3}
+  - ID: Twitter X
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c3e295e652c12a64c94c40659baa5adb, type: 3}
+  - ID: Twitter
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 7e005dc1001ce9f4d853f7fc602d5eb9, type: 3}
+  - ID: Xbox
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d18d78db70674714ead50936d0e7e732, type: 3}
+  - ID: YouTube
+    category: Logo
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2c9ce72ef4d51a54b90160bfdc8abbb3, type: 3}
+  - ID: Compass (Fill)
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f8c18375b7129da47bb9b80bc86a4e59, type: 3}
+  - ID: Compass
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 520f06e222bc0cc458460309c8e78974, type: 3}
+  - ID: Location (Fill)
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 061ed3b61e96ade418649094ad89a80e, type: 3}
+  - ID: Location
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0e0eaa519bfb9bc409ef000fa2776643, type: 3}
+  - ID: Map (Fill)
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: afb8be5ca84a8f0479b44203430e5828, type: 3}
+  - ID: Map
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f1ba9ba2dd57b744fa5891823a28fb5e, type: 3}
+  - ID: Planet (Fill)
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 095dfc3e8c576d74595ecf7cdeb932e0, type: 3}
+  - ID: Planet
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 84cafe318a4bdb648adf846edc6d69ee, type: 3}
+  - ID: World (Fill)
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8ae371bd62a1df64694229b7451be02a, type: 3}
+  - ID: World
+    category: Map
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c06ed3ac2d0760e4e9594cdf12e3ef19, type: 3}
+  - ID: Audio Tape (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0eaf93c7b6c0dec4bbc6c3c3a13c95af, type: 3}
+  - ID: Audio Tape
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8c3386b6da598a54abae1dd020c718f8, type: 3}
+  - ID: Camera (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 629ef2a2034272545bba0c96444a7ac4, type: 3}
+  - ID: Camera
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a576aad6425c59f4485ea808c9a2addc, type: 3}
+  - ID: Mic (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0c8f03c16ba373f4c8543abae520212e, type: 3}
+  - ID: Mic Off (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 08a62aea5d8f3e641b51157dccbc27f2, type: 3}
+  - ID: Mic Off
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6dfb773021d92724fbad6141548d5ccf, type: 3}
+  - ID: Mic
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 75d8afa30dcdce944b689974b3d5fb22, type: 3}
+  - ID: Music (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 98fbf9a4ed0541d4681bbda157c0dd7f, type: 3}
+  - ID: Music
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e0b730013bfe91e468621c0c257963e0, type: 3}
+  - ID: Notification (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b0f67956743386745835f5ed5e84144a, type: 3}
+  - ID: Notification
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5fc9e5009b450244d9ce57473b65eab2, type: 3}
+  - ID: Pause (Circle Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b7db9c12082ca03499e9cdd31b38c888, type: 3}
+  - ID: Pause (Circle)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1b07d3ce5c8672f4a8a81d61d4669b20, type: 3}
+  - ID: Pause
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5dabff2736ee8554aa0c1e918bd83a75, type: 3}
+  - ID: Play (Circle Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6e5bf24865899194a8ec06af8780d38a, type: 3}
+  - ID: Play (Circle)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c1f95956a2f64ea448ebee32d1aabf8a, type: 3}
+  - ID: Play (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9e78cc0e8b1b99f4b8662481fe960548, type: 3}
+  - ID: Play
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 318856bc445183049927f740c666381e, type: 3}
+  - ID: Playlist (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4a96fb32b7f0a1e48a5fa838cd12bd4d, type: 3}
+  - ID: Playlist
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c79b1df358243a84ba8970605668273a, type: 3}
+  - ID: Video (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 64b61b37042882e429dd9bd3fd5311cd, type: 3}
+  - ID: Video
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: eff190062819a2946afa9d2342dfbf21, type: 3}
+  - ID: Volume (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: dd089a5d5fd10a944ac657916ba54f0a, type: 3}
+  - ID: Volume Mute (Fill)
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 55f838b4ad02f1946ac6cce4baf6332c, type: 3}
+  - ID: Volume Mute
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8bd84f76a2362f44fb396a50e8dc6264, type: 3}
+  - ID: Volume
+    category: Media
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 499a7bc76363a6a49a5840241b58a585, type: 3}
+  - ID: Campfire (Fill)
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 51f74fcf321f02748adefda08c985f8c, type: 3}
+  - ID: Campfire
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e025838ba1e751b4f975196805ee1bdb, type: 3}
+  - ID: Cat (Fill)
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 327ba77f3918c5b4ca81c5fd92a541f1, type: 3}
+  - ID: Cat
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8034c58a3e06fd24b92175be8b8c42b1, type: 3}
+  - ID: Dog (Fill)
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6bbf2431b025cc64fb4acd78538c7e3d, type: 3}
+  - ID: Dog
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 541ddb1d771ea4244aa81400eed8eec4, type: 3}
+  - ID: Flower (Fill)
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c9717fc9152de404d969b78e515c0525, type: 3}
+  - ID: Flower
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 27ca29e2835f53f43a3e0d957dca267e, type: 3}
+  - ID: Paw (Fill)
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 02a0b0cf10138e44e95d085e572a3ad9, type: 3}
+  - ID: Paw
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 22bd50c20fa1d8445994dc837bde45f5, type: 3}
+  - ID: Tree (Fill)
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5d8af9f081b096b4d8ff20b59abed192, type: 3}
+  - ID: Tree
+    category: Nature
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 126cb0c1f0a28354cbc7037c3cc9e32e, type: 3}
+  - ID: Add (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 19bd15e80d79d0947b6c710f366aa2c3, type: 3}
+  - ID: Add (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9a30edc77db5904458718e6ce9dc62d6, type: 3}
+  - ID: Add
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: bd4197e75ec71d24e95e8ed88e58762c, type: 3}
+  - ID: Arrow Down (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 084ee4ef20f55ca488c4bcd02067d15b, type: 3}
+  - ID: Arrow Down (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c5a272d4e88f4a94fb647c2220faccec, type: 3}
+  - ID: Arrow Down
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fb5f5c5dd993a964e8e8f78dcb227a2e, type: 3}
+  - ID: Arrow Left (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fbfcc207bd272934691d11467a477851, type: 3}
+  - ID: Arrow Left (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5238004c7f7bfa9418533e56706fbd23, type: 3}
+  - ID: Arrow Left
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 73bc676a002bbb247ad056dccce5d8a4, type: 3}
+  - ID: Arrow Right (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8473923a22fa1994183ce875e9b1408a, type: 3}
+  - ID: Arrow Right (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 62dbe75926c58484d8be1c122750b278, type: 3}
+  - ID: Arrow Right
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c5d7f68b70710b3498cc4687882dd844, type: 3}
+  - ID: Arrow Up (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 7c004a8ae2af7274a93dd0f5515b7351, type: 3}
+  - ID: Arrow Up (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: e11e2633dacf7dd49a239aa36b4e9a2f, type: 3}
+  - ID: Arrow Up
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a3871bb9da6c4ae408b03b7244bd80db, type: 3}
+  - ID: Close (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 476f77a4a8b92784caed2a5822e359c6, type: 3}
+  - ID: Close (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 83d372a598c79ef4ab0107c11ce05fd9, type: 3}
+  - ID: Close
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d6175a21c35fc2847b6862477c12d68a, type: 3}
+  - ID: Home (Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d0a5a4ea827690945805f50645b3a62e, type: 3}
+  - ID: Home
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c107aad9ae2eac448afb8d8f6562ef60, type: 3}
+  - ID: Minus (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2176525b062b0dc48a8300cbee1290eb, type: 3}
+  - ID: Minus (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: dfaaa2f8dc2053a4c8705832922c618b, type: 3}
+  - ID: Minus
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 61d785aa645d5cd46b8d5187b83c57ce, type: 3}
+  - ID: More (Circle Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a18c5d926f01d3745baee3523d916cba, type: 3}
+  - ID: More (Circle)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2552b0c5fddf4e94593e17703f6f5855, type: 3}
+  - ID: More
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4d0051f0e7a402a4ab51ce4e659ec38d, type: 3}
+  - ID: Refresh
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 67e12a107ad03fa4a9495b48c07a6852, type: 3}
+  - ID: Search (Fill)
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ea3850ad0e27b9d4889ae2da56839e7a, type: 3}
+  - ID: Search
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b32a8592a61a35944b7e8b0956d8e8f7, type: 3}
+  - ID: Up
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2d7093dc0a4b10c4d918996bd828648c, type: 3}
+  - ID: Down
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f3ccf1e5e815a6f479374e4a8870b9d3, type: 3}
+  - ID: Left
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c02ad6f766681ed4b8d85a727b0e836c, type: 3}
+  - ID: Right
+    category: Navigation
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d8c00234241712d41a24c4e4850d6a06, type: 3}
+  - ID: Diamond Square (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 23c40bdccf10c6d4482b335647abf801, type: 3}
+  - ID: Diamond Square
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c1dc9108404b2c94a977e87401efdc33, type: 3}
+  - ID: Heart (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: d3beb2bcc72801844826789ea357f4b5, type: 3}
+  - ID: Heart Crack (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 858f0c04c0da06c4d86da13d0d916548, type: 3}
+  - ID: Heart Crack
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0655c765b0d20f84fbd87fafd594cf63, type: 3}
+  - ID: Heart Half
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8052ecfb36b7b604aabec19884289bfe, type: 3}
+  - ID: Heart
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b1d8a0e014eec1a4e86ff6f8990a4389, type: 3}
+  - ID: Hexagon (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 551a87dca04bdd44db37e503d7a5f51a, type: 3}
+  - ID: Hexagon
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 479ae5e123ba89a428695979cb870cc8, type: 3}
+  - ID: Octagon (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 9e2f8b37e2fe38348882177617c95394, type: 3}
+  - ID: Octagon
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 839b990691203e748b34d67aef1f510a, type: 3}
+  - ID: Pentagon (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 953e97af493262b48a344f2f8acdd1da, type: 3}
+  - ID: Pentagon
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 21c9c75e5a1109b439b9c561f2b19436, type: 3}
+  - ID: Shield (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 87f22a97563024344920a9faed0ab4e7, type: 3}
+  - ID: Shield
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0b2f9d415f37c8f458d54fbb4d5ce22e, type: 3}
+  - ID: Star (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3acbdf5ab46598e4585caa4360c87db9, type: 3}
+  - ID: Star Half
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: adeadc7eddb4f5141aa869426d396877, type: 3}
+  - ID: Star
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5bc36343c9ead2e4289637a8122e3d27, type: 3}
+  - ID: Triangle (Fill)
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 47f0d1ea34d0e0c40be65adf5d82ebd6, type: 3}
+  - ID: Triangle
+    category: Shape
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2e5997621f399cf488d574b78a54edaf, type: 3}
+  - ID: Basketball (Fill)
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 29306c368cc217c4db2a56d879b6a759, type: 3}
+  - ID: Basketball
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: abc01967cb70f4d439f55446e996d4fc, type: 3}
+  - ID: Dumbbell (Fill)
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a36c70e0f55d9d64aa5db301896c6305, type: 3}
+  - ID: Dumbbell
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3f00d1664a9851444a75c3c31cddf236, type: 3}
+  - ID: Fitness (Fill)
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a4330e27775ac0a4197def656464ddb8, type: 3}
+  - ID: Fitness
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4f2b67631422e2641b93bea186b175a5, type: 3}
+  - ID: Playground (Fill)
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fba83a42810278544b57fcbf4ae532ec, type: 3}
+  - ID: Playground
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: c37ecc61ec21f3747bdf36a98ef044a0, type: 3}
+  - ID: Sword (Fill)
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0b1a0bceb820434498de959b4b59b33a, type: 3}
+  - ID: Sword
+    category: Sports
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 945135b97e7445c4bab5ebf0c6ff558f, type: 3}
+  - ID: Alert (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 00a801bd6904596438a107d69e411248, type: 3}
+  - ID: Alert
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b4cd174a8b017bc458aaeac05acfcc0c, type: 3}
+  - ID: Check (Circle Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 254a0d621e2620845a4d196be808a696, type: 3}
+  - ID: Check (Circle)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f8fe00a6df49c0b4784be7db94e72972, type: 3}
+  - ID: Check
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1fe9abdc905125641be7d2a8471ee62f, type: 3}
+  - ID: Checks
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ac40cf4879dbe0f40933ff2ca275928a, type: 3}
+  - ID: Forbid (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ea8d94327b120394ab86bc42f13848f2, type: 3}
+  - ID: Forbid
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: b07c44a4f0a067d47b2fce80a42424ad, type: 3}
+  - ID: Heartbeat
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6891f9eff3bf24548ac52a6ce59a707d, type: 3}
+  - ID: Information (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4bcddd47a43c89949970f2273e43fa01, type: 3}
+  - ID: Information
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6fdf25f10f97c59438276b94ab56b6fc, type: 3}
+  - ID: Question (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4bc531f52d504e448b0719700a7b33b6, type: 3}
+  - ID: Question
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 34fae120dc4ed4948b62a2948a266d58, type: 3}
+  - ID: Thumbs Down (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ee466cb5035ebf4449a392a0748f724a, type: 3}
+  - ID: Thumbs Down
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 96f2cf31ad7553f49ae215930876ea7d, type: 3}
+  - ID: Thumbs Up (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a60d9ae100de2b54e87152e27d641296, type: 3}
+  - ID: Thumbs Up
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 91227b9d3c967fe48a8147414ef761da, type: 3}
+  - ID: Verified (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2956b0cf23aa8034a9274cd9dc6315c1, type: 3}
+  - ID: Verified
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 98af6aa6a827a2e40b10689c5ab0f4eb, type: 3}
+  - ID: Warning (Fill)
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ac3517569edde514485e878cd529e6a8, type: 3}
+  - ID: Warning
+    category: Status
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6e2b714d92e757b428f657647e62e9fb, type: 3}
+  - ID: Eye (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6efc5fd5000199441a7dba6bcdff16f9, type: 3}
+  - ID: Eye
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8dc037fb3d9140e40a2566b43ec097b7, type: 3}
+  - ID: Gear (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8330e45620121054cbc5278b94d1099a, type: 3}
+  - ID: Gear
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5ab3019d796b00a47a1c015f1e977a7c, type: 3}
+  - ID: Key (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5f9b774a366287a4291e5fd4744bde6a, type: 3}
+  - ID: Key
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 07875e412043a5c42b34bdeb5b4cc21f, type: 3}
+  - ID: Lock (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0f1c3d17eb15e1c4e9f8a374b3404398, type: 3}
+  - ID: Lock
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 3ca2fd20823cd744daa73b79210d57fc, type: 3}
+  - ID: Power
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4c831a21c77ca174780acdcd937b1040, type: 3}
+  - ID: Settings (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 282c195fe1003af44b5ad8cf4564db59, type: 3}
+  - ID: Settings
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 84eafa975c3919745a06ff6386417a05, type: 3}
+  - ID: Tool (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 702e69aa521c3eb409091b93f472f93f, type: 3}
+  - ID: Tool
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: f56a29f093cf964429b6d3ac7ffade1e, type: 3}
+  - ID: Trash Can (Fill)
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 4ae952337cdc50940818fabeebd80cc4, type: 3}
+  - ID: Trash Can
+    category: System
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 14cd93fad8a23874abf2ecbc8d2ae0d1, type: 3}
+  - ID: Alarm (Fill)
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 33bbb85497d41ae44b6b0a503ee3c802, type: 3}
+  - ID: Alarm
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1ee019ddfa66e234a9a95998890a31c8, type: 3}
+  - ID: Calendar (Fill)
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: ccd0735e6b0cadc41876c74ed997bbed, type: 3}
+  - ID: Calendar
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0c8ef18bc96eb3840ab88b3775d51bdb, type: 3}
+  - ID: Clock (Fill)
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1016e2a158c32d1449dfe5616d82c2ab, type: 3}
+  - ID: Clock
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 44dd96f11bcbd4a459ace7e6a96f2d7d, type: 3}
+  - ID: Watch (Fill)
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 0b392cfa4dbbd58498a119eafb4dcd5f, type: 3}
+  - ID: Watch
+    category: Time
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 7212d932bbef0b045ba857e25f3595fc, type: 3}
+  - ID: Cloud (Fill)
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 1febd43f6f3292d4f9fd3f4211b6ca94, type: 3}
+  - ID: Cloud
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 5f6ce13f7aeb6a748917c26e3577558f, type: 3}
+  - ID: Moon (Fill)
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 35f12dc3e2e4848408f3a865e63dcf85, type: 3}
+  - ID: Moon
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 71cfaf520443adc4ba2bc1a051fa6862, type: 3}
+  - ID: Rain (Fill)
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 6899132e3e6fe3f438be61b2665e207a, type: 3}
+  - ID: Rain
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 859d055b9f4e8df41aa77282fb2b621a, type: 3}
+  - ID: Snow (Fill)
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 2f3596a6446e03e4a9288ec6e1c44713, type: 3}
+  - ID: Snow
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: 8ed847214bbafc54889d0be418c82c8a, type: 3}
+  - ID: Sun (Fill)
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: a54476942c2f63c4895b6179dcbc7978, type: 3}
+  - ID: Sun
+    category: Weather
+    searchKeywords: []
+    resolutions:
+    - resolution: 64
+      sprite: {fileID: 21300000, guid: fa6fb45dd8d89f7458c2fb8333b1db08, type: 3}

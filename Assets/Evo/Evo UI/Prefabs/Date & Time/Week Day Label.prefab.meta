@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b9e65698c333d6641984c7a2c7c69fe2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Evo UI/Prefabs/Date & Time/Week Day Label.prefab
+  uploadId: 957982

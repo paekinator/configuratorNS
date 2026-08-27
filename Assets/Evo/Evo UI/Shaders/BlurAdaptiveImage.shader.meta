@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: bedc0e28ca367034ca7187704a5e61c0
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Evo UI/Shaders/BlurAdaptiveImage.shader
+  uploadId: 957982

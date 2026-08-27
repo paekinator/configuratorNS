@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 2923c14ba3e796546beefdc3e4911ddb
+AssetOrigin:
+  serializedVersion: 1
+  productId: 310303
+  packageName: Evo UI - Modern UI Framework
+  packageVersion: 1.9.9
+  assetPath: Assets/Evo/Shared/Editor/Scripts/EvoHideIfDrawer.cs
+  uploadId: 957982

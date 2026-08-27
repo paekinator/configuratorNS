@@ -13,171 +13,189 @@ MonoBehaviour:
   m_Name: PartDatabase_Main
   m_EditorClassIdentifier: Assembly-CSharp::PartDatabase
   parts:
-  - partId: V1
-    realPrefab: {fileID: 534115028575572522, guid: 7a88e1f0bd5be400097de25a9a8c6bc1, type: 3}
-    ghostPrefab: {fileID: 534115028575572522, guid: 1985a6eb67a36404b99f1bbfe2ace482, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V3
-    realPrefab: {fileID: 5550564472603340788, guid: 65cbaf70c42424f0db6d92d6bf781221, type: 3}
-    ghostPrefab: {fileID: 5550564472603340788, guid: 3ac8f43df56c4440583b0b7170be9be0, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V5
-    realPrefab: {fileID: 2266462452466019956, guid: 9a6a88a347dbd49579e269b8ae97045c, type: 3}
-    ghostPrefab: {fileID: 2266462452466019956, guid: 7cf06ff1f06e54f6499705e3b2e8f653, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V9
-    realPrefab: {fileID: 5244673532094743804, guid: 969e9121bb7674e9b86eaa4c1ea47b37, type: 3}
-    ghostPrefab: {fileID: 5244673532094743804, guid: 6cd48b9b90b8f4a8aad6f2ced7a588c7, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V13
-    realPrefab: {fileID: 8794585298228003242, guid: 03281b3160e4447c6b9c096689ac235d, type: 3}
-    ghostPrefab: {fileID: 8794585298228003242, guid: 9b2e0f73ac9c04146ad73a4c3bd71597, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V15
-    realPrefab: {fileID: 1196461800265988240, guid: 002070b5c825f4101a7a74abd1e6ca76, type: 3}
-    ghostPrefab: {fileID: 1196461800265988240, guid: 88dd8f99e05874accbfef5c57560abc9, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V17
-    realPrefab: {fileID: 5313609047674639799, guid: 3e81175541032495e8692c2ab2a417ab, type: 3}
-    ghostPrefab: {fileID: 5313609047674639799, guid: 6a79f7a41e7a64528a854a82def77d6b, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: V25
-    realPrefab: {fileID: 8299624089120300886, guid: 85b48a85015384968b37b7b49984c0a8, type: 3}
-    ghostPrefab: {fileID: 8299624089120300886, guid: 96e78eeed2ee44efebb5eee69c503107, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
   - partId: H1
-    realPrefab: {fileID: 6067530191977774152, guid: 3a9261166b70f4c34957dc6e0739230d, type: 3}
-    ghostPrefab: {fileID: 6067530191977774152, guid: cdedb32eba77346a8aa114330088e8a9, type: 3}
+    realPrefab: {fileID: 5266322628586628326, guid: c9be580fe737a46cdbaa913e9089249d, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: H3
-    realPrefab: {fileID: 4485030570974238940, guid: 763ea25f86dc8436788ce946a27defc5, type: 3}
-    ghostPrefab: {fileID: 4485030570974238940, guid: e2c175cfea9da4640971606339286a7b, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: H5
-    realPrefab: {fileID: 821830490766507998, guid: b078a2e7b4fdb4fb8882e329418691fc, type: 3}
-    ghostPrefab: {fileID: 821830490766507998, guid: aee3bf4aa92bf4649bbb8066a28b414f, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
-    vRotationEuler: {x: 90, y: 0, z: 0}
-    vYawAngles: []
-  - partId: H7
-    realPrefab: {fileID: 3904535945648213348, guid: 051276374894645109ac35aaac58d966, type: 3}
-    ghostPrefab: {fileID: 3904535945648213348, guid: dbf4f67ec847e44568d4e084dbf3ae4b, type: 3}
-    overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: H11
-    realPrefab: {fileID: 7758439105324417743, guid: 634b5e2729eea417f89f4250ee1718d5, type: 3}
-    ghostPrefab: {fileID: 7758439105324417743, guid: 48cd2f6b4219c4e43961b6fa6aee6b63, type: 3}
+    realPrefab: {fileID: 8186662466227600465, guid: 32d82e4931c1c415cb71b25deb658d94, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: H15
-    realPrefab: {fileID: 5005559254999810230, guid: 2c63e11b998af46f59c9e09a328874e3, type: 3}
-    ghostPrefab: {fileID: 5005559254999810230, guid: df44a053fba644b2d9062cddcb7086c3, type: 3}
+    realPrefab: {fileID: 388423578034169592, guid: 95dceae8449d0491e86c731fa5755e91, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: H19
-    realPrefab: {fileID: 2029535653613239538, guid: ef179c5d856924d68aa7eec2b4fb36fe, type: 3}
-    ghostPrefab: {fileID: 2029535653613239538, guid: c707a2c6cf14c449da7def930bccbabc, type: 3}
+    realPrefab: {fileID: 376124845940180206, guid: 3fd197e28d3f1428cbf685a536fc7085, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: H23
-    realPrefab: {fileID: 1953413172206013406, guid: 9e197b361d7564a87a39e8e8a4247705, type: 3}
-    ghostPrefab: {fileID: 1953413172206013406, guid: 14467a08addce4da7a2858322bb264cf, type: 3}
+    realPrefab: {fileID: 2155518435639771833, guid: cb4342e9eb9894920957d909a0a351ef, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
-  - partId: H23
-    realPrefab: {fileID: 1953413172206013406, guid: 9e197b361d7564a87a39e8e8a4247705, type: 3}
-    ghostPrefab: {fileID: 1953413172206013406, guid: 14467a08addce4da7a2858322bb264cf, type: 3}
+  - partId: H3
+    realPrefab: {fileID: 5806086379153858645, guid: 71550b4e8b90842eba2f5c4ee49161f0, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
-  - partId: T3
-    realPrefab: {fileID: 8226570891046717567, guid: 2f01267af390a403d9ed6934c983af4f, type: 3}
-    ghostPrefab: {fileID: 8226570891046717567, guid: 6cca5522fc5db428a8a4d8c48e93f59a, type: 3}
+  - partId: H5
+    realPrefab: {fileID: 971285747253977506, guid: 26a3a635bf01d47b1abca7a69de6af4d, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
-  - partId: T5
-    realPrefab: {fileID: 3054246624623117054, guid: 2849bd324e64444a2b6eba2608388f54, type: 3}
-    ghostPrefab: {fileID: 3054246624623117054, guid: 67cd4d6dd39d84351b9a53a3052b2f32, type: 3}
+  - partId: H7
+    realPrefab: {fileID: 333279831564273831, guid: db307c1257d31409cb796eb1110552b8, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
-  - partId: T7
-    realPrefab: {fileID: 7824071367163911451, guid: 34745d76d13fb4291b27c0b6603a0811, type: 3}
-    ghostPrefab: {fileID: 7824071367163911451, guid: b1f4b8d6db6094ad88bd2589f25f69cb, type: 3}
+  - partId: H9
+    realPrefab: {fileID: 1010663205870211378, guid: e571d79af9093428793e037ab0cd0e12, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: T1
+    realPrefab: {fileID: 9059318346818556580, guid: 0d4cd9c60be51496bbd908fc6925baf4, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: T11
-    realPrefab: {fileID: 1573829099224822366, guid: 8556fe9ac1b694fb090e16a1a65e4315, type: 3}
-    ghostPrefab: {fileID: 1573829099224822366, guid: c8404575ad88541ab81f53f22eb2e9ac, type: 3}
+    realPrefab: {fileID: 3465570172429613656, guid: 81dbd7afa8e0548a082720fe4f6cb594, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: T15
-    realPrefab: {fileID: 6286220234352632423, guid: 5b59b76542d994d07aacec2d706f8a58, type: 3}
-    ghostPrefab: {fileID: 6286220234352632423, guid: c8412a5722b774641aece90fe3bac7b2, type: 3}
+    realPrefab: {fileID: 1108295383252661723, guid: c6ff93e9c8aeb41358aa969be782510e, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: T19
-    realPrefab: {fileID: 3565030130145209889, guid: 189f3713b71984bd0a12e073d23203df, type: 3}
-    ghostPrefab: {fileID: 3565030130145209889, guid: 2bdace5f28ec84ef0bbfe556b52102a1, type: 3}
+    realPrefab: {fileID: 5937012833404280461, guid: 097dfcbf4cf0448d1a4d5859bd656e0d, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
   - partId: T23
-    realPrefab: {fileID: 6274742999089161831, guid: 7e35813b934574d368d1e9d6b0d330c6, type: 3}
-    ghostPrefab: {fileID: 6274742999089161831, guid: 3e07cb705fd0d49a69f1204ce63ef2da, type: 3}
+    realPrefab: {fileID: 8592906812698492729, guid: b6abf7b02c5c349f1af84d1c2dca8e0d, type: 3}
+    ghostPrefab: {fileID: 0}
     overrideVPlacement: 0
-    vHeightOffset: 2.173
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: T3
+    realPrefab: {fileID: 7928792216546317954, guid: 26e3e38afb7b04f90a48099f757b9443, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: T5
+    realPrefab: {fileID: 4021461438139572270, guid: 2a1aa6fccaba649809927915a88a79f8, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: T7
+    realPrefab: {fileID: 2542710463485640071, guid: c19b9736c7f2540338dfcf6328f4de2c, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: T9
+    realPrefab: {fileID: 9109968355706576045, guid: c513ba763ccca4c408446ad744f6d802, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V1
+    realPrefab: {fileID: 3992153634660073256, guid: 4424cee2ffedb43a38d74335ff7cbe78, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V11
+    realPrefab: {fileID: 610752039836656865, guid: 4d5febfbf12fc4004b3bc6e7f76b8edd, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V13
+    realPrefab: {fileID: 1890495791521469856, guid: 7291f6a9382b142d4aa8cd13101b291a, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V15
+    realPrefab: {fileID: 3410701112262767562, guid: 591ce2e2b66fe4ebd9909a4cd25be448, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V17
+    realPrefab: {fileID: 3892133287557866721, guid: 65fdb604501334d46b1c68428b9aab02, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V21
+    realPrefab: {fileID: 6193366814636794341, guid: a82cbd1354a32475286b23cbd00a9bee, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V25
+    realPrefab: {fileID: 1569136446890672066, guid: f86be21c7e92547b4b127855244809bb, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V27
+    realPrefab: {fileID: 1101548077494069983, guid: 7169714d3d2ec4c458db8476aa3c27b5, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V29
+    realPrefab: {fileID: 6731310063739731491, guid: 82326a6beda2e49babf9a272ecbddc81, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V3
+    realPrefab: {fileID: 6252200782497724281, guid: 8a6b74f8d59c14cdb8cf565a9557b05d, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V5
+    realPrefab: {fileID: 5205336121033691430, guid: 6d7ca3a3ca4314a74bf7562ba74cd88f, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V7
+    realPrefab: {fileID: 285215503191736173, guid: 5667e2038e4904182a9bf650cd8ae84a, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
+    vRotationEuler: {x: 90, y: 0, z: 0}
+    vYawAngles: []
+  - partId: V9
+    realPrefab: {fileID: 2533701932239584103, guid: f87a5312a03c742d6887cebae54458eb, type: 3}
+    ghostPrefab: {fileID: 0}
+    overrideVPlacement: 0
     vRotationEuler: {x: 90, y: 0, z: 0}
     vYawAngles: []
