@@ -106,6 +106,16 @@ public partial class BuildController
             Quaternion.Euler(h3RotationEuler) *
             Quaternion.Euler(GetFaceEulerOffset(hostKind, faceIndex));
 
+        // H into an H hole: roll 90° around the beam's local Z. The peg is
+        // re-fitted to the host hole after this rotation (see the trial
+        // loop), so gizmos stay on the joint instead of swinging off it.
+        const float HOnHHoleRollZ = 90f;
+        bool hOnHHole = useHoleHost &&
+                        hostKind == HostKind.H &&
+                        BeamPartUtility.IsHorizontal(partId);
+        if (hOnHHole)
+            targetRotation *= Quaternion.Euler(0f, 0f, HOnHHoleRollZ);
+
         AttachmentPoint.PointRole neededRole = useHoleHost
             ? AttachmentPoint.PointRole.Peg
             : AttachmentPoint.PointRole.Hole;
@@ -146,7 +156,16 @@ public partial class BuildController
         // post faces used to aim the body into the host and fail overlap.
         // Extra 180° flips keep that peg on the hole and send the body out.
         var rotations = new List<Quaternion>(4) { targetRotation };
-        if (BeamPartUtility.IsTwist(partId))
+        if (hOnHHole)
+        {
+            // Opposite roll if +90 intersects the host.
+            Quaternion unrolled =
+                Quaternion.LookRotation(beamDirection, up) *
+                Quaternion.Euler(h3RotationEuler) *
+                Quaternion.Euler(GetFaceEulerOffset(hostKind, faceIndex));
+            rotations.Add(unrolled * Quaternion.Euler(0f, 0f, -HOnHHoleRollZ));
+        }
+        else if (BeamPartUtility.IsTwist(partId))
         {
             rotations.Add(Quaternion.AngleAxis(180f, Vector3.up) * targetRotation);
             if (faceOut.sqrMagnitude > 1e-8f)
@@ -165,7 +184,9 @@ public partial class BuildController
         for (int r = 0; r < rotations.Count && !placed; r++)
         {
             Quaternion rotation = rotations[r];
-            Vector3 along = (r == 1) ? -beamDirection : beamDirection;
+            Vector3 along = (BeamPartUtility.IsTwist(partId) && r == 1)
+                ? -beamDirection
+                : beamDirection;
 
             ghost.transform.rotation = rotation;
             Physics.SyncTransforms();
@@ -246,7 +267,8 @@ public partial class BuildController
             chosenPegNameOnBeam = chosenPegName,
             chosenHoleNameOnBeam = chosenHoleName,
             debugInfo = useHoleHost
-                ? $"H/T OK via hole face={faceLabel} host={hostKind} peg={chosenPegName}"
+                ? $"H/T OK via hole face={faceLabel} host={hostKind} peg={chosenPegName}" +
+                  (hOnHHole ? " (H-on-H roll)" : "")
                 : $"H/T OK via peg face={faceLabel} host={hostKind} hole={chosenHoleName}"
         };
     }

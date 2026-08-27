@@ -138,7 +138,7 @@ public class UIStatusBar : MonoBehaviour
         build.GetGhostStatus(out bool hasPose, out bool isValid, out _);
 
         if (string.Equals(id, "PANEL", System.StringComparison.OrdinalIgnoreCase))
-            return "Panel  |  Hover a bay between frames and click to fill it  |  Esc puts the tool away";
+            return "Panel  |  Aim at a bay, or at a corner ring on a frame  |  Esc puts the tool away";
 
         if (BeamPartUtility.IsVertical(id))
         {

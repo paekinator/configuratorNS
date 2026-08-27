@@ -43,8 +43,12 @@ public class SpaceEditSession : MonoBehaviour
     TMP_FontAsset _font;
 
     static Color Accent => UIThemeController.AccentColor;
-    static readonly Color Ink = new Color(0.149f, 0.133f, 0.118f);
-    static readonly Color Surface = new Color(0.953f, 0.937f, 0.914f);
+    static Color Ink => UIThemeController.InkColor;
+    static Color Surface => UIThemeController.SurfaceColor;
+    static Color Card => UIThemeController.CardColor;
+
+    void OnEnable() => UIThemeController.ThemeChanged += RestyleBar;
+    void OnDisable() => UIThemeController.ThemeChanged -= RestyleBar;
 
     // ------------------------------------------------------------------
     // Pure edit semantics (unit-tested by SpaceCodeSelfTest)
@@ -305,7 +309,7 @@ public class SpaceEditSession : MonoBehaviour
         _bar.sizeDelta = new Vector2(620f, 64f);
 
         var img = go.GetComponent<Image>();
-        img.color = Surface;
+        img.color = Card;
         StyleCard(img, 1.4f);
 
         UiPolish.SoftShadow(_bar);
@@ -325,6 +329,32 @@ public class SpaceEditSession : MonoBehaviour
         BarButton("Btn_CancelEdit", "Cancel", Ink, Surface, -14f, 74f, CancelEdit);
 
         _bar.gameObject.SetActive(false);
+        RestyleBar();
+    }
+
+    void RestyleBar()
+    {
+        if (_bar == null)
+            return;
+        if (_bar.TryGetComponent(out Image bg))
+            bg.color = Card;
+        if (_barLabel != null)
+            _barLabel.color = Ink;
+        PaintBarButton("Btn_UpdateAll", Accent, Color.white);
+        PaintBarButton("Btn_MakeUnique", Surface, Ink);
+        PaintBarButton("Btn_CancelEdit", Ink, Surface);
+    }
+
+    void PaintBarButton(string name, Color bg, Color fg)
+    {
+        Transform t = _bar.Find(name);
+        if (t == null)
+            return;
+        if (t.TryGetComponent(out Image img))
+            img.color = bg;
+        var text = t.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (text != null)
+            text.color = fg;
     }
 
     TextMeshProUGUI BarButton(string name, string label, Color bg, Color fg,

@@ -1,13 +1,18 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// Makes the invisible connection system visible while building. Whenever a
-/// placement tool is armed, every FREE attachment point that the armed part
-/// could target lights up near the cursor:
+/// placement tool is armed, attachment points that the armed part can target
+/// light up near the cursor:
 ///
-///   - rings = free HOLES (a beam's peg plugs into a hole)
+///   - rings = HOLES (a beam's peg plugs into a hole)
 ///   - dots  = free PEGS  (a frame seats onto a peg)
+///
+/// Beam tools hide occupied holes. The panel tool keeps showing them: a
+/// joined corner has no free face for another beam, but it is still a valid
+/// panel corner.
 ///
 /// Only one role is ever shown at a time (it depends on the armed tool), so
 /// shape alone distinguishes them. All markers draw in the theme ink tone;
@@ -74,7 +79,7 @@ public class AttachmentMarkerController : MonoBehaviour
         float targetRange = targetRangeModules * module;
         int ghostMask = buildController != null ? buildController.ghostLayerMask.value : 0;
 
-        // Gather every free point of the wanted role near the cursor ray.
+        // Gather every candidate of the wanted role near the cursor ray.
         // Points sharing the same part, height level and grid cell merge into
         // ONE marker (a V frame has four holes per level — one ring reads far
         // cleaner than four, and any of the four accepts the connection).
@@ -83,12 +88,19 @@ public class AttachmentMarkerController : MonoBehaviour
         _rootIds.Clear();
         int bestIndex = -1;
         float bestDist = float.MaxValue;
+        bool panelCorners = PanelToolArmed();
         foreach (AttachmentPoint ap in AttachmentPoint.Live)
         {
-            if (ap == null || ap.role != role.Value || ap.isOccupied)
+            if (ap == null || ap.role != role.Value)
+                continue;
+            // Beam tools need a free face. Panel corners stay pickable after a
+            // beam has already joined there — occupancy is a beam rule.
+            if (!panelCorners && ap.isOccupied)
                 continue;
             Transform root = ap.transform.root;
             if (root == null || (ghostMask & (1 << root.gameObject.layer)) != 0)
+                continue;
+            if (panelCorners && !BeamPartUtility.IsVertical(root.name))
                 continue;
 
             Vector3 p = ap.transform.position;
@@ -218,11 +230,12 @@ public class AttachmentMarkerController : MonoBehaviour
             if (_session == null)
                 return null;
 
-            // Beams bridge two frame holes; Panels start from a frame hole.
-            return _session.ActiveTool == GuidedTemplateTool.ConnectorsT2 ||
-                   _session.ActiveTool == GuidedTemplateTool.PanelBayT3
-                ? AttachmentPoint.PointRole.Hole
-                : (AttachmentPoint.PointRole?)null;
+            // Beams bridge two frame holes; Panels start from a frame hole
+            // (including occupied corners — the bay is already framed there).
+            if (_session.ActiveTool == GuidedTemplateTool.ConnectorsT2 ||
+                _session.ActiveTool == GuidedTemplateTool.PanelBayT3)
+                return AttachmentPoint.PointRole.Hole;
+            return null;
         }
 
         // Category part tools (Upright / Crossbar / Twist bar): markers show
@@ -245,7 +258,18 @@ public class AttachmentMarkerController : MonoBehaviour
             return AttachmentPoint.PointRole.Peg;    // frames seat onto pegs
         if (BeamPartUtility.IsHorizontalLike(partId))
             return AttachmentPoint.PointRole.Hole;   // beams plug into holes
-        return null;                                 // PANEL etc: slot hover handles it
+        if (string.Equals(partId, "PANEL", StringComparison.OrdinalIgnoreCase))
+            return AttachmentPoint.PointRole.Hole;   // panel corners on frames
+        return null;
+    }
+
+    bool PanelToolArmed()
+    {
+        if (UIInteractionState.CurrentExperience == UIInteractionState.Experience.Guided)
+            return _session != null && _session.ActiveTool == GuidedTemplateTool.PanelBayT3;
+
+        string partId = buildController != null ? buildController.currentPartId : null;
+        return string.Equals(partId, "PANEL", StringComparison.OrdinalIgnoreCase);
     }
 
     // ------------------------------------------------------------------

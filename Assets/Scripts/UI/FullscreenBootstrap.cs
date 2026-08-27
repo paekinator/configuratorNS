@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,16 +9,20 @@ using UnityEngine.UI;
 /// </summary>
 public static class FullscreenBootstrap
 {
-    static readonly Color Surface = new Color(0.953f, 0.937f, 0.914f);
-    static readonly Color Muted = new Color(0.561f, 0.533f, 0.502f);
-
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoBootstrap()
     {
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-        if (canvas == null || canvas.transform.Find("Btn_Fullscreen") != null)
+        if (canvas == null)
             return;
 
+        Transform existing = canvas.transform.Find("Btn_Fullscreen");
+        GameObject go = existing != null ? existing.gameObject : CreateButton(canvas);
+        BindTheme(go);
+    }
+
+    static GameObject CreateButton(Canvas canvas)
+    {
         var go = new GameObject("Btn_Fullscreen", typeof(RectTransform), typeof(Image), typeof(Button));
         go.transform.SetParent(canvas.transform, false);
 
@@ -30,7 +33,7 @@ public static class FullscreenBootstrap
         rt.sizeDelta = new Vector2(40f, 40f);
 
         var img = go.GetComponent<Image>();
-        img.color = Surface;
+        img.color = UIThemeController.SurfaceColor;
         ApplyCardSprite(canvas, img);
 
         UiPolish.SoftShadow(rt, scale: 0.45f);
@@ -45,7 +48,7 @@ public static class FullscreenBootstrap
             iconRt.sizeDelta = new Vector2(20f, 20f);
             var iconImg = iconGo.GetComponent<Image>();
             iconImg.sprite = icon;
-            iconImg.color = Muted;
+            iconImg.color = UIThemeController.MutedColor;
             iconImg.preserveAspect = true;
             iconImg.raycastTarget = false;
         }
@@ -53,6 +56,18 @@ public static class FullscreenBootstrap
         Button button = go.GetComponent<Button>();
         UiPolish.HoverTint(button);
         button.onClick.AddListener(Toggle);
+        return go;
+    }
+
+    static void BindTheme(GameObject go)
+    {
+        var theme = Object.FindFirstObjectByType<UIThemeController>();
+        if (theme == null)
+            return;
+        theme.RegisterSurface(go.GetComponent<Image>());
+        Transform icon = go.transform.Find("Icon");
+        if (icon != null)
+            theme.RegisterMutedIcon(icon.GetComponent<Image>());
     }
 
     static void Toggle()

@@ -30,12 +30,14 @@ public class GuidedModeController : MonoBehaviour
     void OnEnable()
     {
         UIInteractionState.OnExperienceChanged += HandleExperienceChanged;
+        UIThemeController.ThemeChanged += RefreshToolHighlight;
         HandleExperienceChanged(UIInteractionState.CurrentExperience);
     }
 
     void OnDisable()
     {
         UIInteractionState.OnExperienceChanged -= HandleExperienceChanged;
+        UIThemeController.ThemeChanged -= RefreshToolHighlight;
     }
 
     public void SetExpert()
@@ -56,25 +58,26 @@ public class GuidedModeController : MonoBehaviour
                 : UIInteractionState.Experience.Guided;
     }
 
-    public void SelectPostsTool()
-    {
-        EnsureGuided();
-        templateSession?.SetTool(GuidedTemplateTool.PostsT1);
-        RefreshHint();
-    }
+    public void SelectPostsTool() => ToggleTool(GuidedTemplateTool.PostsT1);
 
-    public void SelectConnectorsTool()
-    {
-        EnsureGuided();
-        templateSession?.SetTool(GuidedTemplateTool.ConnectorsT2);
-        RefreshHint();
-    }
+    public void SelectConnectorsTool() => ToggleTool(GuidedTemplateTool.ConnectorsT2);
 
-    public void SelectPanelBayTool()
+    public void SelectPanelBayTool() => ToggleTool(GuidedTemplateTool.PanelBayT3);
+
+    /// <summary>
+    /// Same as the Parts-tab beam cards: first click arms the tool, clicking
+    /// the armed tool again puts it down.
+    /// </summary>
+    void ToggleTool(GuidedTemplateTool tool)
     {
         EnsureGuided();
-        templateSession?.SetTool(GuidedTemplateTool.PanelBayT3);
+        if (templateSession == null)
+            return;
+
+        templateSession.SetTool(
+            templateSession.ActiveTool == tool ? GuidedTemplateTool.None : tool);
         RefreshHint();
+        RefreshToolHighlight();
     }
 
     void EnsureGuided()
@@ -98,8 +101,6 @@ public class GuidedModeController : MonoBehaviour
                 buildController.SetCurrentPart(null);
             if (panelGhost != null)
                 panelGhost.DisablePanelTool();
-            if (templateSession != null && templateSession.ActiveTool == GuidedTemplateTool.None)
-                templateSession.SetTool(GuidedTemplateTool.PostsT1);
         }
         else
         {
@@ -107,6 +108,7 @@ public class GuidedModeController : MonoBehaviour
         }
 
         RefreshHint();
+        RefreshToolHighlight();
     }
 
     void Update()

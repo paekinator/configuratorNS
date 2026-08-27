@@ -9,9 +9,6 @@ using UnityEngine.UI;
 /// </summary>
 public static class DimensionsToggleBootstrap
 {
-    static readonly Color Surface = new Color(0.953f, 0.937f, 0.914f);
-    static readonly Color Muted = new Color(0.561f, 0.533f, 0.502f);
-
     static Image _background;
     static Image _icon;
 
@@ -19,9 +16,26 @@ public static class DimensionsToggleBootstrap
     static void AutoBootstrap()
     {
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-        if (canvas == null || canvas.transform.Find("Btn_Dimensions") != null)
+        if (canvas == null)
             return;
 
+        Transform existing = canvas.transform.Find("Btn_Dimensions");
+        if (existing == null)
+            CreateButton(canvas);
+        else
+        {
+            _background = existing.GetComponent<Image>();
+            Transform icon = existing.Find("Icon");
+            _icon = icon != null ? icon.GetComponent<Image>() : null;
+        }
+
+        UIThemeController.ThemeChanged -= Restyle;
+        UIThemeController.ThemeChanged += Restyle;
+        Restyle();
+    }
+
+    static void CreateButton(Canvas canvas)
+    {
         var go = new GameObject("Btn_Dimensions", typeof(RectTransform), typeof(Image), typeof(Button));
         go.transform.SetParent(canvas.transform, false);
 
@@ -53,17 +67,15 @@ public static class DimensionsToggleBootstrap
             StructureDimensionsController.Pinned = !StructureDimensionsController.Pinned;
             Restyle();
         });
-
-        Restyle();
     }
 
     static void Restyle()
     {
         bool on = StructureDimensionsController.Pinned;
         if (_background != null)
-            _background.color = on ? UIThemeController.AccentColor : Surface;
+            _background.color = on ? UIThemeController.AccentColor : UIThemeController.SurfaceColor;
         if (_icon != null)
-            _icon.color = on ? Color.white : Muted;
+            _icon.color = on ? Color.white : UIThemeController.MutedColor;
     }
 
     static void ApplyCardSprite(Canvas canvas, Image img)

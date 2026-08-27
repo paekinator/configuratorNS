@@ -31,12 +31,33 @@ public class MarqueeSelectionController : MonoBehaviour
 
     public static MarqueeSelectionController Instance { get; private set; }
 
-    void OnEnable() { Instance = this; }
+    void OnEnable()
+    {
+        Instance = this;
+        UIThemeController.ThemeChanged += HandleThemeChanged;
+    }
 
     void OnDisable()
     {
+        UIThemeController.ThemeChanged -= HandleThemeChanged;
         if (Instance == this)
             Instance = null;
+    }
+
+    void HandleThemeChanged()
+    {
+        if (_popup == null)
+            return;
+        Vector2 pos = _popup.anchoredPosition;
+        bool show = _popup.gameObject.activeSelf;
+        Destroy(_popup.gameObject);
+        _popup = null;
+        if (!show)
+            return;
+        BuildPopup();
+        _popup.gameObject.SetActive(true);
+        _popup.anchoredPosition = pos;
+        _popup.SetAsLastSibling();
     }
 
     /// <summary>

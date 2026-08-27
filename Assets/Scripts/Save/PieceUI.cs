@@ -64,6 +64,63 @@ public class PieceUI : MonoBehaviour
         BuildPanel();
     }
 
+    void OnEnable() => UIThemeController.ThemeChanged += OnThemeChanged;
+
+    void OnDisable() => UIThemeController.ThemeChanged -= OnThemeChanged;
+
+    void OnThemeChanged()
+    {
+        if (_panel == null)
+            return;
+
+        RestyleButton(_panel.Find("Btn_Close"), Surface, Ink);
+        RestyleButton(_panel.Find("Btn_SavePiece"), Accent, Color.white);
+        RestyleInput(_nameInput);
+
+        if (_listContent == null)
+            return;
+        foreach (Transform row in _listContent)
+        {
+            if (row.TryGetComponent(out Image bg))
+                bg.color = Surface;
+            var name = row.Find("Name")?.GetComponent<TextMeshProUGUI>();
+            if (name != null)
+                name.color = Ink;
+            var meta = row.Find("Meta")?.GetComponent<TextMeshProUGUI>();
+            if (meta != null)
+                meta.color = Muted;
+            RestyleButton(row.Find("Btn_Id"), Surface, Ink);
+            RestyleButton(row.Find("Btn_Open"), Accent, Color.white);
+            RestyleButton(row.Find("Btn_Overwrite"), Surface, Ink);
+            RestyleButton(row.Find("Btn_Delete"), Surface, UIThemeController.DangerColor);
+        }
+    }
+
+    static void RestyleButton(Transform t, Color bg, Color fg)
+    {
+        if (t == null)
+            return;
+        if (t.TryGetComponent(out Image img))
+            img.color = bg;
+        var text = t.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (text != null)
+            text.color = fg;
+    }
+
+    void RestyleInput(TMP_InputField input)
+    {
+        if (input == null)
+            return;
+        if (input.TryGetComponent(out Image bg))
+            bg.color = Surface;
+        if (input.placeholder is TextMeshProUGUI placeholder)
+            placeholder.color = Muted;
+        if (input.textComponent != null)
+            input.textComponent.color = Ink;
+        input.caretColor = Ink;
+        input.selectionColor = new Color(Accent.r, Accent.g, Accent.b, 0.35f);
+    }
+
     void Update()
     {
         if (_panel != null && _panel.gameObject.activeSelf &&

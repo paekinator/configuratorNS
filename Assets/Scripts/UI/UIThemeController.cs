@@ -80,6 +80,8 @@ public class UIThemeController : MonoBehaviour
     public List<TMP_Text> mutedTexts = new List<TMP_Text>();
     /// <summary>Icon images tinted with the ink color (e.g. undo/redo arrows).</summary>
     public List<Image> inkIcons = new List<Image>();
+    /// <summary>Icon images tinted with the muted color (e.g. gear, fullscreen).</summary>
+    public List<Image> mutedIcons = new List<Image>();
     public Image hintImage;
 
     [Header("Controllers")]
@@ -125,6 +127,10 @@ public class UIThemeController : MonoBehaviour
 
     void Start()
     {
+        // Runtime-injected chrome (fullscreen, gear glyph, tool icons) is
+        // created in AfterSceneLoad, before this Start. Collect it so the
+        // first Apply — and every toggle after — tints those buttons too.
+        CollectRuntimeChrome();
         // Dark is the default; a user's explicit toggle is remembered.
         Apply(PlayerPrefs.GetInt(ThemePrefKey, 1) == 1);
     }
@@ -168,6 +174,9 @@ public class UIThemeController : MonoBehaviour
         foreach (Image img in inkIcons)
             if (img != null) img.color = p.ink;
 
+        foreach (Image img in mutedIcons)
+            if (img != null) img.color = p.muted;
+
         if (hintImage != null)
             hintImage.color = p.hintBg;
 
@@ -187,6 +196,7 @@ public class UIThemeController : MonoBehaviour
             palette.selectedBgColor = p.accent;
             palette.normalTextColor = p.ink;
             palette.selectedTextColor = Color.white;
+            palette.RefreshHighlights();
         }
 
         // --- Toggle icon shows the mode you would switch TO ---
@@ -225,6 +235,72 @@ public class UIThemeController : MonoBehaviour
         }
 
         ThemeChanged?.Invoke();
+    }
+
+    public void RegisterCard(Image img) => Add(cardImages, img, CardColor);
+    public void RegisterSurface(Image img) => Add(surfaceImages, img, SurfaceColor);
+    public void RegisterInkIcon(Image img) => Add(inkIcons, img, InkColor);
+    public void RegisterMutedIcon(Image img) => Add(mutedIcons, img, MutedColor);
+    public void RegisterInkText(TMP_Text text) => AddText(inkTexts, text, InkColor);
+    public void RegisterMutedText(TMP_Text text) => AddText(mutedTexts, text, MutedColor);
+
+    /// <summary>
+    /// Buttons built at runtime (or baked without a theme slot) would otherwise
+    /// keep the light-mode fill they were created with.
+    /// </summary>
+    void CollectRuntimeChrome()
+    {
+        RegisterSurface(FindImg("Btn_Fullscreen"));
+        RegisterMutedIcon(FindImg("Btn_Fullscreen/Icon"));
+        RegisterSurface(FindImg("TopBar/Btn_Settings"));
+        RegisterMutedIcon(FindImg("TopBar/Btn_Settings/Icon"));
+
+        RegisterCard(FindImg("GuidedToolsPanel"));
+        RegisterSurface(FindImg("GuidedToolsPanel/HintBox"));
+        RegisterSurface(FindImg("GuidedToolsPanel/Btn_T1_Posts"));
+        RegisterSurface(FindImg("GuidedToolsPanel/Btn_T3_PanelBay"));
+        RegisterInkIcon(FindImg("GuidedToolsPanel/Btn_T1_Posts/Icon"));
+        RegisterInkIcon(FindImg("GuidedToolsPanel/Btn_T3_PanelBay/Icon"));
+        RegisterInkText(FindTmp("GuidedToolsPanel/Title"));
+        RegisterMutedText(FindTmp("GuidedToolsPanel/Subtitle"));
+        RegisterInkText(FindTmp("GuidedToolsPanel/Btn_T1_Posts/Label"));
+        RegisterMutedText(FindTmp("GuidedToolsPanel/Btn_T1_Posts/Caption"));
+        RegisterInkText(FindTmp("GuidedToolsPanel/Btn_T3_PanelBay/Label"));
+        RegisterMutedText(FindTmp("GuidedToolsPanel/Btn_T3_PanelBay/Caption"));
+        RegisterMutedText(FindTmp("GuidedToolsPanel/HintBox/Txt_GuidedHint"));
+        RegisterMutedText(FindTmp("GuidedToolsPanel/Txt_GuidedHint"));
+
+        RegisterCard(FindImg("ControlSettingsPanel"));
+        RegisterInkText(FindTmp("ControlSettingsPanel/Title"));
+        RegisterMutedText(FindTmp("ControlSettingsPanel/Txt_Legend"));
+    }
+
+    Image FindImg(string path)
+    {
+        Transform t = transform.Find(path);
+        return t != null ? t.GetComponent<Image>() : null;
+    }
+
+    TMP_Text FindTmp(string path)
+    {
+        Transform t = transform.Find(path);
+        return t != null ? t.GetComponent<TMP_Text>() : null;
+    }
+
+    static void Add(List<Image> list, Image img, Color color)
+    {
+        if (img == null || list.Contains(img))
+            return;
+        list.Add(img);
+        img.color = color;
+    }
+
+    static void AddText(List<TMP_Text> list, TMP_Text text, Color color)
+    {
+        if (text == null || list.Contains(text))
+            return;
+        list.Add(text);
+        text.color = color;
     }
 
     static Color Hex(string hex)

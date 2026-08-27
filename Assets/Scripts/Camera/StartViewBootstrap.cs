@@ -48,10 +48,7 @@ public static class StartViewBootstrap
             fly.SyncPoseFromTransform();
 
         var cad = rig.GetComponent<CadCameraController>();
-        if (cad != null && cad.enabled)
-        {
-            cad.enabled = false;   // OnEnable re-reads the transform
-            cad.enabled = true;
-        }
+        if (cad != null)
+            cad.SyncPoseFromTransform();
     }
 }

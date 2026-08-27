@@ -79,6 +79,10 @@ public static class ConfigurationCodeSelfTest
         Check(ConfigurationCodec.Encode(shuffled) == richCode,
             "record order does not change the code (canonical sort)");
 
+        BeamRecord offsetBeam = back.Beams.Find(b => b.PartCode == 35 && b.OrientIndex == -1);
+        Check(offsetBeam.XMm == -88 && offsetBeam.ZMm == 176,
+            "absolute grid X/Z survive encode (not shifted to origin)");
+
         ConfigurationModel moved = BuildRichModel();
         for (int i = 0; i < moved.Beams.Count; i++)
         {
@@ -88,8 +92,13 @@ public static class ConfigurationCodeSelfTest
         {
             PanelRecord p = moved.Panels[i]; p.XMm += 880; p.ZMm += 1760; moved.Panels[i] = p;
         }
-        Check(ConfigurationCodec.Encode(moved) == richCode,
-            "same build elsewhere on the grid gives the same code (XZ normalization)");
+        string movedCode = ConfigurationCodec.Encode(moved);
+        Check(movedCode != richCode,
+            "the same build on different grid cells produces a different code");
+        ConfigurationModel movedBack = ConfigurationCodec.Decode(movedCode);
+        Check(movedBack.Beams.Exists(b => b.PartCode == 35 && b.OrientIndex == -1 &&
+                                         b.XMm == -88 + 880 && b.ZMm == 176 + 1760),
+            "import restores the saved grid cell, not the origin");
 
         ConfigurationModel raised = BuildRichModel();
         for (int i = 0; i < raised.Beams.Count; i++)

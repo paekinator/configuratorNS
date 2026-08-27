@@ -30,15 +30,19 @@ public class TemplateSpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// Snap a world position to the nearest FREE HOLE, using the same radius
+    /// Snap a world position to the nearest HOLE, using the same radius
     /// as the Expert mouse ghost. By default only holes on V posts qualify —
     /// Guided connector/panel picks may never anchor on beams, pegs or free
     /// space. The category Part tools pass includeBeamHoles: true so beams can
     /// also start from the holes of an existing H/T beam (the strict Expert
     /// pipeline downstream already supports beam hosts).
+    ///
+    /// Occupied holes are skipped unless <paramref name="includeOccupied"/> is
+    /// set: a panel corner is still a valid pick after a beam has plugged into
+    /// that hole (there is no free face for another H, but the corner exists).
     /// </summary>
     public bool TrySnapPostHole(Vector3 near, out AttachmentPoint hole, bool includeBeamHoles = false,
-        float maxDistance = -1f)
+        float maxDistance = -1f, bool includeOccupied = false)
     {
         hole = null;
         if (buildController == null)
@@ -51,7 +55,9 @@ public class TemplateSpawner : MonoBehaviour
         for (int i = 0; i < all.Count; i++)
         {
             AttachmentPoint ap = all[i];
-            if (ap == null || ap.isOccupied || ap.role != AttachmentPoint.PointRole.Hole)
+            if (ap == null || ap.role != AttachmentPoint.PointRole.Hole)
+                continue;
+            if (!includeOccupied && ap.isOccupied)
                 continue;
 
             Transform root = ap.transform.root;
@@ -73,8 +79,12 @@ public class TemplateSpawner : MonoBehaviour
         return hole != null;
     }
 
-    /// <summary>Is there a V post with a free hole at this axis position and height?</summary>
-    public bool HasFreePostHoleAt(Vector3 axisPoint, float y)
+    /// <summary>
+    /// Is there a V post with a hole at this axis position and height?
+    /// Occupied holes count: the post is there even if every face already
+    /// has a beam (the usual case at a framed panel corner).
+    /// </summary>
+    public bool HasFreePostHoleAt(Vector3 axisPoint, float y, bool requireFree = false)
     {
         float xzTolerance = NeospaceUnits.Mm(90f);
         float yTolerance = NeospaceUnits.Mm(20f);
@@ -83,7 +93,9 @@ public class TemplateSpawner : MonoBehaviour
         for (int i = 0; i < all.Count; i++)
         {
             AttachmentPoint ap = all[i];
-            if (ap == null || ap.isOccupied || ap.role != AttachmentPoint.PointRole.Hole)
+            if (ap == null || ap.role != AttachmentPoint.PointRole.Hole)
+                continue;
+            if (requireFree && ap.isOccupied)
                 continue;
 
             Transform root = ap.transform.root;

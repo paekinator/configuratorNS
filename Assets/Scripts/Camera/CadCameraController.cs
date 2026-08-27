@@ -5,13 +5,18 @@ using UnityEngine.EventSystems;
 /// Professional CAD-style viewport navigation, modelled on Rhino's perspective
 /// viewport with the universal middle-mouse conventions layered in:
 ///
-///   Right-drag            orbit (turntable around the point under the cursor)
+///   Right-drag            orbit (turntable around the view target)
 ///   Shift + right-drag    pan (grab the model, 1:1 with the cursor)
 ///   Ctrl + right-drag     zoom (drag up = in, down = out)
 ///   Middle-drag           pan
 ///   Scroll wheel          zoom toward the cursor
 ///   Double middle-click   zoom extents
 ///   F                     zoom extents
+///
+/// The orbit target is the point in front of the camera, not the pixel under
+/// the cursor. Re-picking under the mouse made a far floor/sky hit the
+/// centre of rotation, so a small drag swung the camera around a distant
+/// point and the view orientation fell apart.
 ///
 /// The left mouse button is never touched, so all build/select tools keep
 /// working. The cursor is never locked or hidden. Attach to the Camera.
@@ -20,7 +25,7 @@ using UnityEngine.EventSystems;
 public class CadCameraController : MonoBehaviour
 {
     [Header("Picking")]
-    [Tooltip("What orbit/zoom target picking can hit. Leave as Everything to include the floor.")]
+    [Tooltip("What zoom/pan grabbing can hit. Leave as Everything to include the floor.")]
     public LayerMask pickMask = ~0;
 
     [Header("Orbit")]
@@ -44,23 +49,29 @@ public class CadCameraController : MonoBehaviour
     [Tooltip("Max delay between middle clicks to count as a double-click.")]
     public float doubleClickTime = 0.32f;
 
+    // Hits farther than this many current-target-distances are treated as
+    // empty space. A grazing ray along the floor can otherwise land hundreds
+    // of metres away and explode pan/zoom.
+    const float MaxPickDistanceFactor = 3f;
+    const float FallbackDistance = 10f;
+
     enum DragMode { None, Orbit, Pan, Zoom }
 
     Camera _cam;
     DragMode _mode = DragMode.None;
 
-    // Turntable state. Position is NOT derived from these; orbit rotates the
-    // camera around the pivot by the delta, so the pivot may sit off-axis
-    // (CAD apps orbit about the geometry under the cursor, not screen center).
+    // Turntable: the camera always looks at _pivot from _distance.
     float _yaw;
     float _pitch;
     Vector3 _pivot;
+    float _distance;
 
     // Pan drag: world point grabbed at drag start + the fixed plane it lives on.
     Vector3 _grabPoint;
     Plane _grabPlane;
 
     float _lastMiddleClickTime = -10f;
+    Vector2 _lastPointer;
 
     void OnEnable()
     {
@@ -68,22 +79,23 @@ public class CadCameraController : MonoBehaviour
         if (_cam == null)
             _cam = Camera.main;
 
-        Vector3 e = transform.eulerAngles;
-        _yaw = e.y;
-        _pitch = NormalizePitch(e.x);
-
-        // Seed the pivot with whatever is in front of the camera.
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 500f, pickMask,
-                QueryTriggerInteraction.Ignore))
-            _pivot = hit.point;
-        else if (new Plane(Vector3.up, Vector3.zero).Raycast(new Ray(transform.position, transform.forward), out float t))
-            _pivot = transform.position + transform.forward * t;
-        else
-            _pivot = transform.position + transform.forward * 10f;
+        SyncPoseFromTransform();
 
         // In case the walkthrough scheme left the cursor locked.
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    /// <summary>
+    /// Re-read yaw/pitch from the transform and place the orbit target on
+    /// the view axis. Call after an outside script moves the rig.
+    /// </summary>
+    public void SyncPoseFromTransform()
+    {
+        Vector3 e = transform.eulerAngles;
+        _yaw = e.y;
+        _pitch = Mathf.Clamp(NormalizePitch(e.x), minPitch, maxPitch);
+        SeedTargetAlongView();
     }
 
     void Update()
@@ -150,37 +162,25 @@ public class CadCameraController : MonoBehaviour
             _lastPointer = Input.mousePosition;
     }
 
-    Vector2 _lastPointer;
-
     void BeginOrbit()
     {
         _mode = DragMode.Orbit;
-
-        // Orbit about the geometry under the cursor (SolidWorks/Fusion feel).
-        // Fall back to the ground point, then to the previous pivot.
-        Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 500f, pickMask, QueryTriggerInteraction.Ignore))
-            _pivot = hit.point;
-        else if (new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float t) && t > 0f)
-            _pivot = ray.GetPoint(t);
+        // Keep the existing target. Only snap it onto the view axis so a
+        // leftover off-centre pivot cannot become a new centre of rotation.
+        SeatTargetOnViewAxis();
     }
 
     void BeginPan()
     {
         _mode = DragMode.Pan;
 
-        // Grab the exact world point under the cursor. Prefer real geometry so
-        // the grabbed point tracks the cursor 1:1; otherwise use a view-parallel
-        // plane through the pivot.
+        // Grab nearby geometry so the model tracks the cursor 1:1. Far floor
+        // or empty sky uses a view-parallel plane through the orbit target
+        // instead of a horizon intersection that would throw the camera.
         Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 500f, pickMask, QueryTriggerInteraction.Ignore))
-            _grabPoint = hit.point;
-        else
-        {
-            var viewPlane = new Plane(-transform.forward, _pivot);
-            _grabPoint = viewPlane.Raycast(ray, out float t) ? ray.GetPoint(t) : _pivot;
-        }
-
+        _grabPoint = TryPickNearby(ray, out Vector3 hit)
+            ? hit
+            : PointOnViewPlane(ray, _pivot);
         _grabPlane = new Plane(-transform.forward, _grabPoint);
     }
 
@@ -209,7 +209,7 @@ public class CadCameraController : MonoBehaviour
 
             case DragMode.Zoom:
                 if (Mathf.Abs(delta.y) > 0.0001f)
-                    ZoomAbout(_pivot, Mathf.Exp(-delta.y * dragZoomSensitivity * 0.1f));
+                    ZoomAlongView(Mathf.Exp(-delta.y * dragZoomSensitivity * 0.1f));
                 break;
         }
     }
@@ -218,28 +218,26 @@ public class CadCameraController : MonoBehaviour
     // Navigation primitives
     // ------------------------------------------------------------------
 
-    /// <summary>Turntable orbit around the pivot: yaw about world up, pitch clamped.</summary>
+    /// <summary>Turntable orbit around the view target: yaw about world up, pitch clamped.</summary>
     void OrbitBy(float dYaw, float dPitch)
     {
-        float newPitch = Mathf.Clamp(_pitch + dPitch, minPitch, maxPitch);
-        Quaternion oldRot = Quaternion.Euler(_pitch, _yaw, 0f);
-
         _yaw += dYaw;
-        _pitch = newPitch;
-        Quaternion newRot = Quaternion.Euler(_pitch, _yaw, 0f);
+        _pitch = Mathf.Clamp(_pitch + dPitch, minPitch, maxPitch);
+        ApplyPose();
+    }
 
-        // Rotate the camera's offset from the pivot by exactly the rotation
-        // delta, so the picked point stays fixed on screen while we orbit.
-        Vector3 offset = transform.position - _pivot;
-        transform.position = _pivot + newRot * (Quaternion.Inverse(oldRot) * offset);
-        transform.rotation = newRot;
+    void ApplyPose()
+    {
+        Quaternion rot = Quaternion.Euler(_pitch, _yaw, 0f);
+        transform.rotation = rot;
+        transform.position = _pivot - rot * Vector3.forward * _distance;
     }
 
     /// <summary>Move the camera so the grabbed world point stays under the cursor.</summary>
     void PanToCursor()
     {
         Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        if (!_grabPlane.Raycast(ray, out float t))
+        if (!_grabPlane.Raycast(ray, out float t) || t <= 0f)
             return;
 
         Vector3 delta = _grabPoint - ray.GetPoint(t);
@@ -247,18 +245,25 @@ public class CadCameraController : MonoBehaviour
         _pivot += delta;
     }
 
+    void ZoomAlongView(float factor)
+    {
+        _distance = Mathf.Clamp(_distance * factor, minDistance, maxDistance);
+        ApplyPose();
+    }
+
     /// <summary>
-    /// Scale the camera (and pivot) about a world point. A homothety keeps the
-    /// target exactly under the cursor while zooming, like every CAD viewport.
+    /// Scale the camera about a world point. A homothety keeps that point
+    /// under the cursor while zooming. The orbit target is then re-seated on
+    /// the view axis so the next orbit is still a stable turntable.
     /// </summary>
     void ZoomAbout(Vector3 target, float factor)
     {
-        float pivotDistance = Vector3.Distance(transform.position, _pivot);
-        float clamped = Mathf.Clamp(pivotDistance * factor, minDistance, maxDistance);
-        factor = pivotDistance > 0.0001f ? clamped / pivotDistance : 1f;
+        float newDistance = Mathf.Clamp(_distance * factor, minDistance, maxDistance);
+        factor = _distance > 0.0001f ? newDistance / _distance : 1f;
 
         transform.position = target + (transform.position - target) * factor;
-        _pivot = target + (_pivot - target) * factor;
+        _distance = newDistance;
+        SeatTargetOnViewAxis();
     }
 
     void HandleWheelZoom()
@@ -267,16 +272,85 @@ public class CadCameraController : MonoBehaviour
         if (Mathf.Abs(scroll) < 0.001f)
             return;
 
-        // Zoom toward whatever is under the cursor; fall back to the ground
-        // plane, then the orbit pivot, so empty space still zooms sensibly.
-        Vector3 target = _pivot;
         Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 500f, pickMask, QueryTriggerInteraction.Ignore))
-            target = hit.point;
-        else if (new Plane(Vector3.up, Vector3.zero).Raycast(ray, out float t) && t > 0f)
-            target = ray.GetPoint(t);
+        Vector3 target = TryPickNearby(ray, out Vector3 hit)
+            ? hit
+            : PointOnViewPlane(ray, _pivot);
 
         ZoomAbout(target, Mathf.Pow(wheelZoomStep, scroll));
+    }
+
+    // ------------------------------------------------------------------
+    // Target / picking
+    // ------------------------------------------------------------------
+
+    void SeedTargetAlongView()
+    {
+        Vector3 origin = transform.position;
+        Vector3 fwd = transform.forward;
+        float range = SeedRange();
+
+        if (Physics.Raycast(origin, fwd, out RaycastHit hit, range, pickMask,
+                QueryTriggerInteraction.Ignore) && hit.distance >= minDistance)
+        {
+            _pivot = hit.point;
+        }
+        else if (new Plane(Vector3.up, Vector3.zero).Raycast(new Ray(origin, fwd), out float t)
+                 && t >= minDistance && t <= range)
+        {
+            _pivot = origin + fwd * t;
+        }
+        else
+        {
+            float seed = _distance > minDistance ? _distance : FallbackDistance;
+            _pivot = origin + fwd * Mathf.Clamp(seed, minDistance, range);
+        }
+
+        _distance = Mathf.Clamp(Vector3.Distance(origin, _pivot), minDistance, maxDistance);
+        SeatTargetOnViewAxis();
+    }
+
+    float SeedRange()
+    {
+        if (TryGetSceneBounds(out Bounds b))
+        {
+            float toScene = Vector3.Distance(transform.position, b.center) + b.extents.magnitude;
+            return Mathf.Clamp(toScene, FallbackDistance, maxDistance);
+        }
+
+        return Mathf.Min(maxDistance, FallbackDistance * 4f);
+    }
+
+    void SeatTargetOnViewAxis()
+    {
+        float along = Vector3.Dot(_pivot - transform.position, transform.forward);
+        _distance = Mathf.Clamp(along > 0.0001f ? along : _distance, minDistance, maxDistance);
+        _pivot = transform.position + transform.forward * _distance;
+    }
+
+    float PickRange()
+    {
+        return Mathf.Min(maxDistance, Mathf.Max(_distance * MaxPickDistanceFactor, minDistance * 8f));
+    }
+
+    bool TryPickNearby(Ray ray, out Vector3 point)
+    {
+        point = default;
+        if (!Physics.Raycast(ray, out RaycastHit hit, PickRange(), pickMask,
+                QueryTriggerInteraction.Ignore))
+            return false;
+        if (hit.distance < minDistance * 0.5f)
+            return false;
+        point = hit.point;
+        return true;
+    }
+
+    Vector3 PointOnViewPlane(Ray ray, Vector3 planePoint)
+    {
+        var plane = new Plane(-transform.forward, planePoint);
+        if (plane.Raycast(ray, out float t) && t > 0f)
+            return ray.GetPoint(t);
+        return planePoint;
     }
 
     // ------------------------------------------------------------------
@@ -302,11 +376,8 @@ public class CadCameraController : MonoBehaviour
 
         float radius = Mathf.Max(b.extents.magnitude, 0.5f) * fitPadding;
         float fov = _cam.fieldOfView * Mathf.Deg2Rad;
-        float distance = Mathf.Clamp(radius / Mathf.Sin(fov * 0.5f), minDistance, maxDistance);
-
-        Quaternion rot = Quaternion.Euler(_pitch, _yaw, 0f);
-        transform.rotation = rot;
-        transform.position = _pivot - rot * Vector3.forward * distance;
+        _distance = Mathf.Clamp(radius / Mathf.Sin(fov * 0.5f), minDistance, maxDistance);
+        ApplyPose();
     }
 
     static bool TryGetSceneBounds(out Bounds bounds)

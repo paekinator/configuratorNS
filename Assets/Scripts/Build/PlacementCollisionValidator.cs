@@ -16,7 +16,8 @@ internal static class PlacementCollisionValidator
         LayerMask panelBlockerMask,
         float overlapMargin,
         float hostPenetrationTolerance,
-        out string reason)
+        out string reason,
+        HashSet<Transform> ignoreRoots = null)
     {
         reason = string.Empty;
 
@@ -53,11 +54,16 @@ internal static class PlacementCollisionValidator
             halfExtents.y = Mathf.Max(halfExtents.y, 0.0005f);
             halfExtents.z = Mathf.Max(halfExtents.z, 0.0005f);
 
+            // Ignore Raycast (layer 2) is used by the move gizmo, grid overlay
+            // and dimension lines. Those colliders sit inside the selection
+            // and must not count as a clash.
+            int queryMask = ~0 & ~(1 << IgnoreRaycastLayer);
+
             hits = Physics.OverlapBox(
                 bounds.center,
                 halfExtents,
                 Quaternion.identity,
-                ~0,
+                queryMask,
                 QueryTriggerInteraction.Ignore);
         }
         finally
@@ -73,6 +79,12 @@ internal static class PlacementCollisionValidator
         {
             Collider hit = hits[i];
             if (hit == null || IsSameOrChildOf(hit.transform, instanceRoot))
+                continue;
+
+            if (ignoreRoots != null && IsUnderAny(hit.transform, ignoreRoots))
+                continue;
+
+            if (hit.gameObject.layer == IgnoreRaycastLayer)
                 continue;
 
             if (allowedRoot != null && IsSameOrChildOf(hit.transform, allowedRoot))
@@ -213,11 +225,13 @@ internal static class PlacementCollisionValidator
         }
     }
 
+    const int IgnoreRaycastLayer = 2;
+
     /// <summary>Max distance for a peg/hole pair to count as "plugged in".</summary>
-    const float MatedConnectorDistance = 0.02f;
+    const float MatedConnectorDistance = 0.028f;
 
     /// <summary>Max penetration allowed with a mated neighbor (flush-fit slack).</summary>
-    const float MatedContactMaxDepth = 0.02f;
+    const float MatedContactMaxDepth = 0.04f;
 
     static bool HasMatedConnector(Transform instanceRoot, Transform otherRoot)
     {
@@ -250,6 +264,18 @@ internal static class PlacementCollisionValidator
     {
         return candidate != null && root != null &&
                (candidate == root || candidate.IsChildOf(root));
+    }
+
+    static bool IsUnderAny(Transform candidate, HashSet<Transform> roots)
+    {
+        if (candidate == null || roots == null)
+            return false;
+        foreach (Transform root in roots)
+        {
+            if (IsSameOrChildOf(candidate, root))
+                return true;
+        }
+        return false;
     }
 
     private static bool IsInMask(int layer, LayerMask mask)

@@ -58,12 +58,14 @@ public class UIPartsPalette : MonoBehaviour
     {
         UIInteractionState.OnModeChanged += HandleModeChanged;
         UIInteractionState.OnExperienceChanged += HandleExperienceChanged;
+        UIThemeController.ThemeChanged += HighlightSelected;
     }
 
     void OnDisable()
     {
         UIInteractionState.OnModeChanged -= HandleModeChanged;
         UIInteractionState.OnExperienceChanged -= HandleExperienceChanged;
+        UIThemeController.ThemeChanged -= HighlightSelected;
     }
 
     void HandleExperienceChanged(UIInteractionState.Experience experience)
@@ -300,6 +302,8 @@ public class UIPartsPalette : MonoBehaviour
         btn.onClick.RemoveAllListeners();
         return btn;
     }
+
+    public void RefreshHighlights() => HighlightSelected();
 
     void HighlightSelected()
     {

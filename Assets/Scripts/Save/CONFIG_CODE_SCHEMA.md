@@ -66,10 +66,11 @@ dimension annotations, structure bounds/center (recomputable via
 `StructureBounds.TryCompute`), camera pose, dark/light theme, control scheme
 (user preference in PlayerPrefs), price/part counts (derived).
 
-**Normalization**: codes must be position-independent. Before encoding,
-translate everything so the structure's minimum module corner
-(`StructureBounds.Info.MinModule`) is the origin. Two identical shelves built
-in different corners of the grid then produce identical codes.
+**Grid position**: Build-mode codes store absolute world millimetres. Import
+must rebuild on the same grid cells the structure occupied when it was saved.
+Records are still sorted for a deterministic byte layout; they are **not**
+translated to the origin. Two identical shelves in different corners produce
+different codes. Y is floor-referenced and likewise absolute.
 
 ---
 
@@ -105,13 +106,13 @@ Configuration v1
 │  └─ panelCount       varint
 ├─ beams[]   (sorted canonically, see 2.4)
 │  ├─ partCode         varint  (PartRegistry id)
-│  ├─ posX, posY, posZ zigzag varint, INTEGER MILLIMETRES from normalized origin
+│  ├─ posX, posY, posZ zigzag varint, INTEGER MILLIMETRES (world, 88 mm grid)
 │  └─ rot              1 byte fast path: index into the 24 axis-aligned
 │                      orientations (covers every pose the snap pipeline
 │                      produces today); escape value 0xFF → extended form:
 │                      3 × int16 euler in 0.1° steps (audit risk R2)
 ├─ panels[]  (sorted canonically)
-│  ├─ centerX/Y/Z      zigzag varint, integer mm from normalized origin
+│  ├─ centerX/Y/Z      zigzag varint, integer mm (world, same grid as beams)
 │  ├─ axis             uint8: ±X, ±Z (standing) or ±Y (lying) slot normal
 │  └─ side             1 bit (+normal / −normal), packed into the axis byte
 ├─ extensions          TLV list (type varint, length varint, payload) — v1
@@ -138,12 +139,12 @@ Poses convert through `NeospaceUnits` on capture/restore.
 
 ### 2.4 Canonical serialization (determinism)
 
-Same rules as `BuildHistory.BuildSignature`: after normalizing the origin,
-sort beams by `(partCode, posX, posY, posZ, rot)` and panels by
+Same rules as `BuildHistory.BuildSignature`: sort beams by
+`(partCode, posX, posY, posZ, rot)` and panels by
 `(centerX, centerY, centerZ, axis, side)`, ordinal integer comparisons only.
-Encoding the same scene — regardless of build order, undo history, or world
-position — yields byte-identical output, so the code doubles as a build
-fingerprint (useful for dedupe and share-link caching).
+Encoding the same scene — regardless of build order or undo history — yields
+byte-identical output. World X/Z are part of that identity, so the same
+geometry on a different grid cell is a different code.
 
 ### 2.5 Space codes — SHIPPED as a sibling format (`NSS1-…`)
 
@@ -174,7 +175,7 @@ recursively. Self-tests: Tools → Configurator → Run SpaceCode Selftest.
 ENCODE
 scene ──▶ Capture: collect beams/panels (ReadScene rules, ghost mask),
           finish flag; convert to integer mm
-      ──▶ Canonicalize: translate to min-module origin; sort (2.4)
+      ──▶ Canonicalize: sort only (keep world X/Z); see 2.4
       ──▶ Pack: binary writer (varint/zigzag), header + records + TLV
       ──▶ Compress: raw Deflate (System.IO.Compression), keep only if smaller
       ──▶ Checksum: CRC32 appended
@@ -211,7 +212,7 @@ state is needed, one bootstrap for future UI wiring — mirroring how
 | `Save/CONFIG_CODE_SCHEMA.md` | doc | this document |
 | `Save/PartRegistry.cs` | static class | permanent id ↔ catalogue-name table; retirement flags |
 | `Save/ConfigurationModel.cs` | plain data | `BeamRecord`, `PanelRecord`, header struct — no Unity scene types, integer mm only |
-| `Save/ConfigurationCapture.cs` | static class | scene → model (ReadScene rules + `StructureBounds` origin normalization) |
+| `Save/ConfigurationCapture.cs` | static class | scene → model (ReadScene rules, world millimetre poses) |
 | `Save/ConfigurationCodec.cs` | static class | model ↔ bytes ↔ `NS1-…` string (varint, Deflate, CRC32, Base64Url) |
 | `Save/ConfigurationRestorer.cs` | MonoBehaviour | model → scene coroutine (wipe → `PlacePartsBatch` → panel slots → finish), progress + skip report |
 | `Save/SaveLoadBootstrap.cs` | static bootstrap | later: runtime UI injection (`RuntimeInitializeOnLoadMethod`, same pattern as `SelectionBootstrap`) |
@@ -255,7 +256,7 @@ scene APIs so they can be unit-tested headless and reused server-side later.
   (V14-style), options are: refuse the whole code, place everything else and
   report, or substitute the nearest size. Proposal: place-and-report, never
   substitute silently.
-- **R8 — Where does the world origin live for Piece/Space?** v1 normalizes
-  to the structure's min corner. Spaces will need a real anchor convention
-  (room origin? first piece?) — decide when Space lands, the TLV reserves the
-  room.
+- **R8 — Where does the world origin live for Piece/Space?** Build-mode
+  codes store absolute world millimetres so import lands on the same grid
+  cells. Space instance poses in `NSS1-` codes are still normalized to the
+  min corner of the space (see `SpaceCodec`).

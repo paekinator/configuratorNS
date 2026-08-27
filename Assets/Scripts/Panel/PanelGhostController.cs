@@ -30,6 +30,7 @@ public class PanelGhostController : MonoBehaviour
     private GameObject _ghost;
     private Renderer[] _ghostRenderers;
     private string _cachedFramePartId;
+    TemplateSpawner _spawner;
 
     // Crisp perimeter outline: the translucent slab alone can wash out over a
     // light floor, so a thin theme-ink frame keeps the boundary readable.
@@ -105,35 +106,17 @@ public class PanelGhostController : MonoBehaviour
         EnsureGhost();
 
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        PanelSlotHandle slot = HitSlot(ray);
 
-        RaycastHit[] hits = Physics.RaycastAll(ray, 500f, slotTriggerMask, QueryTriggerInteraction.Collide);
-        if (hits == null || hits.Length == 0)
-        {
-            HideGhost();
-            PushStatus(false, false, "Move cursor onto a closed slot");
-            return;
-        }
-
-        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-        PanelSlotHandle slot = null;
-        for (int i = 0; i < hits.Length; i++)
-        {
-            var h = hits[i];
-            if (h.collider == null) continue;
-
-            var candidate = h.collider.GetComponentInParent<PanelSlotHandle>();
-            if (candidate != null)
-            {
-                slot = candidate;
-                break;
-            }
-        }
+        // The slot trigger lives in the opening. Aiming at a joined corner
+        // hits the frame instead, so fall back to the ring on that post.
+        if (slot == null)
+            slot = SlotFromFrameCorner(ray);
 
         if (slot == null)
         {
             HideGhost();
-            PushStatus(false, false, "No slot hit (panel may be blocking). Check slotTriggerMask layers.");
+            PushStatus(false, false, "Aim at a bay, or at a corner ring on a frame");
             return;
         }
 
@@ -196,9 +179,47 @@ public class PanelGhostController : MonoBehaviour
         ApplyPanelToolState(panelToolEnabled);
     }
 
-    // ---------------------------
-    // Internal
-    // ---------------------------
+    PanelSlotHandle HitSlot(Ray ray)
+    {
+        RaycastHit[] hits = Physics.RaycastAll(ray, 500f, slotTriggerMask, QueryTriggerInteraction.Collide);
+        if (hits == null || hits.Length == 0)
+            return null;
+
+        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider == null) continue;
+            var candidate = hits[i].collider.GetComponentInParent<PanelSlotHandle>();
+            if (candidate != null)
+                return candidate;
+        }
+
+        return null;
+    }
+
+    PanelSlotHandle SlotFromFrameCorner(Ray ray)
+    {
+        if (buildController == null || slotManager == null)
+            return null;
+
+        if (_spawner == null)
+            _spawner = FindFirstObjectByType<TemplateSpawner>();
+        if (_spawner == null)
+            return null;
+
+        if (!Physics.Raycast(ray, out RaycastHit hit, 500f,
+                buildController.placementRayMask, QueryTriggerInteraction.Ignore))
+            return null;
+
+        // Occupied holes are valid: that is the usual state of a framed corner.
+        if (!_spawner.TrySnapPostHole(hit.point, out AttachmentPoint hole, includeOccupied: true))
+            return null;
+
+        return slotManager.FindSlotNearestCorner(
+            TemplateSpawner.AxisPoint(hole), cam.transform.position);
+    }
+
     void ApplyPanelToolState(bool enabled)
     {
         if (buildController == null) return;
@@ -214,7 +235,7 @@ public class PanelGhostController : MonoBehaviour
             UIInteractionState.CurrentMode = UIInteractionState.Mode.Build;
             buildController.SetCurrentPart(panelPartId);
 
-            PushStatus(false, false, "Panel tool enabled. Hover a closed slot.");
+            PushStatus(false, false, "Panel tool enabled. Aim at a bay, or at a corner ring on a frame.");
         }
         else
         {

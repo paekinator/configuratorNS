@@ -77,9 +77,17 @@ public class FinishPaletteUI : MonoBehaviour
     public static bool IsOpen =>
         _instance != null && _instance._panel != null && _instance._panel.gameObject.activeSelf;
 
-    void OnEnable() => FinishStyle.Changed += RefreshSelection;
+    void OnEnable()
+    {
+        FinishStyle.Changed += RefreshSelection;
+        UIThemeController.ThemeChanged += RefreshSelection;
+    }
 
-    void OnDisable() => FinishStyle.Changed -= RefreshSelection;
+    void OnDisable()
+    {
+        FinishStyle.Changed -= RefreshSelection;
+        UIThemeController.ThemeChanged -= RefreshSelection;
+    }
 
     void OnDestroy()
     {

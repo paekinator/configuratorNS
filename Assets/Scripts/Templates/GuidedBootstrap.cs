@@ -273,10 +273,11 @@ public class GuidedBootstrap : MonoBehaviour
 
     static void WireExistingButtons(Transform root, GuidedModeController guided)
     {
-        Button t1 = root.Find("Btn_T1_Posts")?.GetComponent<Button>();
-        Button t3 = root.Find("Btn_T3_PanelBay")?.GetComponent<Button>();
-        if (t1 != null) t1.onClick.AddListener(guided.SelectPostsTool);
-        if (t3 != null) t3.onClick.AddListener(guided.SelectPanelBayTool);
+        // Baked scenes already persist SelectPostsTool / SelectPanelBayTool on
+        // these buttons. Adding a runtime listener on top would fire twice —
+        // select then immediately deselect once the tools toggle on re-click.
+        BindClick(root.Find("Btn_T1_Posts")?.GetComponent<Button>(), guided.SelectPostsTool);
+        BindClick(root.Find("Btn_T3_PanelBay")?.GetComponent<Button>(), guided.SelectPanelBayTool);
 
         // The Beams tool is retired (redundant with the Horizontal beam card
         // in Parts): remove it from baked scenes and close the gap.
@@ -284,9 +285,28 @@ public class GuidedBootstrap : MonoBehaviour
         if (t2 != null)
         {
             Object.Destroy(t2.gameObject);
-            if (t3 != null && t3.transform is RectTransform t3Rt)
-                t3Rt.anchoredPosition = new Vector2(t3Rt.anchoredPosition.x, -197f);
+            var t3 = root.Find("Btn_T3_PanelBay") as RectTransform;
+            if (t3 != null)
+                t3.anchoredPosition = new Vector2(t3.anchoredPosition.x, -197f);
         }
+    }
+
+    static void BindClick(Button button, UnityEngine.Events.UnityAction action)
+    {
+        if (button == null)
+            return;
+
+        // Baked scenes persist SelectPostsTool on the button. A second runtime
+        // listener would fire toggle twice (select then immediately deselect).
+        // Skip only when a persistent target is still alive; a destroyed host
+        // leaves a missing persistent call that must be replaced.
+        for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+        {
+            if (button.onClick.GetPersistentTarget(i) != null)
+                return;
+        }
+
+        button.onClick.AddListener(action);
     }
 
     /// <summary>

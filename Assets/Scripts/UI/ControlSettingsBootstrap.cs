@@ -93,13 +93,22 @@ public static class ControlSettingsBootstrap
             iconRt.sizeDelta = new Vector2(20f, 20f);
             var iconImg = iconGo.GetComponent<Image>();
             iconImg.sprite = gearSprite;
-            iconImg.color = Muted;
+            iconImg.color = UIThemeController.MutedColor;
             iconImg.preserveAspect = true;
             iconImg.raycastTarget = false;
         }
         else
         {
             SetLabel(gear, "...");
+        }
+
+        var theme = Object.FindFirstObjectByType<UIThemeController>();
+        if (theme != null)
+        {
+            theme.RegisterSurface(gear.GetComponent<Image>());
+            Transform gearIcon = gear.transform.Find("Icon");
+            if (gearIcon != null)
+                theme.RegisterMutedIcon(gearIcon.GetComponent<Image>());
         }
 
         // Controls card, top-right under the bar

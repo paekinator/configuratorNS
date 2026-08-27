@@ -8,12 +8,15 @@ using UnityEngine;
 ///  - Selection contains vertical frames (a structure / full configuration):
 ///    X and Z arrows only — the whole thing slides around the grid in 88 mm
 ///    steps while staying on the ground. The destination is validated on
-///    release; a spot that clips into another structure reverts the move.
+///    release. A legal peg-in-hole join (the same rule as placement) is
+///    allowed; clipping into another structure reverts the move.
 ///
-///  - Selection is only horizontal/twist beams (and panels): a single Y arrow
-///    — the beams slide UP/Down along the frames they are plugged into,
-///    snapping exclusively to hole rows where every peg lands on a free hole
-///    (same rule as the panel layer mover).
+///  - Selection is only horizontal/twist beams (and panels) plugged into
+///    frames: a single Y arrow — the beams slide UP/Down along those frames,
+///    snapping exclusively to hole rows where every peg lands on a free hole.
+///
+///  - Unplugged horizontal/twist beams: X, Y and Z arrows so they can be
+///    walked onto a free peg or hole.
 ///
 /// One axis at a time, never diagonally. On release the move commits: beam
 /// connections re-pair, panels re-seat into the bay at their destination, and
@@ -57,9 +60,11 @@ public class MoveGizmoController : MonoBehaviour
     // Drag state
     bool _dragging;
     bool _slideMode;                 // no vertical frames selected → slide along posts
+    bool _freeMove;                  // unplugged horizontals: X/Z/Y, not hole-row slide
     int _dragAxis = -1;
     float _startParam;
     float _applied;                  // world-unit offset applied so far along the axis
+    Vector3 _connectExtra;           // extra click-onto-peg/hole after the 88 mm snap
     int _minSteps;                   // floor clamp for free-stepping moves
     readonly List<float> _slideDeltas = new List<float>();
     readonly List<Transform> _dragRoots = new List<Transform>();
@@ -129,9 +134,9 @@ public class MoveGizmoController : MonoBehaviour
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// A selection WITHOUT vertical frames can only slide along the posts it
-    /// is plugged into (Y). A selection WITH vertical frames is a structure
-    /// and moves around the grid (X/Z), staying on the ground.
+    /// True when the selection has no vertical frames. Plugged horizontals
+    /// then slide in Y; unplugged ones are free to walk onto a peg/hole.
+    /// A selection WITH vertical frames is a structure and moves in X/Z.
     /// </summary>
     bool ComputeSlideMode()
     {
@@ -150,12 +155,37 @@ public class MoveGizmoController : MonoBehaviour
     {
         if (_axes == null)
             return;
+
+        bool plugged = false;
+        if (_slideMode)
+        {
+            var beams = new List<Transform>();
+            CollectSelectedBeamRoots(beams);
+            var deltas = new List<float>();
+            plugged = BeamSlideRules.CollectValidDeltas(beams, deltas) && deltas.Count > 0;
+        }
+
         for (int i = 0; i < _axes.Length; i++)
         {
             bool isY = _axes[i].dir == Vector3.up;
-            bool wanted = _slideMode ? isY : !isY;
+            bool wanted = !_slideMode ? !isY : plugged ? isY : true;
             if (_axes[i].go.activeSelf != wanted)
                 _axes[i].go.SetActive(wanted);
+        }
+    }
+
+    void CollectSelectedBeamRoots(List<Transform> beams)
+    {
+        var seen = new HashSet<Transform>();
+        foreach (SelectableBeam sel in selection.Selected)
+        {
+            if (sel == null)
+                continue;
+            Transform root = MarqueeSelectionController.PartRootOf(sel);
+            if (root == null || !seen.Add(root))
+                continue;
+            if (root.GetComponent<PanelInstance>() == null)
+                beams.Add(root);
         }
     }
 
@@ -167,6 +197,8 @@ public class MoveGizmoController : MonoBehaviour
     {
         _dragAxis = axis;
         _applied = 0f;
+        _connectExtra = Vector3.zero;
+        _freeMove = false;
         _slideDeltas.Clear();
 
         _dragRoots.Clear();
@@ -189,14 +221,20 @@ public class MoveGizmoController : MonoBehaviour
         if (_slideMode)
         {
             // Beams plugged into frames may only stop at valid hole rows.
-            if (BeamSlideRules.CollectValidDeltas(beamRoots, _slideDeltas) &&
-                _slideDeltas.Count <= 1)
+            if (BeamSlideRules.CollectValidDeltas(beamRoots, _slideDeltas))
             {
-                _dragRoots.Clear();
-                _slideDeltas.Clear();
-                SelectionStatus.Set(
-                    "No other free hole rows on these frames · the beams can't slide.", 4f);
-                return; // press stays claimed so nothing else grabs this drag
+                if (_slideDeltas.Count <= 1)
+                {
+                    _dragRoots.Clear();
+                    _slideDeltas.Clear();
+                    SelectionStatus.Set(
+                        "No other free hole rows on these frames · the beams can't slide.", 4f);
+                    return; // press stays claimed so nothing else grabs this drag
+                }
+            }
+            else
+            {
+                _freeMove = true;
             }
         }
 
@@ -211,16 +249,18 @@ public class MoveGizmoController : MonoBehaviour
 
         selection.HideActionCard();
         UpdateHighlight(axis);
-        SelectionStatus.Set(_slideMode
-            ? "Sliding along the frames · snaps to free hole rows, release to place"
-            : $"Moving along {_axes[axis].label} · 88 mm steps, release to place");
+        SelectionStatus.Set(_freeMove
+            ? $"Moving along {_axes[axis].label} · 88 mm steps, clicks onto free pegs/holes"
+            : _slideMode
+                ? "Sliding along the frames · snaps to free hole rows, release to place"
+                : $"Moving along {_axes[axis].label} · 88 mm steps, clicks onto free pegs/holes");
     }
 
     void UpdateDrag()
     {
         if (!Input.GetMouseButton(0))
         {
-            EndDrag(commit: Mathf.Abs(_applied) > 1e-4f);
+            EndDrag(commit: Mathf.Abs(_applied) > 1e-4f || _connectExtra.sqrMagnitude > 1e-8f);
             return;
         }
 
@@ -244,21 +284,52 @@ public class MoveGizmoController : MonoBehaviour
         if (Mathf.Abs(target - _applied) > 1e-5f)
         {
             Vector3 delta = axis.dir * (target - _applied);
-            foreach (Transform partRoot in _dragRoots)
-            {
-                if (partRoot != null)
-                    partRoot.position += delta;
-            }
-            _root.position += delta;
+            ApplyWorldDelta(delta);
             _applied = target;
         }
 
+        RefreshConnectionSnap(axis.dir);
+
         float mm = _applied / Mathf.Max(NeospaceUnits.UnitsPerMm, 1e-9f);
-        SelectionStatus.Set(Mathf.Abs(_applied) > 1e-4f
+        SelectionStatus.Set(Mathf.Abs(_applied) > 1e-4f || _connectExtra.sqrMagnitude > 1e-8f
             ? $"Move {axis.label} {(mm > 0 ? "+" : "")}{mm:0} mm · release to place"
-            : (_slideMode
+            : (_slideMode && !_freeMove
                 ? "Sliding along the frames · snaps to free hole rows, release to place"
-                : $"Moving along {axis.label} · 88 mm steps, release to place"));
+                : $"Moving along {axis.label} · 88 mm steps, clicks onto free pegs/holes"));
+    }
+
+    void RefreshConnectionSnap(Vector3 axisDir)
+    {
+        ApplyWorldDelta(-_connectExtra);
+        _connectExtra = Vector3.zero;
+
+        if (_slideMode && !_freeMove)
+            return;
+        if (Mathf.Abs(_applied) <= 1e-4f)
+            return;
+
+        bool draggingY = axisDir == Vector3.up;
+        LayerMask ghost = buildController != null ? buildController.ghostLayerMask : 0;
+        _connectExtra = MoveConnectionSnapper.ComputeExtra(
+            _dragRoots,
+            lockY: !draggingY,
+            lockXZ: draggingY,
+            NeospaceUnits.ModuleMeters * 0.5f,
+            ghost);
+        ApplyWorldDelta(_connectExtra);
+    }
+
+    void ApplyWorldDelta(Vector3 delta)
+    {
+        if (delta.sqrMagnitude < 1e-12f)
+            return;
+        foreach (Transform partRoot in _dragRoots)
+        {
+            if (partRoot != null)
+                partRoot.position += delta;
+        }
+        if (_root != null)
+            _root.position += delta;
     }
 
     float NearestSlideDelta(float travelled)
@@ -281,23 +352,22 @@ public class MoveGizmoController : MonoBehaviour
     {
         float applied = _applied;
         int axisIndex = _dragAxis;
+        Vector3 extra = _connectExtra;
 
         _dragging = false;
         _dragAxis = -1;
         _applied = 0f;
+        _connectExtra = Vector3.zero;
         _slideDeltas.Clear();
+
+        Vector3 total = (axisIndex >= 0 ? _axes[axisIndex].dir * applied : Vector3.zero) + extra;
 
         if (!commit)
         {
             // Put everything back where it started.
-            if (Mathf.Abs(applied) > 1e-4f && axisIndex >= 0)
+            if (total.sqrMagnitude > 1e-8f)
             {
-                Vector3 back = _axes[axisIndex].dir * -applied;
-                foreach (Transform partRoot in _dragRoots)
-                {
-                    if (partRoot != null)
-                        partRoot.position += back;
-                }
+                ApplyWorldDelta(-total);
                 Physics.SyncTransforms();
             }
             _dragRoots.Clear();
@@ -310,7 +380,7 @@ public class MoveGizmoController : MonoBehaviour
             return;
         }
 
-        CommitMove(_axes[axisIndex].dir * applied);
+        CommitMove(total);
         _dragRoots.Clear();
 
         selection.PruneSelection();
@@ -330,6 +400,10 @@ public class MoveGizmoController : MonoBehaviour
     /// </summary>
     void CommitMove(Vector3 totalMove)
     {
+        // Gizmo colliders sit inside the selection; hide them before the
+        // destination overlap test so they cannot fail the move.
+        HideGizmo();
+
         // Panels can't live outside a bay — pull them out of their old slots
         // first, remembering where (and how big) they should re-appear. The
         // sheet rectangle matters: if the destination merge divides the bay,
@@ -379,14 +453,25 @@ public class MoveGizmoController : MonoBehaviour
 
         // Destination check: the same overlap rules as placement, so flush
         // peg-in-hole contacts pass but clipping into another structure fails.
+        // Other parts in this move are ignored so a connected group isn't
+        // treated as colliding with itself.
         if (buildController != null)
         {
+            var ignore = new HashSet<Transform>();
+            foreach (Transform root in _dragRoots)
+            {
+                if (root != null)
+                    ignore.Add(root);
+            }
+
             foreach (Transform partRoot in _dragRoots)
             {
                 if (partRoot == null || partRoot.GetComponent<PanelInstance>() != null)
                     continue;
-                if (buildController.MovedPartOverlaps(partRoot.gameObject, out _))
+                if (buildController.MovedPartOverlaps(partRoot.gameObject, ignore, out string reason))
                 {
+                    if (buildController.debugLogs)
+                        Debug.LogWarning("[MoveGizmo] destination rejected: " + reason);
                     RevertMove(totalMove, reseat);
                     return;
                 }

@@ -54,6 +54,7 @@ public class UIToolbarController : MonoBehaviour
         UIInteractionState.OnModeChanged += HandleModeChanged;
         UIInteractionState.OnTabChanged += HandleTabChanged;
         UIInteractionState.OnExperienceChanged += HandleExperienceChanged;
+        UIThemeController.ThemeChanged += RefreshHighlights;
     }
 
     void OnDisable()
@@ -61,6 +62,7 @@ public class UIToolbarController : MonoBehaviour
         UIInteractionState.OnModeChanged -= HandleModeChanged;
         UIInteractionState.OnTabChanged -= HandleTabChanged;
         UIInteractionState.OnExperienceChanged -= HandleExperienceChanged;
+        UIThemeController.ThemeChanged -= RefreshHighlights;
     }
 
     void Start()

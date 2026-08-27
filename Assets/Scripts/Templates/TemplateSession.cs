@@ -362,7 +362,8 @@ public class TemplateSession : MonoBehaviour
         return plane.Raycast(ray, out float enter) ? ray.GetPoint(enter) : anchor;
     }
 
-    bool TryPickConnectionPoint(out Vector3 snapped, out AttachmentPoint point)
+    bool TryPickConnectionPoint(out Vector3 snapped, out AttachmentPoint point,
+        bool includeOccupied = false)
     {
         snapped = Vector3.zero;
         point = null;
@@ -375,7 +376,7 @@ public class TemplateSession : MonoBehaviour
                 buildController.placementRayMask, QueryTriggerInteraction.Ignore))
             return false;
 
-        if (!spawner.TrySnapPostHole(hit.point, out point))
+        if (!spawner.TrySnapPostHole(hit.point, out point, includeOccupied: includeOccupied))
             return false;
 
         snapped = point.transform.position;
@@ -419,7 +420,7 @@ public class TemplateSession : MonoBehaviour
             GuidedTemplateTool.ConnectorsT2 =>
                 "Step 1 of 2 · Click a ring marker on a frame · ring markers mark free holes.",
             GuidedTemplateTool.PanelBayT3 =>
-                "Step 1 of 3 · Click a ring marker on a frame · ring markers mark free holes.",
+                "Step 1 of 3 · Click a ring marker on a frame · a corner still counts after a beam has joined there.",
             _ => "Pick a tool: Frames raise the structure, Panels fill a bay."
         };
     }
@@ -622,7 +623,10 @@ public class TemplateSession : MonoBehaviour
 
     void UpdatePanelPicking()
     {
-        bool found = TryPickConnectionPoint(out Vector3 snapped, out AttachmentPoint point);
+        // Occupied holes are valid panel corners: the bay is already framed
+        // there. Beam tools still require a free face; panels do not.
+        bool found = TryPickConnectionPoint(out Vector3 snapped, out AttachmentPoint point,
+            includeOccupied: true);
 
         if (_pickedPoints.Count == 0)
         {
@@ -644,7 +648,7 @@ public class TemplateSession : MonoBehaviour
         {
             if (!found)
             {
-                StatusMessage = "That wasn't a free hole · click one of the ring markers on a placed frame.";
+                StatusMessage = "Click a ring on a frame · joined corners (no free hole left) still count.";
                 return;
             }
             AcceptPanelPick(point);
@@ -927,7 +931,7 @@ public class TemplateSession : MonoBehaviour
         Vector3 fourth = farEnd + depthVec;
         if (!spawner.HasFreePostHoleAt(fourth, pa.y))
         {
-            reason = "No frame with a free hole at the fourth corner of the rectangle.";
+            reason = "No frame at the fourth corner of the rectangle.";
             return false;
         }
 

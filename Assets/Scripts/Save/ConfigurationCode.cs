@@ -12,7 +12,7 @@ using UnityEngine;
 /// </summary>
 public static class ConfigurationCode
 {
-    /// <summary>Capture the current build and encode it. Same build → same code, always.</summary>
+    /// <summary>Capture the current build and encode it. Same scene (including grid cell) → same code.</summary>
     public static string Encode(BuildController build) =>
         ConfigurationCodec.Encode(ConfigurationCapture.Capture(build));
 

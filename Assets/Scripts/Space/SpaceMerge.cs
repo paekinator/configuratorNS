@@ -7,7 +7,9 @@ using UnityEngine;
 /// must be reused (longer wins), a post landing inside another piece's beam
 /// must split that beam into catalogue pieces (H15 → H7 + post + H7), and
 /// panels whose bay is divided must re-seat per sub-bay. When no catalogue
-/// split exists the pose is refused — the ghost turns red.
+/// split exists between two pieces the pose is refused — the ghost turns red.
+/// A single saved piece is never refused: its own beams already form a legal
+/// build, so merge rules only run between different pieces.
 ///
 /// Everything here is DERIVED state: instance
 /// data (piece id + pose) never changes, so codes, undo snapshots and
@@ -62,6 +64,14 @@ public static class SpaceMerge
         public Vector3 Normal, Up, Right;   // panels
         public float Width, Height, Thick;  // panels
         public float Price;
+        /// <summary>
+        /// Which placed instance this part belongs to. Parts of the same
+        /// piece never run the merge solver against each other — a saved
+        /// build is already legal. Merge rules only fire between different
+        /// owners (two pieces sharing a frame, a ghost against the space).
+        /// Candidate / ghost parts use a negative owner.
+        /// </summary>
+        public int Owner;
     }
 
     /// <summary>Signed price correction: derived pieces added minus originals hidden.</summary>
@@ -107,14 +117,20 @@ public static class SpaceMerge
     // ------------------------------------------------------------------
 
     /// <summary>Part records of every child under a root, in current world pose.</summary>
-    public static List<PartRecord> RecordsFrom(Transform root)
+    public static List<PartRecord> RecordsFrom(Transform root) => RecordsFrom(root, 0);
+
+    /// <summary>Part records tagged as belonging to one placed instance (or a ghost).</summary>
+    public static List<PartRecord> RecordsFrom(Transform root, int owner)
     {
         var list = new List<PartRecord>();
         if (root == null)
             return list;
         foreach (Transform child in root)
             if (TryBuildRecord(child, out PartRecord rec))
+            {
+                rec.Owner = owner;
                 list.Add(rec);
+            }
         return list;
     }
 
@@ -123,9 +139,9 @@ public static class SpaceMerge
     /// rotate, duplicate previews). Yaw-only rigid remap of the live records.
     /// </summary>
     public static List<PartRecord> RecordsFrom(SpaceInstance inst,
-        Vector3 newPosition, float newYawDegrees)
+        Vector3 newPosition, float newYawDegrees, int owner)
     {
-        var list = RecordsFrom(inst.transform);
+        var list = RecordsFrom(inst.transform, owner);
         Transform t = inst.transform;
         Quaternion dq = Quaternion.Euler(0f, newYawDegrees, 0f) * Quaternion.Inverse(t.rotation);
         Vector3 oldPos = t.position;
@@ -340,6 +356,8 @@ public static class SpaceMerge
                     break;
                 if (o.Hidden[j])
                     continue;
+                if (recs[i].Owner == recs[j].Owner)
+                    continue;   // same saved piece — already a legal build
                 ResolveCoaxial(recs, i, j, o);
             }
         }
@@ -352,6 +370,8 @@ public static class SpaceMerge
             for (int j = i + 1; j < recs.Count; j++)
             {
                 if (o.Hidden[j])
+                    continue;
+                if (recs[i].Owner == recs[j].Owner)
                     continue;
                 ResolveCrossing(recs, i, j, o);
             }
@@ -1001,7 +1021,7 @@ public static class SpaceMerge
             SpaceInstance inst = instances[i];
             if (inst == null || (ignore != null && ignore.Contains(inst)))
                 continue;
-            recs.AddRange(RecordsFrom(inst.transform));
+            recs.AddRange(RecordsFrom(inst.transform, i));
         }
         recs.AddRange(candidate);
 
@@ -1085,7 +1105,7 @@ public static class SpaceMerge
             if (instances[i] == null)
                 continue;
             int before = recs.Count;
-            recs.AddRange(RecordsFrom(instances[i].transform));
+            recs.AddRange(RecordsFrom(instances[i].transform, i));
             for (int r = before; r < recs.Count; r++)
                 owner.Add(i);
         }

@@ -70,6 +70,13 @@ public class GhostController : MonoBehaviour
             return;
         }
 
+        // Panel placement is owned by PanelGhostController (bays / corner rings).
+        if (partId.Equals("PANEL", System.StringComparison.OrdinalIgnoreCase))
+        {
+            HideGhost();
+            return;
+        }
+
         EnsureGhostForPart(partId);
 
         if (_ghostInstance == null)

@@ -47,8 +47,6 @@ public class SpaceModeController : MonoBehaviour
     Button _modeButton;
     TextMeshProUGUI _modeLabel;
     Image _modeImage;
-    Color _modeIdleColor;
-    Color _modeIdleTextColor;
 
     UIBuildStats _stats;
     float _statsTimer;
@@ -59,10 +57,19 @@ public class SpaceModeController : MonoBehaviour
         "Space Mode · pick a piece on the left, then click the floor to place it. " +
         "Drag pieces to move them, R rotates.";
 
+    void OnEnable()
+    {
+        UIThemeController.ThemeChanged += UpdateModeButtonVisual;
+        UpdateModeButtonVisual();
+    }
+
+    void OnDisable()
+    {
+        UIThemeController.ThemeChanged -= UpdateModeButtonVisual;
+    }
+
     void Update()
     {
-        RepaintSegmentsOnThemeChange();
-
         if (!Active)
             return;
 
@@ -306,10 +313,6 @@ public class SpaceModeController : MonoBehaviour
         _modeButton = button;
         _modeLabel = button.GetComponentInChildren<TextMeshProUGUI>(true);
         _modeImage = button.GetComponent<Image>();
-        if (_modeImage != null)
-            _modeIdleColor = _modeImage.color;
-        if (_modeLabel != null)
-            _modeIdleTextColor = _modeLabel.color;
         button.onClick.AddListener(ToggleMode);
         UpdateModeButtonVisual();
     }
@@ -343,20 +346,6 @@ public class SpaceModeController : MonoBehaviour
     }
 
     UIThemeController _segTheme;
-    bool _segPaintedDark;
-
-    /// <summary>
-    /// The segments are painted from the theme palette, but registration
-    /// runs before UIThemeController.Apply and the user can toggle themes
-    /// any time — repaint whenever the theme flips.
-    /// </summary>
-    void RepaintSegmentsOnThemeChange()
-    {
-        if (_segBuild == null || _segTheme == null)
-            return;
-        if (_segTheme.IsDark != _segPaintedDark)
-            UpdateModeButtonVisual();
-    }
 
     void UpdateModeButtonVisual()
     {
@@ -366,11 +355,10 @@ public class SpaceModeController : MonoBehaviour
             if (_segTheme == null)
                 _segTheme = FindFirstObjectByType<UIThemeController>();
             UIThemeController theme = _segTheme;
-            _segPaintedDark = theme != null && theme.IsDark;
             var palette = theme != null ? (theme.IsDark ? theme.dark : theme.light) : null;
-            Color ink = palette != null ? palette.ink : new Color(0.149f, 0.133f, 0.118f);
-            Color muted = palette != null ? palette.muted : new Color(0.561f, 0.533f, 0.502f);
-            Color activeText = palette != null ? palette.card : Color.white;
+            Color ink = palette != null ? palette.ink : UIThemeController.InkColor;
+            Color muted = palette != null ? palette.muted : UIThemeController.MutedColor;
+            Color activeText = palette != null ? palette.card : UIThemeController.CardColor;
 
             Paint(_segBuild, !Active);
             Paint(_segSpace, Active);
@@ -389,9 +377,9 @@ public class SpaceModeController : MonoBehaviour
         if (_modeLabel != null)
             _modeLabel.text = Active ? "Piece mode" : "Space mode";
         if (_modeImage != null)
-            _modeImage.color = Active ? UIThemeController.AccentColor : _modeIdleColor;
+            _modeImage.color = Active ? UIThemeController.AccentColor : UIThemeController.SurfaceColor;
         if (_modeLabel != null)
-            _modeLabel.color = Active ? Color.white : _modeIdleTextColor;
+            _modeLabel.color = Active ? Color.white : UIThemeController.InkColor;
     }
 
     // ------------------------------------------------------------------

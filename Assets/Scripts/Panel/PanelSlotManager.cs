@@ -142,6 +142,53 @@ public class PanelSlotManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Slot that has a corner at <paramref name="corner"/>, preferring the
+    /// opening that faces the viewer. Used when the panel tool is aimed at a
+    /// frame ring instead of the bay interior — the beam mesh occludes the
+    /// slot trigger at a joined corner.
+    /// </summary>
+    public PanelSlotHandle FindSlotNearestCorner(Vector3 corner, Vector3 viewOrigin)
+    {
+        float maxD = NeospaceUnits.Mm(90f);
+        float maxD2 = maxD * maxD;
+
+        PanelSlotHandle best = null;
+        float bestScore = float.PositiveInfinity;
+
+        foreach (var kv in _slots)
+        {
+            PanelSlotHandle slot = kv.Value;
+            if (slot == null) continue;
+
+            float d2 = MinCornerDistSq(slot, corner);
+            if (d2 > maxD2) continue;
+
+            Vector3 toCenter = slot.center - viewOrigin;
+            float dist = toCenter.magnitude;
+            Vector3 view = dist > 1e-4f ? toCenter / dist : Vector3.forward;
+            Vector3 n = slot.normal.sqrMagnitude > 1e-8f ? slot.normal.normalized : Vector3.up;
+            float facing = Mathf.Abs(Vector3.Dot(n, view));
+            float score = Mathf.Sqrt(d2) + (1f - facing) * 0.25f;
+            if (score < bestScore)
+            {
+                bestScore = score;
+                best = slot;
+            }
+        }
+
+        return best;
+    }
+
+    static float MinCornerDistSq(PanelSlotHandle slot, Vector3 p)
+    {
+        float d0 = (slot.corner0 - p).sqrMagnitude;
+        float d1 = (slot.corner1 - p).sqrMagnitude;
+        float d2 = (slot.corner2 - p).sqrMagnitude;
+        float d3 = (slot.corner3 - p).sqrMagnitude;
+        return Mathf.Min(Mathf.Min(d0, d1), Mathf.Min(d2, d3));
+    }
+
+    /// <summary>
     /// Single source of truth for panel pose/size in a slot. Used by real panels
     /// and the panel ghost so preview, placement and reattachment always match.
     /// </summary>
@@ -279,7 +326,57 @@ public class PanelSlotManager : MonoBehaviour
         _scanQueued = false;
         _scannedVersion = AttachmentPoint.StructureVersion;
         RebuildConnectionsFromProximity();
+        StripBranchHorizontalAttachments();
         ScanAllSlots();
+    }
+
+    /// <summary>
+    /// An H that plugged into another H's hole is a dead-end branch: keep the
+    /// connecting peg so the host hole stays occupied, disable every other
+    /// attachment point so nothing else can join that beam.
+    /// </summary>
+    void StripBranchHorizontalAttachments()
+    {
+        var keep = new HashSet<AttachmentPoint>();
+        var roots = new HashSet<Transform>();
+        List<AttachmentPoint> live = AttachmentPoint.Live;
+        for (int i = 0; i < live.Count; i++)
+        {
+            AttachmentPoint peg = live[i];
+            if (peg == null || peg.role != AttachmentPoint.PointRole.Peg)
+                continue;
+            AttachmentPoint hole = peg.pairedWith;
+            if (hole == null)
+                continue;
+
+            Transform pegRoot = peg.transform.root;
+            Transform holeRoot = hole.transform.root;
+            if (pegRoot == null || holeRoot == null || pegRoot == holeRoot)
+                continue;
+            if (!BeamPartUtility.IsHorizontal(pegRoot.name) ||
+                !BeamPartUtility.IsHorizontal(holeRoot.name))
+                continue;
+
+            keep.Add(peg);
+            roots.Add(pegRoot);
+        }
+
+        if (roots.Count == 0)
+            return;
+
+        foreach (Transform root in roots)
+        {
+            if (root == null)
+                continue;
+            AttachmentPoint[] all = root.GetComponentsInChildren<AttachmentPoint>(true);
+            for (int i = 0; i < all.Length; i++)
+            {
+                AttachmentPoint ap = all[i];
+                if (ap == null || keep.Contains(ap) || !ap.enabled)
+                    continue;
+                ap.enabled = false;
+            }
+        }
     }
 
     // ---------------------------

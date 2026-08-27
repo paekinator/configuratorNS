@@ -15,9 +15,10 @@ using System.IO.Compression;
 ///   extensionCount varuint { type varuint | length varuint | bytes } — v1 writes none, skips unknown
 /// Text: "NS1-" + Base64Url (RFC 4648 §5, no padding).
 ///
-/// Canonical: before writing, records are normalized (min X/Z → 0; Y is
-/// floor-referenced and kept absolute) and sorted, so the same build always
-/// yields the same code, byte for byte, wherever it stood on the grid.
+/// Canonical: records are sorted so the same scene always yields the same
+/// code. World X/Z millimetres are kept as captured — a build imported in
+/// Build mode must land on the same grid cells it was saved from. Y is
+/// floor-referenced and likewise absolute.
 ///
 /// All failures throw <see cref="ConfigurationCodeException"/> with a
 /// human-readable message; <see cref="Validate"/> wraps that into a result.
@@ -167,30 +168,10 @@ public static class ConfigurationCodec
         canon.Beams.AddRange(model.Beams);
         canon.Panels.AddRange(model.Panels);
 
-        // Position independence: shift so the minimum X/Z is 0. Y stays
-        // absolute — it is floor-referenced and must survive round trips.
-        int minX = int.MaxValue, minZ = int.MaxValue;
-        foreach (BeamRecord b in canon.Beams) { minX = Math.Min(minX, b.XMm); minZ = Math.Min(minZ, b.ZMm); }
-        foreach (PanelRecord p in canon.Panels) { minX = Math.Min(minX, p.XMm); minZ = Math.Min(minZ, p.ZMm); }
-
-        if (minX != int.MaxValue)
-        {
-            for (int i = 0; i < canon.Beams.Count; i++)
-            {
-                BeamRecord b = canon.Beams[i];
-                b.XMm -= minX;
-                b.ZMm -= minZ;
-                canon.Beams[i] = b;
-            }
-            for (int i = 0; i < canon.Panels.Count; i++)
-            {
-                PanelRecord p = canon.Panels[i];
-                p.XMm -= minX;
-                p.ZMm -= minZ;
-                canon.Panels[i] = p;
-            }
-        }
-
+        // Keep world X/Z. Shifting min X/Z to 0 made every import land at
+        // the origin (and could slide parts off the 88 mm lattice when the
+        // minimum root was not a module multiple). Sort only, so the same
+        // scene still encodes identically regardless of capture order.
         canon.Beams.Sort(CompareBeams);
         canon.Panels.Sort(ComparePanels);
         return canon;

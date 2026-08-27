@@ -365,7 +365,7 @@ public class SpaceInteractionController : MonoBehaviour
             _lastGhostPos = snapped;
             _lastGhostYaw = _ghostYaw;
             bool nowBlocked = SpaceMerge.PoseBlocked(
-                _instances, null, SpaceMerge.RecordsFrom(_ghost.transform), out _ghostBlockReason);
+                _instances, null, SpaceMerge.RecordsFrom(_ghost.transform, -1), out _ghostBlockReason);
             if (nowBlocked != _ghostBlocked)
             {
                 _ghostBlocked = nowBlocked;
@@ -530,7 +530,8 @@ public class SpaceInteractionController : MonoBehaviour
         {
             SpaceInstance inst = _selected[i];
             candidate.AddRange(SpaceMerge.RecordsFrom(
-                inst, _dragStartPositions[i] + delta, inst.transform.eulerAngles.y));
+                inst, _dragStartPositions[i] + delta, inst.transform.eulerAngles.y,
+                _instances.IndexOf(inst)));
         }
         return SpaceMerge.PoseBlocked(_instances, _ignoreSet, candidate, out _);
     }
@@ -676,7 +677,8 @@ public class SpaceInteractionController : MonoBehaviour
         foreach (SpaceInstance inst in _selected)
         {
             (Vector3 newPos, float newYaw) = RotatedPose(inst, centroid);
-            candidate.AddRange(SpaceMerge.RecordsFrom(inst, newPos, newYaw));
+            candidate.AddRange(SpaceMerge.RecordsFrom(inst, newPos, newYaw,
+                _instances.IndexOf(inst)));
         }
 
         if (SpaceMerge.PoseBlocked(_instances, _ignoreSet, candidate, out string why))
@@ -742,7 +744,7 @@ public class SpaceInteractionController : MonoBehaviour
             records.Clear();
             foreach (SpaceInstance src in _selected)
                 records.AddRange(SpaceMerge.RecordsFrom(
-                    src, src.transform.position + candidate, src.transform.eulerAngles.y));
+                    src, src.transform.position + candidate, src.transform.eulerAngles.y, -1));
 
             if (!SpaceMerge.PoseBlocked(_instances, null, records, out _))
             {
@@ -906,6 +908,29 @@ public class SpaceInteractionController : MonoBehaviour
     // ------------------------------------------------------------------
     // Action card
     // ------------------------------------------------------------------
+
+    void OnEnable() => UIThemeController.ThemeChanged += HandleThemeChanged;
+    void OnDisable() => UIThemeController.ThemeChanged -= HandleThemeChanged;
+
+    void HandleThemeChanged()
+    {
+        if (_card == null)
+            return;
+        Vector2 pos = _card.anchoredPosition;
+        bool show = _card.gameObject.activeSelf;
+        Destroy(_card.gameObject);
+        _card = null;
+        _cardLabel = null;
+        _editButton = null;
+        if (!show)
+            return;
+        BuildCard();
+        if (_card == null)
+            return;
+        _card.gameObject.SetActive(true);
+        _card.anchoredPosition = pos;
+        _card.SetAsLastSibling();
+    }
 
     void UpdateCard()
     {

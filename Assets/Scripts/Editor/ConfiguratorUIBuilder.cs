@@ -378,6 +378,7 @@ public static class ConfiguratorUIBuilder
             gearIconImg.color = Muted;
             gearIconImg.preserveAspect = true;
             gearIconImg.raycastTarget = false;
+            _theme.mutedIcons.Add(gearIconImg);
         }
 
         BuildControlSettingsPanel(canvas, gear);
@@ -1145,6 +1146,7 @@ public static class ConfiguratorUIBuilder
             iconImg.preserveAspect = true;
             iconImg.raycastTarget = false;
             iconImg.color = Ink;
+            _theme.inkIcons.Add(iconImg);
 
             textX = 52f;
         }

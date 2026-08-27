@@ -51,12 +51,30 @@ public class SpacePanelUI : MonoBehaviour
 
         if (interaction != null)
             interaction.ArmedChanged += HighlightArmedRow;
+        UIThemeController.ThemeChanged += OnThemeChanged;
     }
 
     void OnDestroy()
     {
         if (interaction != null)
             interaction.ArmedChanged -= HighlightArmedRow;
+        UIThemeController.ThemeChanged -= OnThemeChanged;
+    }
+
+    void OnThemeChanged()
+    {
+        if (_listContent == null)
+            return;
+        foreach (Transform row in _listContent)
+        {
+            var name = row.Find("Name")?.GetComponent<TextMeshProUGUI>();
+            if (name != null)
+                name.color = Ink;
+            var meta = row.Find("Meta")?.GetComponent<TextMeshProUGUI>();
+            if (meta != null)
+                meta.color = Muted;
+        }
+        HighlightArmedRow();
     }
 
     public void Show()

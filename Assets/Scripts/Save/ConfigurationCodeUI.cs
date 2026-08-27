@@ -64,6 +64,57 @@ public class ConfigurationCodeUI : MonoBehaviour
         InjectTopBarButtons();
     }
 
+    void OnEnable() => UIThemeController.ThemeChanged += OnThemeChanged;
+
+    void OnDisable() => UIThemeController.ThemeChanged -= OnThemeChanged;
+
+    void OnThemeChanged()
+    {
+        RestyleDialog(_dialog);
+        RestyleDialog(_shareDialog);
+        RestyleInput(_codeInput);
+        RestyleInput(_shareInput);
+        if (_shareFeedback != null)
+            _shareFeedback.color = Muted;
+    }
+
+    void RestyleDialog(RectTransform dialog)
+    {
+        if (dialog == null)
+            return;
+        RestyleNamed(dialog, "Btn_Cancel", Surface, Ink);
+        RestyleNamed(dialog, "Btn_Paste", Surface, Ink);
+        RestyleNamed(dialog, "Btn_Close", Surface, Ink);
+        RestyleNamed(dialog, "Btn_Load", Accent, Color.white);
+        RestyleNamed(dialog, "Btn_Copy", Accent, Color.white);
+    }
+
+    static void RestyleNamed(Transform root, string name, Color bg, Color fg)
+    {
+        Transform t = root.Find(name);
+        if (t == null)
+            return;
+        if (t.TryGetComponent(out Image img))
+            img.color = bg;
+        var text = t.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (text != null)
+            text.color = fg;
+    }
+
+    void RestyleInput(TMP_InputField input)
+    {
+        if (input == null)
+            return;
+        if (input.TryGetComponent(out Image bg))
+            bg.color = Surface;
+        if (input.placeholder is TextMeshProUGUI placeholder)
+            placeholder.color = Muted;
+        if (input.textComponent != null)
+            input.textComponent.color = Ink;
+        input.caretColor = Ink;
+        input.selectionColor = new Color(Accent.r, Accent.g, Accent.b, 0.35f);
+    }
+
     void Update()
     {
         bool open = (_dialog != null && _dialog.gameObject.activeSelf) ||
