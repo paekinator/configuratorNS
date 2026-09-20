@@ -7,84 +7,132 @@ public class UIStatusBar : MonoBehaviour
     public TextMeshProUGUI statusText;
 
     FreePartSession _freeSession;
+    public Color idleDotColor = new Color32(66, 126, 220, 255);
+    public Color activeDotColor = new Color32(234, 143, 62, 255);
+    static float _flashUntil;
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetFlash() => _flashUntil = 0f;
+    UnityEngine.UI.Image _dot;
+    TemplateSession _guided;
+    SpaceInteractionController _space;
+    MoveGizmoController _move;
+    public static void FlashAction() => _flashUntil = Time.unscaledTime + .32f;
+    void OnEnable() => BuildHistory.Changed += FlashAction;
+    void OnDisable() => BuildHistory.Changed -= FlashAction;
+
+    void RefreshDot()
+    {
+        if (_dot == null) _dot = transform.Find("Dot")?.GetComponent<UnityEngine.UI.Image>();
+        if (_dot == null) return;
+        if (_guided == null) _guided = FindFirstObjectByType<TemplateSession>();
+        if (_freeSession == null) _freeSession = FindFirstObjectByType<FreePartSession>();
+        if (_space == null) _space = FindFirstObjectByType<SpaceInteractionController>();
+        if (_move == null) _move = FindFirstObjectByType<MoveGizmoController>();
+        bool active = ModulePickSession.Armed ||
+            (SpaceModeController.Active ? _space != null && _space.HasActiveAction :
+            (_guided != null && _guided.isActiveAndEnabled && _guided.ActiveTool != GuidedTemplateTool.None) ||
+            (_freeSession != null && _freeSession.isActiveAndEnabled && _freeSession.ActiveKind != FreePartKind.None) ||
+            (buildController != null && !string.IsNullOrEmpty(buildController.currentPartId)) ||
+            (StructureClipboard.Active != null && StructureClipboard.Active.IsActive) ||
+            (BeamResizeSession.Instance != null && BeamResizeSession.Instance.IsActive) ||
+            (_move != null && _move.IsDragging) ||
+            (FinishController.Instance != null && FinishController.Instance.IsOn) || FinishPaletteUI.IsOpen);
+        _dot.color = active || Time.unscaledTime < _flashUntil ? activeDotColor : idleDotColor;
+    }
 
     void Awake()
     {
         ConfigureTextFit();
     }
 
-    /// <summary>
-    /// Long guidance messages must never spill out of the pill: wrap onto a
-    /// second line, auto-shrink the font until the text fits the rect, and
-    /// ellipsize as a last resort.
-    /// </summary>
+    // Measure in the shared parent space so both outside gaps are equal.
+    // Font size follows the hint, never the length of the current message.
+    const float TextInset = 58f;
+    const float NeighbourClearance = 20f;
+    RectTransform _leftNeighbour, _rightNeighbour;
+    TMP_Text _hintText;
+    readonly Vector3[] _corners = new Vector3[4];
+
     void ConfigureTextFit()
+    {
+        if (statusText == null) return;
+        statusText.enableAutoSizing = false;
+        statusText.characterSpacing = 0f;
+        statusText.textWrappingMode = TextWrappingModes.NoWrap;
+        statusText.overflowMode = TextOverflowModes.Ellipsis;
+    }
+
+    public void RefreshLayout()
+    {
+        if (statusText == null || !(transform is RectTransform pill) ||
+            !(pill.parent is RectTransform parent)) return;
+        if (_leftNeighbour == null)
+            _leftNeighbour = UIChrome.ModeSwitch(parent) as RectTransform;
+        if (_rightNeighbour == null)
+        {
+            _rightNeighbour = UIChrome.FindPanel(parent, "HintPill") as RectTransform;
+            if (_rightNeighbour != null)
+                _hintText = _rightNeighbour.GetComponentInChildren<TMP_Text>(true);
+        }
+
+        ConfigureTextFit();
+        statusText.fontSize = _hintText != null ? _hintText.fontSize : 12f;
+        float left = parent.rect.xMin + UIChrome.DockInset;
+        float right = parent.rect.xMax - UIChrome.DockInset;
+        if (_leftNeighbour != null)
+        {
+            _leftNeighbour.GetWorldCorners(_corners);
+            left = parent.InverseTransformPoint(_corners[2]).x;
+        }
+        var hintGroup = _rightNeighbour != null ? _rightNeighbour.GetComponent<CanvasGroup>() : null;
+        if (_rightNeighbour != null && _rightNeighbour.gameObject.activeInHierarchy &&
+            (hintGroup == null || hintGroup.alpha > 0f))
+        {
+            _rightNeighbour.GetWorldCorners(_corners);
+            right = parent.InverseTransformPoint(_corners[0]).x;
+        }
+        float available = Mathf.Max(1f, right - left - 2f * NeighbourClearance);
+        float wanted = Mathf.Ceil(statusText.GetPreferredValues(statusText.text).x) + TextInset;
+        pill.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+            Mathf.Min(Mathf.Max(160f, wanted), available));
+        // Use local position rather than an assumed screen-centre anchor.
+        Vector3 position = pill.localPosition;
+        position.x = (left + right) * 0.5f + (pill.pivot.x - 0.5f) * pill.rect.width;
+        pill.localPosition = position;
+    }
+
+    void LateUpdate() { RefreshLayout(); RefreshDot(); }
+
+    void Update()
     {
         if (statusText == null)
             return;
 
-        statusText.textWrappingMode = TextWrappingModes.Normal;
-        statusText.overflowMode = TextOverflowModes.Ellipsis;
-        statusText.enableAutoSizing = true;
-        statusText.fontSizeMax = statusText.fontSize;
-        statusText.fontSizeMin = 9f;
+        // The pill is the only place this message appears. The dock footer
+        // briefly mirrored it, which put the same sentence on screen twice;
+        // the footer carries the active page's standing description instead.
+        statusText.text = Compose();
     }
-
-    string _lastFitText;
-    RectTransform _pillRt;
 
     /// <summary>
-    /// Hug the message: a fixed-width pill leaves a long empty box after
-    /// short messages. Width follows the text (within limits); longer copy
-    /// still wraps, shrinks, and ellipsizes inside the max width.
+    /// The one message, composed once. Previously each branch wrote straight
+    /// to statusText and returned; it returns the string instead so the pill
+    /// and the dock footer cannot drift apart.
     /// </summary>
-    void LateUpdate()
+    string Compose()
     {
-        if (statusText == null || statusText.text == _lastFitText)
-            return;
-        _lastFitText = statusText.text;
-
-        if (_pillRt == null)
-            _pillRt = transform as RectTransform;
-        if (_pillRt == null)
-            return;
-
-        // Measure at the full font size: auto-sizing may have shrunk the
-        // current size to fit a previous long message.
-        float measured = statusText.GetPreferredValues(_lastFitText).x;
-        if (statusText.enableAutoSizing && statusText.fontSize > 0.1f)
-            measured *= statusText.fontSizeMax / statusText.fontSize;
-
-        // 34 px left inset (accent dot) + 16 px right padding + breathing room.
-        float width = Mathf.Clamp(Mathf.Ceil(measured) + 58f, 220f, 540f);
-        _pillRt.sizeDelta = new Vector2(width, _pillRt.sizeDelta.y);
-    }
-
-    void Update()
-    {
-        if (statusText == null) return;
-
         if (buildController == null)
-        {
-            statusText.text = "No BuildController linked.";
-            return;
-        }
+            return "No BuildController linked.";
 
         // Selection / copy / layer-move guidance always wins while active.
         if (SelectionStatus.TryGet(out string selectionMessage))
-        {
-            statusText.text = selectionMessage;
-            return;
-        }
+            return selectionMessage;
 
         if (UIInteractionState.CurrentExperience == UIInteractionState.Experience.Guided)
         {
             var session = FindFirstObjectByType<TemplateSession>();
             if (session == null)
-            {
-                statusText.text = "Choose a tool from the left panel.";
-                return;
-            }
+                return "Choose a tool from the dock.";
 
             string tool = session.ActiveTool switch
             {
@@ -93,10 +141,9 @@ public class UIStatusBar : MonoBehaviour
                 GuidedTemplateTool.PanelBayT3 => "Panels",
                 _ => null
             };
-            statusText.text = tool == null
+            return tool == null
                 ? session.StatusMessage
                 : $"{tool}  |  {session.StatusMessage}";
-            return;
         }
 
         // Category part tools (Upright / Crossbar / Twist bar) speak for themselves.
@@ -111,20 +158,18 @@ public class UIStatusBar : MonoBehaviour
                 FreePartKind.Twist => "Twist beam",
                 _ => null
             };
-            statusText.text = toolName == null
+            return toolName == null
                 ? _freeSession.StatusMessage
                 : $"{toolName}  |  {_freeSession.StatusMessage}";
-            return;
         }
 
-        // If not building, show mode hint
-        if (UIInteractionState.CurrentMode != UIInteractionState.Mode.Build || string.IsNullOrEmpty(buildController.currentPartId))
-        {
-            statusText.text = "Pick a tool on the left, or click a part to select it";
-            return;
-        }
+        // Idle. "on the left" was true of the old vertical panel; the tools
+        // are in the dock now, and this same line is shown inside it.
+        if (UIInteractionState.CurrentMode != UIInteractionState.Mode.Build ||
+            string.IsNullOrEmpty(buildController.currentPartId))
+            return "Pick a tool, or click a part to select it";
 
-        statusText.text = BuildInstruction(buildController);
+        return BuildInstruction(buildController);
     }
 
     /// <summary>

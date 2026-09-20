@@ -150,8 +150,16 @@ public class AttachmentMarkerController : MonoBehaviour
         }
 
         bool holes = role.Value == AttachmentPoint.PointRole.Hole;
+        // The markers you COULD use stay ink: they are a quiet inventory of
+        // what is available. The one under the cursor is the thing being
+        // pointed at, so it gets the colour that means exactly that.
+        //
+        // It used to be UIThemeController.AccentColor — #3F3F3F against the
+        // others' #242424, two dark greys a shade apart. The marker that is
+        // meant to answer "this one" was distinguishable only by its size,
+        // which is why the whole set read as grey.
         Color baseColor = UIThemeController.InkColor;
-        Color targetColor = UIThemeController.AccentColor;
+        Color targetColor = UIThemeController.HighlightColor;
         float diameter = NeospaceUnits.Mm(holes ? holeDiameterMm : pegDiameterMm);
         Mesh mesh = holes ? RingMesh() : DiscMesh();
         Quaternion facing = cam.transform.rotation;

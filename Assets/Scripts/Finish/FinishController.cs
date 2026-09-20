@@ -168,7 +168,7 @@ public class FinishController : MonoBehaviour
         if (_floorProxy != null)
             _floorProxy.SetActive(dropped);
 
-        AdaptiveGridController.FloorVisualOffset = -drop;
+        GroundGridController.FloorVisualOffset = -drop;
         _floorDrop = drop;
         Physics.SyncTransforms();
     }

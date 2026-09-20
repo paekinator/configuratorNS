@@ -18,7 +18,14 @@ public static class EnvironmentBootstrap
         if (host == null)
             host = new GameObject("BuildEnvironment");
 
-        var grid = host.GetComponent<AdaptiveGridController>() ?? host.AddComponent<AdaptiveGridController>();
+        // ONE grid component now. AdaptiveGridController drew the 88 mm lines
+        // on a second quad that followed the build while this one followed the
+        // camera; both drew the same lattice from different sources, and the
+        // H7 lines were every eighth line of each. GroundGridController draws
+        // every layer in one pass, so they cannot land a fraction of a pixel
+        // apart.
+        var grid = host.GetComponent<GroundGridController>()
+                   ?? host.AddComponent<GroundGridController>();
         grid.buildController = build;
 
         var dims = host.GetComponent<StructureDimensionsController>() ?? host.AddComponent<StructureDimensionsController>();

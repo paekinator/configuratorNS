@@ -867,7 +867,7 @@ public class MarqueeSelectionController : MonoBehaviour
 
     void AdoptCardStyle()
     {
-        Transform partsPanel = _canvas.transform.Find("PartsPanel");
+        Transform partsPanel = UIChrome.FindPanel(_canvas.transform, "PartsPanel");
         if (partsPanel == null)
             return;
 

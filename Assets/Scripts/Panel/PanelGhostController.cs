@@ -263,12 +263,18 @@ public class PanelGhostController : MonoBehaviour
             cols[i].enabled = false;
 
         _ghostRenderers = _ghost.GetComponentsInChildren<Renderer>(true);
+        // A panel fills a bay between frames that are already standing, so
+        // nothing new arrives on the ground and an outline down there marks
+        // a place that is already taken.
+        if (_ghost.GetComponent<NoGroundHighlight>() == null)
+            _ghost.AddComponent<NoGroundHighlight>();
         _ghost.SetActive(false);
 
         if (_edge == null)
         {
             var go = new GameObject("PanelGhostEdge");
             go.layer = ghostLayer;
+            go.AddComponent<NoGroundHighlight>();
             _edge = go.AddComponent<LineRenderer>();
             _edgeMaterial = new Material(Shader.Find("Sprites/Default"));
             _edge.sharedMaterial = _edgeMaterial;
@@ -300,7 +306,9 @@ public class PanelGhostController : MonoBehaviour
         _edge.startWidth = width;
         _edge.endWidth = width;
 
-        Color c = valid ? UIThemeController.InkColor : UIThemeController.DangerColor;
+        // The outline of a bay that is about to be filled is a preview, so it
+        // takes the highlight colour rather than ink. Red still means no.
+        Color c = valid ? UIThemeController.HighlightColor : UIThemeController.DangerColor;
         c.a = 0.85f;
         _edge.startColor = c;
         _edge.endColor = c;

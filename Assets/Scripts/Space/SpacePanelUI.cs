@@ -95,14 +95,33 @@ public class SpacePanelUI : MonoBehaviour
     // Panel
     // ------------------------------------------------------------------
 
+    /// <summary>
+    /// The panel's actual width.
+    ///
+    /// NOT sizeDelta.x. This panel copies PartsPanel's rect wholesale, and
+    /// PartsPanel used to be a fixed 316-wide floating card, where sizeDelta.x
+    /// WAS the width. It is now a dock page STRETCHED across the body, where
+    /// sizeDelta is an inset from the parent's edges and reads (0, 0).
+    ///
+    /// Every width derived from it therefore went negative: the hint label got
+    /// -40 and wrapped to one character per line, printing itself vertically
+    /// down the screen edge, and the two bottom buttons got -20 and collapsed
+    /// on top of each other. rect.width resolves the anchors and gives the
+    /// real number at either size.
+    /// </summary>
+    float PanelWidth => _panel.rect.width > 1f ? _panel.rect.width : _panel.sizeDelta.x;
+
     void BuildPanel()
     {
         var go = new GameObject("SpacePanel", typeof(RectTransform), typeof(Image));
-        go.transform.SetParent(_canvas.transform, false);
         _panel = (RectTransform)go.transform;
 
-        // Sit exactly where the PartsPanel sits.
-        Transform partsPanel = _canvas.transform.Find("PartsPanel");
+        // Sit exactly where the PartsPanel sits — including inside the dock
+        // body, which is where PartsPanel lives once the UI has been rebuilt.
+        // Find it before reparenting, since the search is canvas-wide.
+        Transform partsPanel = UIChrome.FindPanel(_canvas.transform, "PartsPanel");
+        go.transform.SetParent(partsPanel != null ? partsPanel.parent : _canvas.transform, false);
+
         if (partsPanel is RectTransform partsRt)
         {
             _panel.anchorMin = partsRt.anchorMin;
@@ -120,23 +139,26 @@ public class SpacePanelUI : MonoBehaviour
             _panel.sizeDelta = new Vector2(316f, 720f);
         }
 
+        // Transparent, and no shadow. This was a white card floating on the
+        // light 3D view; it is now a page inside the dock's dark body, and a
+        // white fill stretched to the body's full 1856x236 was a sheet laid
+        // over the dock. The dark body shows through instead, as it does for
+        // every other dock page.
         var img = go.GetComponent<Image>();
-        img.color = CardColor;
+        img.color = new Color(1f, 1f, 1f, 0f);
         StyleCard(img, 1.2f);
-        if (_theme != null)
-            _theme.cardImages.Add(img);
+        img.raycastTarget = false;
 
-        UiPolish.SoftShadow(_panel);
-
-        TextMeshProUGUI title = CreateText(_panel, "Title", "My Pieces", 18f, Ink, true);
+        // Card, not Ink: ink is near-black and would be invisible here. Not
+        // theme-registered for the same reason — the theme would paint it
+        // back to ink on the next refresh.
+        TextMeshProUGUI title = CreateText(_panel, "Title", "My Pieces", 18f, CardColor, true);
         PlaceTop(title.rectTransform, 20f, -18f, 220f, 26f);
-        if (_theme != null)
-            _theme.inkTexts.Add(title);
 
         TextMeshProUGUI hint = CreateText(_panel, "Hint",
             "Click a piece, then click the floor to place it. Drag placed pieces to move them.",
             11.5f, Muted, false);
-        PlaceTop(hint.rectTransform, 20f, -48f, _panel.sizeDelta.x - 40f, 34f);
+        PlaceTop(hint.rectTransform, 20f, -48f, PanelWidth - 40f, 34f);
         hint.textWrappingMode = TextWrappingModes.Normal;
         if (_theme != null)
             _theme.mutedTexts.Add(hint);
@@ -213,7 +235,7 @@ public class SpacePanelUI : MonoBehaviour
     /// </summary>
     void BuildCopyCodeButton()
     {
-        float half = (_panel.sizeDelta.x - 40f) * 0.5f;
+        float half = (PanelWidth - 40f) * 0.5f;
 
         Button copy = MakeBottomButton("Btn_CopySpaceCode", "Copy code", 16f, half);
         copy.onClick.AddListener(() =>

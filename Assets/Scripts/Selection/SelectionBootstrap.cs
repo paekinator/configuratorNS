@@ -2,9 +2,14 @@ using UnityEngine;
 
 /// <summary>
 /// Runtime wiring for the selection tools (marquee select, structure
-/// clipboard, panel layer mover). Also removes the legacy top-bar
-/// Build/Select switch — selection is now always available by dragging with
-/// the left mouse button, so a separate mode is no longer needed.
+/// clipboard, panel layer mover).
+///
+/// It used to demolish leftovers from an older interface as well — the
+/// top-bar Build/Select switch, a retired Copy button, the Frames/Beams/Twist
+/// tab row, a bottom Panel-tool button — re-laying the parts gallery around
+/// each one it removed. The builder stopped producing any of those some time
+/// ago, so all of it was searching for things that no longer exist. Removed:
+/// see the commit for the check that confirmed each target was already gone.
 /// </summary>
 public static class SelectionBootstrap
 {
@@ -89,59 +94,8 @@ public static class SelectionBootstrap
         freeSession.ghosts = freeGhosts;
         freeSession.spawner = spawner;
 
-        RemoveLegacySelectUi();
-    }
-
-    static void RemoveLegacySelectUi()
-    {
-        Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-        if (canvas == null)
-            return;
-
-        // The legacy Build/Select segmented control: selection no longer is
-        // a mode. Careful: the CURRENT top bar has a "ModeSwitch" too (the
-        // Build | Space segments) — only the old one (Btn_Build/Btn_Select
-        // children) may be destroyed.
-        Transform bar = canvas.transform.Find("TopBar");
-        Transform modeSwitch = bar != null ? bar.Find("ModeSwitch") : null;
-        if (modeSwitch != null && modeSwitch.Find("Btn_ModeBuild") == null)
-            Object.Destroy(modeSwitch.gameObject);
-
-        // The retired Copy template button (superseded by the selection card).
-        Transform staleCopy = canvas.transform.Find("GuidedToolsPanel/Btn_T4_Copy");
-        if (staleCopy != null)
-            Object.Destroy(staleCopy.gameObject);
-
-        // The Frames/Beams/Twist tab row: the three category cards ARE the
-        // categories now, so the tab track is dead weight. Let the card grid
-        // grow into its space.
-        Transform partsTabs = canvas.transform.Find("PartsPanel/Tabs");
-        if (partsTabs != null)
-        {
-            Object.Destroy(partsTabs.gameObject);
-
-            Transform scroll = canvas.transform.Find("PartsPanel/PartsScroll");
-            if (scroll is RectTransform scrollRt)
-                scrollRt.offsetMax = new Vector2(scrollRt.offsetMax.x, -131f);
-
-            Transform subtitle = canvas.transform.Find("PartsPanel/Subtitle");
-            if (subtitle != null &&
-                subtitle.TryGetComponent(out TMPro.TextMeshProUGUI subtitleText))
-                subtitleText.text = "Pick a part type · the size is chosen while placing";
-        }
-
-        // The bottom "Panel tool" button: the Panel tool is a card in the
-        // grid now, so drop the button and give the grid its space.
-        Transform panelToolBtn = canvas.transform.Find("PartsPanel/Btn_PanelTool");
-        if (panelToolBtn != null)
-        {
-            Object.Destroy(panelToolBtn.gameObject);
-
-            Transform scroll = canvas.transform.Find("PartsPanel/PartsScroll");
-            if (scroll is RectTransform scrollRt)
-                scrollRt.offsetMin = new Vector2(scrollRt.offsetMin.x, 16f);
-        }
-
+        // Selection is not a mode — it is always available by dragging with
+        // the left mouse button — so the session always starts in Build.
         UIInteractionState.CurrentMode = UIInteractionState.Mode.Build;
     }
 }

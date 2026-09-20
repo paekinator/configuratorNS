@@ -13,6 +13,7 @@ public static class SelectionStatus
 
     public static void Set(string message, float seconds = 0f)
     {
+        if (seconds > 0f && !string.IsNullOrEmpty(message)) UIStatusBar.FlashAction();
         _message = message;
         _expiry = seconds > 0f ? Time.unscaledTime + seconds : float.PositiveInfinity;
     }

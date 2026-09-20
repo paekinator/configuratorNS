@@ -59,6 +59,7 @@ public class MoveGizmoController : MonoBehaviour
 
     // Drag state
     bool _dragging;
+    public bool IsDragging => _dragging;
     bool _slideMode;                 // no vertical frames selected → slide along posts
     bool _freeMove;                  // unplugged horizontals: X/Z/Y, not hole-row slide
     int _dragAxis = -1;
@@ -688,7 +689,10 @@ public class MoveGizmoController : MonoBehaviour
 
     void UpdateScale()
     {
-        float dist = Vector3.Distance(cam.transform.position, _root.position);
+        // Effective, not literal: an orthographic camera sits far back purely
+        // to avoid clipping, and a gizmo scaled by that distance would fill
+        // the screen. Identical to the plain distance in perspective.
+        float dist = CameraMath.EffectiveDistance(cam, _root.position);
         _root.localScale = Vector3.one * Mathf.Clamp(dist * screenScale, 0.35f, 8f);
     }
 

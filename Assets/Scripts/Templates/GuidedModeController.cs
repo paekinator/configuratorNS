@@ -10,7 +10,11 @@ public class GuidedModeController : MonoBehaviour
     public BuildController buildController;
     public TemplateSession templateSession;
     public PanelGhostController panelGhost;
-    public GameObject expertPartsPanel;
+    /// <summary>
+    /// Kept only so RefreshToolHighlight can find the two tool buttons under
+    /// it. This does NOT control whether the panel is shown — DockTabs does,
+    /// and the PartsPanel reference that sat beside this is gone entirely.
+    /// </summary>
     public GameObject guidedToolsPanel;
 
     [Header("Optional status")]
@@ -74,8 +78,10 @@ public class GuidedModeController : MonoBehaviour
         if (templateSession == null)
             return;
 
-        templateSession.SetTool(
-            templateSession.ActiveTool == tool ? GuidedTemplateTool.None : tool);
+        bool putAway = templateSession.ActiveTool == tool;
+        ActiveInteraction.Exit();
+        if (!putAway)
+            templateSession.SetTool(tool);
         RefreshHint();
         RefreshToolHighlight();
     }
@@ -90,11 +96,19 @@ public class GuidedModeController : MonoBehaviour
     {
         bool guided = experience == UIInteractionState.Experience.Guided;
 
-        if (expertPartsPanel != null)
-            expertPartsPanel.SetActive(!guided);
-        if (guidedToolsPanel != null)
-            guidedToolsPanel.SetActive(guided);
-
+        // It used to show and hide the two panels here. DockTabs owns that
+        // now — it listens to this same event, and it alone knows whether the
+        // Build tab is even the one on screen.
+        //
+        // Two owners, and this one was blind to the tab: the call ran from
+        // OnEnable, so anything that disabled and re-enabled this controller
+        // put the Tools panel back on screen over whatever tab you were
+        // looking at. The block picker sleeps these controllers while it is
+        // armed and wakes them afterwards, which is exactly that — and the
+        // Tools cards reappeared on top of the Blocks gallery.
+        //
+        // The panel references stay: RefreshToolHighlight finds the two tool
+        // buttons through guidedToolsPanel.
         if (guided)
         {
             if (buildController != null)
@@ -185,6 +199,7 @@ public class GuidedModeController : MonoBehaviour
             bg.color = selected ? accent : surface;
 
         Transform label = button.Find("Label");
+        UIToolCardOutline.Apply(button, selected);
         if (label != null && label.TryGetComponent(out TMPro.TextMeshProUGUI title))
             title.color = selected ? Color.white : ink;
 

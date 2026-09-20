@@ -57,7 +57,7 @@ public static class UiPolish
         if (canvas == null)
             return null;
 
-        // Any baked panel (TopBar, PartsPanel, ...) carries a "Shadow" child
+        // Any baked panel (Dock, PartsPanel, ...) carries a "Shadow" child
         // with the Evo shadow sprite; use the first one as the donor.
         foreach (Image img in canvas.GetComponentsInChildren<Image>(true))
         {

@@ -57,7 +57,7 @@ public class BuildHistory : MonoBehaviour
 
     /// <summary>
     /// While true (Space Mode), the piece-build history is fully dormant: no
-    /// captures, no keyboard shortcuts, and the top-bar buttons no-op — Space
+    /// captures, no keyboard shortcuts, and the rail's buttons no-op — Space
     /// Mode routes those to its own history instead.
     /// </summary>
     public static bool Suspended;
