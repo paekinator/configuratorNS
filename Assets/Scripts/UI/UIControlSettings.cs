@@ -61,6 +61,8 @@ public class UIControlSettings : MonoBehaviour
             panel.SetActive(!panel.activeSelf);
             if (panel.activeSelf)
             {
+                // Only one rail panel at a time — they share the same slot.
+                UIChrome.CloseOtherRailPanels(panel.transform.parent, panel.name);
                 panel.transform.SetAsLastSibling();
                 Refresh();
             }

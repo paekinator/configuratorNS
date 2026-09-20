@@ -282,8 +282,9 @@ public class PanelLayerMover : MonoBehaviour
     {
         // Screen-space vertical motion → world metres at the slot's depth.
         float pixels = Input.mousePosition.y - _pressScreenY;
-        float dist = Vector3.Distance(cam.transform.position, _slot.center);
-        float worldPerPixel = 2f * dist * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) / Screen.height;
+        // From CameraMath, which knows an orthographic camera's pixel is set by
+        // its view size, not by how far back it happens to be standing.
+        float worldPerPixel = CameraMath.WorldPerPixel(cam, _slot.center);
         float rawDelta = pixels * worldPerPixel;
 
         // Snap to the nearest valid hole-row offset.

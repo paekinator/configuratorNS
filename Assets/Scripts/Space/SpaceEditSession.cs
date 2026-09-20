@@ -255,7 +255,7 @@ public class SpaceEditSession : MonoBehaviour
 
             Camera cam = buildController != null && buildController.cam != null
                 ? buildController.cam : Camera.main;
-            Texture2D thumb = PieceLibrary.CaptureThumbnail(cam);
+            Texture2D thumb = ThumbnailCapture.Plain(cam);
             if (thumb != null)
             {
                 PieceLibrary.SaveThumbnail(record.id, thumb);
@@ -414,7 +414,7 @@ public class SpaceEditSession : MonoBehaviour
 
     void AdoptCardStyle(Canvas canvas)
     {
-        Transform partsPanel = canvas.transform.Find("PartsPanel");
+        Transform partsPanel = UIChrome.FindPanel(canvas.transform, "PartsPanel");
         if (partsPanel == null)
             return;
 

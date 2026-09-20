@@ -8,7 +8,7 @@ public enum FreePartKind { None, Vertical, Horizontal, Twist }
 /// one button per catalogue size, so nobody needs to know what a "V13" is.
 ///
 ///  - Vertical: click open ground (frames stand anywhere on the grid, no
-///    bridging rule) or an amber dot (peg) to stack — then a scale appears
+///    bridging rule) or a marker on a frame (peg) to stack — then a scale appears
 ///    and EVERY catalogue height is a tick; click when the label shows the
 ///    size you want. Aiming below a peg hangs the frame instead.
 ///  - Horizontal / Twist: click a blue ring (free hole on a frame) — then
@@ -67,7 +67,7 @@ public class FreePartSession : MonoBehaviour
         StatusMessage = kind switch
         {
             FreePartKind.Vertical =>
-                "Step 1 of 2 · Click the ground where the frame goes · or an amber dot to stack on it.",
+                "Step 1 of 2 · Click the ground where the frame goes · or a marker on a frame to stack on it.",
             FreePartKind.Horizontal =>
                 "Step 1 of 2 · Click a blue ring on a frame · the beam starts there.",
             FreePartKind.Twist =>
@@ -181,8 +181,9 @@ public class FreePartSession : MonoBehaviour
         string label = TemplateSnapping.VLabel(size);
         guide.ShowMeasure(_anchor, end, hangDown ? Vector3.down : Vector3.up,
             label, true, _stops, active);
-        if (_anchorPeg == null)
-            guide.ShowCrosshair(_anchor);   // keep the grid cross while scaling
+        // No crosshair here either. Once the anchor is down there IS a ghost,
+        // so the ground grid is already lighting the cell it stands in —
+        // and it keeps doing so while the frame is scaled.
 
         // Live ghost for ground placements (pose math matches the spawner).
         if (_anchorPeg == null)
@@ -222,7 +223,8 @@ public class FreePartSession : MonoBehaviour
 
         if (peg != null)
         {
-            guide.HideCrosshair();
+            // A dot IS right here: the target is a peg on a frame, up in the
+            // air, not a square of ground. The grid cannot mark it.
             guide.ShowPoint(peg.transform.position, "Stack here · click to anchor");
             if (LeftClickGesture.ClickReleased && LeftClickGesture.PressClaim == null)
             {
@@ -242,8 +244,12 @@ public class FreePartSession : MonoBehaviour
         }
 
         Vector3 spot = T1PostsPlanner.SnapGround(floorHit.point);
-        guide.ShowPoint(spot, "Click to start a frame here");
-        guide.ShowCrosshair(spot);   // grid row + column the frame will land on
+        // No dot and no crosshair. The ground grid lights the 88 mm cell the
+        // frame will stand in, which is the same answer the Frames tool gives
+        // and is the one a person can actually see — where the crosshair was
+        // two full-width lines across the floor for a fact that fits in one
+        // square.
+        guide.ShowGroundTarget(spot, "Click to start a frame here");
 
         if (LeftClickGesture.ClickReleased && LeftClickGesture.PressClaim == null)
         {
@@ -416,7 +422,7 @@ public class FreePartSession : MonoBehaviour
         StatusMessage = kind switch
         {
             FreePartKind.Vertical =>
-                "Step 1 of 2 · Click the ground where the frame goes · or an amber dot to stack on it.",
+                "Step 1 of 2 · Click the ground where the frame goes · or a marker on a frame to stack on it.",
             FreePartKind.Horizontal =>
                 "Step 1 of 2 · Click a blue ring on a frame · the beam starts there.",
             FreePartKind.Twist =>

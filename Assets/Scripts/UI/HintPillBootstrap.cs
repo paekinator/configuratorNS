@@ -29,13 +29,20 @@ public class HintPillBootstrap : MonoBehaviour
             return;
 
         Canvas canvas = FindFirstObjectByType<Canvas>();
-        Transform pill = canvas != null ? canvas.transform.Find("HintPill") : null;
+        if (canvas == null)
+            return;
+
+        // Resolved by UIChrome rather than a canvas-root Find: both pills are
+        // canvas children today, but the band above the dock is the kind of
+        // thing that acquires a container, and a root-only Find would then
+        // return null and leave the pill stale and unstyled with no error.
+        Transform pill = UIChrome.FindPanel(canvas.transform, "HintPill");
         if (pill == null)
             return;
 
         var host = pill.gameObject.AddComponent<HintPillBootstrap>();
         host._pill = (RectTransform)pill;
-        host._status = canvas.transform.Find("StatusPill") as RectTransform;
+        host._status = UIChrome.FindPanel(canvas.transform, "StatusPill") as RectTransform;
         host._group = pill.gameObject.GetComponent<CanvasGroup>();
         if (host._group == null)
             host._group = pill.gameObject.AddComponent<CanvasGroup>();
@@ -54,17 +61,23 @@ public class HintPillBootstrap : MonoBehaviour
         text.alignment = TextAlignmentOptions.Midline;
 
         // Baked scenes carry a stale fixed width; hug the text instead, and
-        // sit on the status pill's baseline so the bottom edge reads as one
-        // aligned row.
+        // sit on the band baseline so the bottom edge reads as one aligned
+        // row with the status pill and the mode switch.
+        //
+        // The position comes from UIChrome, NOT from a literal. This method
+        // runs in every scene and overwrites whatever the builder baked, so a
+        // private copy of the baseline here silently wins over the builder —
+        // which is what put this pill back down behind the dock.
         float textWidth = Mathf.Ceil(text.GetPreferredValues(HintText).x);
         _pill.anchorMin = _pill.anchorMax = new Vector2(1f, 0f);
         _pill.pivot = new Vector2(1f, 0f);
-        _pill.anchoredPosition = new Vector2(-24f, 12f);
-        _pill.sizeDelta = new Vector2(textWidth + SidePadding * 2f, 38f);
+        _pill.anchoredPosition = new Vector2(-UIChrome.DockInset, UIChrome.BandY);
+        _pill.sizeDelta = new Vector2(textWidth + SidePadding * 2f, UIChrome.PillHeight);
 
         // Dress the pill like the status pill (solid card, same rounding,
         // soft shadow) instead of the old translucent white that read as
-        // loose text floating on the floor.
+        // loose text floating on the floor. The builder now bakes it this way
+        // too, so this only heals scenes baked before that.
         _pillImage = _pill.GetComponent<Image>();
         _statusImage = _status != null ? _status.GetComponent<Image>() : null;
         if (_pillImage != null && _statusImage != null)
@@ -77,8 +90,11 @@ public class HintPillBootstrap : MonoBehaviour
             }
             _pillImage.color = _statusImage.color;
         }
+        // Same spread as the status pill's. UiPolish.SoftShadow's default is
+        // drawn for large surfaces; at 0.6 this still hung a halo taller than
+        // the pill itself off a 38-unit pill.
         if (_pill.Find("Shadow") == null)
-            UiPolish.SoftShadow(_pill, 0.6f);
+            UiPolish.SoftShadow(_pill, UIChrome.PillShadowScale);
     }
 
     void LateUpdate()
@@ -103,18 +119,12 @@ public class HintPillBootstrap : MonoBehaviour
     /// <summary>Hide the pill instead of letting it collide with the status pill.</summary>
     void UpdateVisibility()
     {
-        bool visible = true;
-        if (_status != null && _status.gameObject.activeInHierarchy)
-        {
-            var pillCorners = new Vector3[4];
-            var statusCorners = new Vector3[4];
-            _pill.GetWorldCorners(pillCorners);
-            _status.GetWorldCorners(statusCorners);
-
-            // pillCorners[0] is the pill's bottom-left, statusCorners[2] the
-            // status pill's top-right; both sit on the bottom edge.
-            visible = pillCorners[0].x > statusCorners[2].x + 12f;
-        }
+        // Stable viewport threshold, independent of the status width.
+        // This prevents alternating hide/show as the status fills released space.
+        var parent = _pill.parent as RectTransform;
+        bool visible = parent == null || parent.rect.width >=
+            UIChrome.ModeSwitchX + UIChrome.ModeSwitchWidth +
+            _pill.rect.width + UIChrome.DockInset + 200f;
 
         _group.alpha = visible ? 1f : 0f;
         _group.blocksRaycasts = visible;

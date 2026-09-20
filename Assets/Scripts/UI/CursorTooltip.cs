@@ -80,7 +80,7 @@ public class CursorTooltip : MonoBehaviour
         _bg.raycastTarget = false;
 
         // Adopt the shared card sprite so the pill matches every other panel.
-        Transform partsPanel = canvas.transform.Find("PartsPanel");
+        Transform partsPanel = UIChrome.FindPanel(canvas.transform, "PartsPanel");
         var reference = partsPanel != null ? partsPanel.GetComponent<Image>() : null;
         if (reference != null && reference.sprite != null)
         {

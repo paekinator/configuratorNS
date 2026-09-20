@@ -18,6 +18,11 @@ public class UIPartsPalette : MonoBehaviour
     public float buttonFontSize = 24f;
     public bool overrideFontSize = false;
 
+    [Header("Tool card typography")]
+    [Tooltip("Uses the selected font set from the card template unless explicitly overridden above.")]
+    [Min(8f)] public float cardTitleSize = 16f;
+    [Min(8f)] public float cardCaptionSize = 11.5f;
+
     public Color normalTextColor = Color.white;
     public Color selectedTextColor = Color.black;
 
@@ -122,12 +127,25 @@ public class UIPartsPalette : MonoBehaviour
 
         _spawned.Clear();
 
-        // Three wide rows read better than a cramped 2-column grid of cards.
+        // Re-apply the gallery metrics, so scenes baked before the dock still
+        // get the right shape. They come from UIChrome, NOT from literals:
+        // this method overwrites whatever the builder baked, so a private copy
+        // here silently wins.
+        //
+        // It used to force FixedColumnCount = 1 -- a single vertical column,
+        // which was right for the old tall left panel and wrong for the short,
+        // wide dock body. Six cards became 636 units tall in a 208-tall
+        // viewport, childAlignment centred that column so it showed cards 3
+        // and 4, and the ScrollRect scrolls only horizontally, so the other
+        // four could not be reached. Vertical frame, Horizontal beam, Finish
+        // and Palette were all still built and wired, and all invisible.
         if (gridParent.TryGetComponent(out GridLayoutGroup grid))
         {
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 1;
-            grid.cellSize = new Vector2(304f, 96f);
+            grid.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+            grid.constraintCount = UIChrome.PartCardRows;
+            grid.cellSize = UIChrome.PartCardSize;
+            grid.spacing = UIChrome.PartCardSpacing;
+            grid.padding = new RectOffset(grid.padding.left, grid.padding.right, 0, 0);
         }
 
         AddCategoryButton(FreePartKind.Vertical, "Vertical frame",
@@ -153,6 +171,7 @@ public class UIPartsPalette : MonoBehaviour
 
         btn.onClick.AddListener(() =>
         {
+            ActiveInteraction.Exit();
             FinishPaletteUI.Toggle();
             HighlightSelected();
         });
@@ -172,6 +191,7 @@ public class UIPartsPalette : MonoBehaviour
 
         btn.onClick.AddListener(() =>
         {
+            ActiveInteraction.Exit();
             FinishController.Ensure().Toggle();
             HighlightSelected();
         });
@@ -198,7 +218,10 @@ public class UIPartsPalette : MonoBehaviour
             if (armed)
                 PanelGhost.DisablePanelTool();
             else
+            {
+                ActiveInteraction.Exit();
                 PanelGhost.EnablePanelTool();
+            }
 
             HighlightSelected();
         });
@@ -228,7 +251,10 @@ public class UIPartsPalette : MonoBehaviour
             if (Session != null)
             {
                 // Clicking the armed tool again puts it away.
-                Session.SetKind(Session.ActiveKind == captured ? FreePartKind.None : captured);
+                bool putAway = Session.ActiveKind == captured;
+                ActiveInteraction.Exit();
+                if (!putAway)
+                    Session.SetKind(captured);
             }
 
             HighlightSelected();
@@ -251,7 +277,7 @@ public class UIPartsPalette : MonoBehaviour
             tmp.text = title;
             if (buttonFont != null)
                 tmp.font = buttonFont;
-            tmp.fontSize = 16f;
+            tmp.fontSize = cardTitleSize;
             tmp.color = normalTextColor;
             tmp.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -267,7 +293,7 @@ public class UIPartsPalette : MonoBehaviour
         if (subChild != null && subChild.TryGetComponent(out TextMeshProUGUI sub))
         {
             sub.text = caption;
-            sub.fontSize = 11.5f;
+            sub.fontSize = cardCaptionSize;
             sub.textWrappingMode = TextWrappingModes.Normal;
             sub.overflowMode = TextOverflowModes.Ellipsis;
             sub.alignment = TextAlignmentOptions.TopLeft;
@@ -339,6 +365,7 @@ public class UIPartsPalette : MonoBehaviour
             }
 
             var tmp = FindLabel(b.transform);
+            UIToolCardOutline.Apply(b.transform, active);
             if (tmp != null)
                 tmp.color = active ? selectedTextColor : normalTextColor;
 

@@ -5,10 +5,11 @@ using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 /// <summary>
-/// Runtime light/dark theme switch for the whole configurator: UI surfaces and
+/// Single-palette theme service for the whole configurator: UI surfaces and
 /// text, the toolbar/palette highlight colors, and the 3D environment (camera
 /// background, sun, ambient trilight and floor tint). The UI builder fills the
-/// reference lists; the toggle button calls <see cref="Toggle"/>.
+/// reference lists. The light/dark toggle was removed — there is one palette,
+/// taken from the NEOSPACE web UI mockup.
 /// </summary>
 public class UIThemeController : MonoBehaviour
 {
@@ -23,54 +24,56 @@ public class UIThemeController : MonoBehaviour
         public Color accent;
         public Color hintBg;
 
-        [Header("Environment")]
-        public Color background;
-        public Color floorTint;
-        public Color sunColor;
-        public float sunIntensity;
-        public Color ambientSky;
-        public Color ambientEquator;
-        public Color ambientGround;
+        // No Environment block at all any more.
+        //
+        // The backdrop is a gradient of four corners, not one colour, and it
+        // belongs to SceneBackdrop. The floor tint, the sun and the ambient
+        // trilight belong to StageLighting. Every one of them was also
+        // authored by ConfiguratorEnvironmentStyler, and a palette that
+        // repainted them on Start silently won that argument — which is how
+        // the floor came to be #DAD3C7 in the editor and #E7E7E7 in Play mode.
+        //
+        // This palette is the UI's colours now, and only those.
     }
 
+    /// <summary>
+    /// The single NEOSPACE palette. Luminance comes from the web UI mockup,
+    /// but the hue does not: the mockup's greys lead green by 1-6 points per
+    /// channel (#202622, #3B423C, #E1E3DF), which reads as a colour cast once
+    /// it fills full-height panels. These are the same greys neutralised to
+    /// zero chroma, so lightness and contrast ratios are unchanged.
+    ///
+    /// The sun, the ambient and the floor have left this palette entirely —
+    /// they are StageLighting's, which is also where the exposure that stopped
+    /// the ground clipping to white lives.
+    /// </summary>
     public Palette light = new Palette
     {
         card = Hex("FFFFFF"),
-        surface = Hex("F3EFE9"),
-        ink = Hex("26221E"),
-        muted = Hex("8F8880"),
-        accent = Hex("D96C47"),
-        hintBg = new Color(1f, 1f, 1f, 0.85f),
-        background = Hex("EAE5DD"),
-        floorTint = Hex("DAD3C7"),
-        sunColor = Hex("FFF5E8"),
-        sunIntensity = 1.1f,
-        ambientSky = Hex("F2EEE7"),
-        ambientEquator = Hex("D8D2C7"),
-        ambientGround = Hex("B5AC9D")
+        surface = Hex("E2E2E2"),
+        ink = Hex("242424"),
+        muted = Hex("7D7D7D"),
+        accent = Hex("3F3F3F"),
+        // Opaque, matching card: the hint pill sits in the band beside the
+        // status pill and must read as the same object. At 85% the shadow
+        // behind it showed through the fill. HintPillBootstrap force-syncs
+        // this colour to the status pill's every frame anyway, so a different
+        // value here only ever produced a flicker at startup.
+        hintBg = Hex("FFFFFF"),
     };
 
-    public Palette dark = new Palette
-    {
-        card = Hex("2C2925"),
-        surface = Hex("3B372F"),
-        ink = Hex("EDE8E1"),
-        muted = Hex("9A938A"),
-        accent = Hex("E07A52"),
-        hintBg = new Color(0.17f, 0.16f, 0.14f, 0.88f),
-        background = Hex("211E1A"),
-        floorTint = Hex("35312B"),
-        sunColor = Hex("FFEBD2"),
-        sunIntensity = 0.85f,
-        ambientSky = Hex("47423A"),
-        ambientEquator = Hex("332F29"),
-        ambientGround = Hex("221F1B")
-    };
+    /// <summary>
+    /// Alias of <see cref="light"/>. The dark palette and its toggle were
+    /// removed; this keeps the panels that read
+    /// <c>IsDark ? theme.dark : theme.light</c> compiling untouched.
+    /// </summary>
+    public Palette dark => light;
 
     [Header("Scene")]
     public Camera targetCamera;
     public Light sun;
-    public Renderer floorRenderer;
+    // No floorRenderer. The ground is a shadow catcher with no colour of its
+    // own, so there is nothing here to repaint.
 
     [Header("UI Elements")]
     public List<Image> cardImages = new List<Image>();
@@ -88,18 +91,8 @@ public class UIThemeController : MonoBehaviour
     public UIToolbarController toolbar;
     public UIPartsPalette palette;
 
-    [Header("Toggle Button")]
-    public Image themeIcon;
-    public Sprite sunSprite;
-    public Sprite moonSprite;
-
-    [Header("Startup")]
-    [Tooltip("Legacy baked default; the saved preference (dark unless the user switched) wins at runtime.")]
-    public bool startDark;
-
-    const string ThemePrefKey = "Neospace.DarkTheme";
-
-    public bool IsDark { get; private set; }
+    /// <summary>Always false — the dark theme was removed. Kept so callers compile.</summary>
+    public bool IsDark => false;
 
     // ------------------------------------------------------------------
     // Design tokens for world-space graphics (guides, markers, marquee).
@@ -107,23 +100,41 @@ public class UIThemeController : MonoBehaviour
     // frame without holding a reference; defaults match the light palette
     // so graphics look right even before a theme controller exists.
     // ------------------------------------------------------------------
-    public static bool IsDarkTheme { get; private set; }
-    public static Color InkColor { get; private set; } = Hex("26221E");
-    public static Color MutedColor { get; private set; } = Hex("8F8880");
-    public static Color AccentColor { get; private set; } = Hex("D96C47");
+    /// <summary>Always false — the dark theme was removed. Kept so callers compile.</summary>
+    public static bool IsDarkTheme => false;
+    public static Color InkColor { get; private set; } = Hex("242424");
+    public static Color MutedColor { get; private set; } = Hex("7D7D7D");
+    public static Color AccentColor { get; private set; } = Hex("3F3F3F");
     public static Color CardColor { get; private set; } = Hex("FFFFFF");
-    public static Color SurfaceColor { get; private set; } = Hex("F3EFE9");
+    public static Color SurfaceColor { get; private set; } = Hex("E2E2E2");
 
     /// <summary>Blocked/invalid signal, tuned per theme to sit in the warm palette.</summary>
     public static Color DangerColor { get; private set; } = Hex("BF4A40");
 
+    /// <summary>
+    /// The ONE colour that means "this is the thing you are pointing at" —
+    /// a valid placement ghost, a selected part, a module under the block
+    /// picker. Anything the scene lights up to answer "which one?" uses this
+    /// and nothing else, so the answer always looks the same.
+    ///
+    /// The scene previously answered in three different colours: green for a
+    /// valid ghost, orange for a selection, and whatever the UI accent
+    /// happened to be for the picker. Three highlights are three things to
+    /// learn for one idea.
+    ///
+    /// Red is NOT part of this and stays as it is: it does not mean "here",
+    /// it means "no", and a refusal that looked like a highlight would be the
+    /// one genuinely dangerous confusion in the set.
+    ///
+    /// The ghost and selection MATERIALS are written from this value by
+    /// ConfiguratorUIBuilder on a rebuild, so the constant is the only place
+    /// it is decided.
+    /// </summary>
+    public static Color HighlightColor { get; private set; } = Hex("2776EA");
+
     /// <summary>Raised after a theme is applied, so self-styling UI can restyle live.</summary>
     public static event System.Action ThemeChanged;
 
-    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
-    static readonly int ColorId = Shader.PropertyToID("_Color");
-
-    MaterialPropertyBlock _floorBlock;
 
     void Start()
     {
@@ -131,29 +142,19 @@ public class UIThemeController : MonoBehaviour
         // created in AfterSceneLoad, before this Start. Collect it so the
         // first Apply — and every toggle after — tints those buttons too.
         CollectRuntimeChrome();
-        // Dark is the default; a user's explicit toggle is remembered.
-        Apply(PlayerPrefs.GetInt(ThemePrefKey, 1) == 1);
+        Apply();
     }
 
-    public void Toggle()
+    public void Apply()
     {
-        Apply(!IsDark);
-        PlayerPrefs.SetInt(ThemePrefKey, IsDark ? 1 : 0);
-        PlayerPrefs.Save();
-    }
+        Palette p = light;
 
-    public void Apply(bool darkMode)
-    {
-        IsDark = darkMode;
-        Palette p = darkMode ? dark : light;
-
-        IsDarkTheme = darkMode;
         InkColor = p.ink;
         MutedColor = p.muted;
         AccentColor = p.accent;
         CardColor = p.card;
         SurfaceColor = p.surface;
-        DangerColor = darkMode ? Hex("E0685C") : Hex("BF4A40");
+        DangerColor = Hex("BF4A40");
 
         // --- UI surfaces & text ---
         foreach (Image img in cardImages)
@@ -199,40 +200,31 @@ public class UIThemeController : MonoBehaviour
             palette.RefreshHighlights();
         }
 
-        // --- Toggle icon shows the mode you would switch TO ---
-        if (themeIcon != null)
-        {
-            Sprite icon = darkMode ? sunSprite : moonSprite;
-            if (icon != null) themeIcon.sprite = icon;
-            themeIcon.color = p.muted;
-        }
-
         // --- Environment ---
         if (targetCamera != null)
         {
+            // NOT from the palette. The visible backdrop is a gradient quad on
+            // the camera (SceneBackdrop), and this clear colour is only the
+            // floor underneath it — so it has to be the gradient's own middle
+            // stop or the two disagree wherever the quad is absent. The
+            // palette used to carry a second, different value here, which is
+            // why the background changed colour on entering Play mode.
             targetCamera.clearFlags = CameraClearFlags.SolidColor;
-            targetCamera.backgroundColor = p.background;
+            targetCamera.backgroundColor = SceneBackdrop.ClearColor;
         }
 
-        if (sun != null)
-        {
-            sun.color = p.sunColor;
-            sun.intensity = p.sunIntensity;
-        }
+        // Sun and ambient come from StageLighting rather than from the
+        // palette. Both used to exist twice — authored by the editor styler
+        // and overwritten here — which is how the floor came to be baked
+        // #DAD3C7 and painted #E7E7E7, changing shade on entering Play mode
+        // with only one of the two ever seen.
+        StageLighting.ApplySun(sun);
+        StageLighting.ApplyAmbient();
 
-        RenderSettings.ambientMode = AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = p.ambientSky;
-        RenderSettings.ambientEquatorColor = p.ambientEquator;
-        RenderSettings.ambientGroundColor = p.ambientGround;
-
-        if (floorRenderer != null)
-        {
-            _floorBlock ??= new MaterialPropertyBlock();
-            floorRenderer.GetPropertyBlock(_floorBlock);
-            _floorBlock.SetColor(BaseColorId, p.floorTint);
-            _floorBlock.SetColor(ColorId, p.floorTint);
-            floorRenderer.SetPropertyBlock(_floorBlock);
-        }
+        // The floor is not tinted here any more, because the floor has no
+        // colour: it is a shadow catcher, invisible except where the key
+        // light is blocked. Repainting a surface nobody can see was a knob
+        // that would have been turned and turned with nothing happening.
 
         ThemeChanged?.Invoke();
     }
@@ -252,23 +244,24 @@ public class UIThemeController : MonoBehaviour
     {
         RegisterSurface(FindImg("Btn_Fullscreen"));
         RegisterMutedIcon(FindImg("Btn_Fullscreen/Icon"));
-        RegisterSurface(FindImg("TopBar/Btn_Settings"));
-        RegisterMutedIcon(FindImg("TopBar/Btn_Settings/Icon"));
+        // No Btn_Settings entries. The gear moved to the utility rail, where
+        // RailButtonVisual owns both its colours — registering it here would
+        // repaint over that on every Apply(). These two paths had been dead
+        // since the move, and the top bar they named is now gone entirely.
 
         RegisterCard(FindImg("GuidedToolsPanel"));
-        RegisterSurface(FindImg("GuidedToolsPanel/HintBox"));
+        // No HintBox entry: it is retired, and GuidedBootstrap destroys any
+        // left over from an older scene.
         RegisterSurface(FindImg("GuidedToolsPanel/Btn_T1_Posts"));
         RegisterSurface(FindImg("GuidedToolsPanel/Btn_T3_PanelBay"));
         RegisterInkIcon(FindImg("GuidedToolsPanel/Btn_T1_Posts/Icon"));
         RegisterInkIcon(FindImg("GuidedToolsPanel/Btn_T3_PanelBay/Icon"));
-        RegisterInkText(FindTmp("GuidedToolsPanel/Title"));
-        RegisterMutedText(FindTmp("GuidedToolsPanel/Subtitle"));
+        // No Title/Subtitle entries: the dock's shared Tools/Parts column
+        // names the page and the footer carries its description.
         RegisterInkText(FindTmp("GuidedToolsPanel/Btn_T1_Posts/Label"));
         RegisterMutedText(FindTmp("GuidedToolsPanel/Btn_T1_Posts/Caption"));
         RegisterInkText(FindTmp("GuidedToolsPanel/Btn_T3_PanelBay/Label"));
         RegisterMutedText(FindTmp("GuidedToolsPanel/Btn_T3_PanelBay/Caption"));
-        RegisterMutedText(FindTmp("GuidedToolsPanel/HintBox/Txt_GuidedHint"));
-        RegisterMutedText(FindTmp("GuidedToolsPanel/Txt_GuidedHint"));
 
         RegisterCard(FindImg("ControlSettingsPanel"));
         RegisterInkText(FindTmp("ControlSettingsPanel/Title"));

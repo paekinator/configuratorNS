@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03ab36f0a03bfd4a9dd904b6bf8229b, type: 3}
+  m_Name: 03 Geist + Geist Mono
+  m_EditorClassIdentifier: Assembly-CSharp::NeospaceTypographySet
+  displayName: "Prototype 03 \u2014 Geist + Geist Mono"
+  character: Clean, digitally native and product-led; the UI-clarity benchmark.
+  primaryRegular: {fileID: 11400000, guid: 158abaedfa8d69d4584933162845a482, type: 2}
+  primaryMedium: {fileID: 11400000, guid: 8d1f7d1ce57f6054db569a5f85d862de, type: 2}
+  primarySemiBold: {fileID: 11400000, guid: 399ab9cc7da74434194863c7090d94db, type: 2}
+  technicalRegular: {fileID: 11400000, guid: 38831f25acfe70045b3bfa424efdca48, type: 2}
+  technicalMedium: {fileID: 11400000, guid: 1918f51b2b4f41c4cab117d34da358e3, type: 2}
+  technicalSemiBold: {fileID: 11400000, guid: b92d980df22ac0344996f25389b4b9aa, type: 2}
+  displayMedium: {fileID: 0}
+  displaySemiBold: {fileID: 0}
