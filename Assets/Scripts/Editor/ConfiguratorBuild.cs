@@ -42,9 +42,17 @@ public static class ConfiguratorBuild
         bool development = Array.Exists(Environment.GetCommandLineArgs(), arg => arg == "-configuratorDevelopment");
         string location = executableName == null ? outputDirectory : Path.Combine(outputDirectory, executableName);
         string previousTemplate = PlayerSettings.WebGL.template;
+        // Release builds carry their git tag as the product version
+        // (Application.version), so a running player can always be traced
+        // back to the exact commit it came from. Restored afterwards: the
+        // setting belongs to the tag, not to the project file.
+        string version = Argument("-configuratorVersion");
+        string previousVersion = PlayerSettings.bundleVersion;
         BuildReport report;
         try
         {
+            if (!string.IsNullOrEmpty(version))
+                PlayerSettings.bundleVersion = version;
             if (target == BuildTarget.WebGL)
                 PlayerSettings.WebGL.template = WebTemplate;
             report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
@@ -59,6 +67,7 @@ public static class ConfiguratorBuild
         {
             if (target == BuildTarget.WebGL)
                 PlayerSettings.WebGL.template = previousTemplate;
+            PlayerSettings.bundleVersion = previousVersion;
         }
 
         if (report == null || report.summary.result != BuildResult.Succeeded)
@@ -71,7 +80,7 @@ public static class ConfiguratorBuild
         File.WriteAllText(Path.Combine(outputDirectory, "build-report.json"), JsonUtility.ToJson(new BuildMetadata
         {
             unityVersion = Application.unityVersion,
-            productVersion = PlayerSettings.bundleVersion,
+            productVersion = string.IsNullOrEmpty(version) ? PlayerSettings.bundleVersion : version,
             target = target.ToString(),
             entryScene = EntryScene,
             development = development,

@@ -475,9 +475,11 @@ Faster NST-style templates for beginners. **Expert Build/Select is unchanged.**
 - Every version worth keeping is an **annotated tag on `main`** (`git tag -a v1.0.0-beta.1 -m "..."`;
   `v1.0.0-beta.1` is the 22 Sep 2026 configurator beta 1.0.0). Tag first, build from the tag: any tag can be
   rebuilt into the identical player later, so builds do not need to be archived for every commit.
-- Builds are outputs, not sources: `Builds/` stays ignored. To publish a version, run
-  `Tools/Build-Configurator.ps1` on the tagged commit and attach the ZIP plus its `.sha256` to a **GitHub
-  Release** named after the tag (`gh release create v1.0.0-beta.1 Builds/<zip> Builds/<zip>.sha256`).
+- Builds are outputs, not sources: `Builds/` stays ignored. To publish a version run
+  `Tools/Release-Version.ps1 -Tag v1.2.3 -Message "..."`: it tags, exports exactly that tree, builds it with the
+  version stamped into the player, packages ZIP + `.sha256`, pushes the tag and creates the **GitHub Release**
+  (with GitHub CLI signed in; otherwise it prints the upload page). Release notes come from the tag's section
+  in `CHANGELOG.md`, so add that section first.
 - Scenes, prefabs and assets are Unity YAML: `.gitattributes` routes them through Unity's SmartMerge. Each
   clone needs the driver once:
   `git config merge.unityyamlmerge.driver "'C:/Program Files/Unity/Hub/Editor/6000.5.0f1/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p %O %B %A %A"`.
