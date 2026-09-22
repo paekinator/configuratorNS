@@ -1,0 +1,352 @@
+Finish diagnostics — 2026-09-22 17:53:29
+Model dimensions (mm, half extents):
+  Veneer H1    L=132.914 W=42.259 T=1.000
+  Veneer H2    L=220.914 W=42.259 T=1.000
+  Veneer H3    L=308.914 W=42.259 T=1.000
+  Veneer H4    L=396.914 W=42.259 T=1.000
+  Veneer H5    L=484.914 W=42.259 T=1.000
+  Veneer H6    L=572.914 W=42.259 T=1.000
+  Veneer H7    L=660.914 W=42.259 T=1.000
+  Veneer H8    L=748.914 W=42.259 T=1.000
+  Veneer H9    L=836.914 W=42.259 T=1.000
+  Veneer H10   L=924.914 W=42.259 T=1.000
+  Veneer H11   L=1012.914 W=42.259 T=1.000
+  Veneer H12   L=1100.914 W=42.259 T=1.000
+  Veneer H13   L=1188.914 W=42.259 T=1.000
+  Veneer H14   L=1276.914 W=42.259 T=1.000
+  Veneer H15   L=1364.914 W=42.259 T=1.000
+  Cap Side     L=42.301 W=42.300 T=1.000
+  Cap End      L=42.301 W=42.300 T=1.000
+
+==================================================================
+=== Scenario: user-code (restored configuration code) ===
+  code: NS1-TlNDAQEtzTsKwzAMgGHLdktcQumDIjCeAs2QkxpPHnsMk1N0zBSKpx6hR6glefr4JZDU_aILrKbAmf1dxTI1sc-xz5Hnz_dx2dyNyJ5IRjIZ7iDbINvQt4G3cxmX18EyM5GMZDL7o_dsI1TY3EBkP1QuVblUGStEGIkPWK6Jq06tvnpzJyL7xtpeayJ7HVFuotxEucml1B-6qSAi
+  model: 19 beams, 16 panels, finish flag False
+    beam code 2 at (88,217,88) mm
+    beam code 2 at (88,217,1144) mm
+    beam code 2 at (88,217,2200) mm
+    beam code 2 at (1496,217,88) mm
+    beam code 2 at (1496,217,1144) mm
+    beam code 2 at (1496,217,2200) mm
+    beam code 37 at (420,21,616) mm
+    beam code 37 at (420,21,1672) mm
+    beam code 37 at (420,197,616) mm
+    beam code 37 at (420,197,1672) mm
+    beam code 37 at (1828,21,616) mm
+    beam code 37 at (1828,21,1672) mm
+    beam code 37 at (1828,197,616) mm
+    beam code 37 at (1828,197,1672) mm
+    beam code 38 at (792,21,332) mm
+    beam code 38 at (792,21,2444) mm
+    beam code 38 at (792,197,332) mm
+    beam code 38 at (792,197,1387) mm
+    beam code 38 at (792,197,2444) mm
+    panel axis PlusX minus-side True at (68,109,616) mm
+    panel axis PlusX minus-side True at (68,109,1672) mm
+    panel axis PlusX minus-side False at (109,109,616) mm
+    panel axis PlusX minus-side False at (109,109,1672) mm
+    panel axis PlusZ minus-side True at (792,109,68) mm
+    panel axis PlusZ minus-side False at (792,109,108) mm
+    panel axis PlusZ minus-side True at (792,109,2180) mm
+    panel axis PlusZ minus-side False at (792,109,2221) mm
+    panel axis PlusY minus-side True at (792,176,616) mm
+    panel axis PlusY minus-side True at (792,176,1672) mm
+    panel axis PlusY minus-side False at (792,217,616) mm
+    panel axis PlusY minus-side False at (792,217,1672) mm
+    panel axis PlusX minus-side True at (1476,109,616) mm
+    panel axis PlusX minus-side True at (1476,109,1672) mm
+    panel axis PlusX minus-side False at (1517,109,616) mm
+    panel axis PlusX minus-side False at (1517,109,1672) mm
+  restore: succeeded
+Frames: 19, panels: 16, planned parts: 78, installed roots: 78
+  planned: Cap End=6 Cap Side=22 Foot=6 Veneer H1=12 Veneer H11=20 Veneer H15=12
+  installed: Cap End=6 Cap Side=22 Foot=6 Veneer H1=12 Veneer H11=20 Veneer H15=12
+Panels:
+  centre (792.0,108.5,108.5) normal (0.00,0.00,1.00) halfU 683.36 halfV 67.36 halfN 0.500
+  centre (792.0,217.0,1672.0) normal (0.00,1.00,0.00) halfU 683.36 halfV 507.36 halfN 0.500
+  centre (67.5,108.5,1672.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (1516.5,108.5,616.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (792.0,108.5,2220.5) normal (0.00,0.00,1.00) halfU 683.36 halfV 67.36 halfN 0.500
+  centre (108.5,108.5,616.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (108.5,108.5,1672.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (792.0,108.5,67.5) normal (0.00,0.00,1.00) halfU 683.36 halfV 67.36 halfN 0.500
+  centre (792.0,217.0,616.0) normal (0.00,1.00,0.00) halfU 683.36 halfV 507.36 halfN 0.500
+  centre (1475.5,108.5,1672.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (1475.5,108.5,616.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (792.0,176.0,1672.0) normal (0.00,1.00,0.00) halfU 683.36 halfV 507.36 halfN 0.500
+  centre (792.0,176.0,616.0) normal (0.00,1.00,0.00) halfU 683.36 halfV 507.36 halfN 0.500
+  centre (1516.5,108.5,1672.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (67.5,108.5,616.0) normal (1.00,0.00,0.00) halfU 507.36 halfV 67.36 halfN 0.500
+  centre (792.0,108.5,2179.5) normal (0.00,0.00,1.00) halfU 683.36 halfV 67.36 halfN 0.500
+  panel object 'Panel H15xH1' slot WALL_88,20,88|88,197,88|1496,20,88|1496,197,88 side 1 at (792.0,108.5,108.5) scale (1366.7 x 134.7 x 1.00) mm
+  panel object 'Panel H15xH11' slot FLOOR_88,197,1144|88,197,2200|1496,197,1144|1496,197,2200 side 1 at (792.0,217.0,1672.0) scale (1366.7 x 1014.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_88,20,1144|88,20,2200|88,197,1144|88,197,2200 side -1 at (67.5,108.5,1672.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_1496,20,88|1496,20,1144|1496,197,88|1496,197,1144 side 1 at (1516.5,108.5,616.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H15xH1' slot WALL_88,20,2200|88,197,2200|1496,20,2200|1496,197,2200 side 1 at (792.0,108.5,2220.5) scale (1366.7 x 134.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_88,20,88|88,20,1144|88,197,88|88,197,1144 side 1 at (108.5,108.5,616.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_88,20,1144|88,20,2200|88,197,1144|88,197,2200 side 1 at (108.5,108.5,1672.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H15xH1' slot WALL_88,20,88|88,197,88|1496,20,88|1496,197,88 side -1 at (792.0,108.5,67.5) scale (1366.7 x 134.7 x 1.00) mm
+  panel object 'Panel H15xH11' slot FLOOR_88,197,88|88,197,1144|1496,197,88|1496,197,1144 side 1 at (792.0,217.0,616.0) scale (1366.7 x 1014.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_1496,20,1144|1496,20,2200|1496,197,1144|1496,197,2200 side -1 at (1475.5,108.5,1672.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_1496,20,88|1496,20,1144|1496,197,88|1496,197,1144 side -1 at (1475.5,108.5,616.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H15xH11' slot FLOOR_88,197,1144|88,197,2200|1496,197,1144|1496,197,2200 side -1 at (792.0,176.0,1672.0) scale (1366.7 x 1014.7 x 1.00) mm
+  panel object 'Panel H15xH11' slot FLOOR_88,197,88|88,197,1144|1496,197,88|1496,197,1144 side -1 at (792.0,176.0,616.0) scale (1366.7 x 1014.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_1496,20,1144|1496,20,2200|1496,197,1144|1496,197,2200 side 1 at (1516.5,108.5,1672.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H11xH1' slot WALL_88,20,88|88,20,1144|88,197,88|88,197,1144 side -1 at (67.5,108.5,616.0) scale (1014.7 x 134.7 x 1.00) mm
+  panel object 'Panel H15xH1' slot WALL_88,20,2200|88,197,2200|1496,20,2200|1496,197,2200 side -1 at (792.0,108.5,2179.5) scale (1366.7 x 134.7 x 1.00) mm
+H11#0 centre (88.5,197.0,616.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (88.5,197.0,1124.0) B (88.5,197.0,108.0)
+  face 0 (0.00,1.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 2 (1.00,0.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+V3#1 centre (88.0,108.5,1144.0) axis (0.00,1.00,0.00) body ±108.5 mm ends A (88.0,20.5,1144.0) B (88.0,196.5,1144.0)
+  ends: top Cap End=True, bottom Cap End=False, Foot=True
+  face 0 (1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5]
+    gap [66.5,108.5] (42.0 mm): joint/connection
+  face 1 (-1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 2 (0.00,0.00,-1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+V3#2 centre (88.0,108.5,2200.0) axis (0.00,1.00,0.00) body ±108.5 mm ends A (88.0,20.5,2200.0) B (88.0,196.5,2200.0)
+  ends: top Cap End=True, bottom Cap End=False, Foot=True
+  face 0 (1.00,0.00,0.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 1 (-1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 2 (0.00,0.00,-1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,1.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+H15#3 centre (792.0,21.0,2200.5) axis (1.00,0.00,0.00) body ±683.5 mm ends A (108.0,21.0,2200.5) B (1476.0,21.0,2200.5)
+  face 0 (0.00,1.00,0.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,1.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,-1.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): joint/connection
+    gap [682.5,683.5] (1.0 mm): joint/connection
+H11#4 centre (1496.5,197.0,616.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (1496.5,197.0,1124.0) B (1496.5,197.0,108.0)
+  face 0 (0.00,1.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 2 (1.00,0.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+H15#5 centre (792.0,21.0,88.5) axis (1.00,0.00,0.00) body ±683.5 mm ends A (108.0,21.0,88.5) B (1476.0,21.0,88.5)
+  face 0 (0.00,1.00,0.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,1.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): joint/connection
+    gap [682.5,683.5] (1.0 mm): joint/connection
+  face 3 (0.00,0.00,-1.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+H15#6 centre (792.0,197.0,2200.5) axis (1.00,0.00,0.00) body ±683.5 mm ends A (108.0,197.0,2200.5) B (1476.0,197.0,2200.5)
+  face 0 (0.00,1.00,0.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,1.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,-1.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+H15#7 centre (792.0,197.0,88.5) axis (1.00,0.00,0.00) body ±683.5 mm ends A (108.0,197.0,88.5) B (1476.0,197.0,88.5)
+  face 0 (0.00,1.00,0.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,1.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,-1.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+H11#8 centre (88.5,21.0,616.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (88.5,21.0,1124.0) B (88.5,21.0,108.0)
+  face 0 (0.00,1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+  face 2 (1.00,0.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): joint/connection
+  face 3 (-1.00,0.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+V3#9 centre (88.0,108.5,88.0) axis (0.00,1.00,0.00) body ±108.5 mm ends A (88.0,20.5,88.0) B (88.0,196.5,88.0)
+  ends: top Cap End=True, bottom Cap End=False, Foot=True
+  face 0 (1.00,0.00,0.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 1 (-1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 2 (0.00,0.00,-1.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 3 (0.00,0.00,1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+H11#10 centre (1496.5,197.0,1672.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (1496.5,197.0,2180.0) B (1496.5,197.0,1164.0)
+  face 0 (0.00,1.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 2 (1.00,0.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+V3#11 centre (1496.0,108.5,2200.0) axis (0.00,1.00,0.00) body ±108.5 mm ends A (1496.0,20.5,2200.0) B (1496.0,196.5,2200.0)
+  ends: top Cap End=True, bottom Cap End=False, Foot=True
+  face 0 (1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 1 (-1.00,0.00,0.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,-1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,1.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+H11#12 centre (1496.5,21.0,1672.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (1496.5,21.0,2180.0) B (1496.5,21.0,1164.0)
+  face 0 (0.00,1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): joint/connection
+  face 2 (1.00,0.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): joint/connection
+    gap [506.5,549.5] (43.1 mm): joint/connection
+H11#13 centre (88.5,21.0,1672.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (88.5,21.0,2180.0) B (88.5,21.0,1164.0)
+  face 0 (0.00,1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): joint/connection
+  face 2 (1.00,0.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): joint/connection
+    gap [506.5,549.5] (43.1 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): joint/connection
+H11#14 centre (88.5,197.0,1672.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (88.5,197.0,2180.0) B (88.5,197.0,1164.0)
+  face 0 (0.00,1.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 2 (1.00,0.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): Veneer H11[-506.5,506.5] Veneer H11[549.5,1562.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,549.5] (43.1 mm): joint/connection
+V3#15 centre (1496.0,108.5,1144.0) axis (0.00,1.00,0.00) body ±108.5 mm ends A (1496.0,20.5,1144.0) B (1496.0,196.5,1144.0)
+  ends: top Cap End=True, bottom Cap End=False, Foot=True
+  face 0 (1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 1 (-1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5]
+    gap [66.5,108.5] (42.0 mm): joint/connection
+  face 2 (0.00,0.00,-1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+H15#16 centre (792.0,197.0,1143.5) axis (1.00,0.00,0.00) body ±683.5 mm ends A (108.0,197.0,1143.5) B (1476.0,197.0,1143.5)
+  face 0 (0.00,1.00,0.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H15[-682.5,682.5]
+    gap [-683.5,-682.5] (1.0 mm): EXPOSED GAP
+    gap [682.5,683.5] (1.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,1.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+  face 3 (0.00,0.00,-1.00): (none)
+    gap [-683.5,683.5] (1367.0 mm): EXPOSED GAP
+V3#17 centre (1496.0,108.5,88.0) axis (0.00,1.00,0.00) body ±108.5 mm ends A (1496.0,20.5,88.0) B (1496.0,196.5,88.0)
+  ends: top Cap End=True, bottom Cap End=False, Foot=True
+  face 0 (1.00,0.00,0.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 1 (-1.00,0.00,0.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+  face 2 (0.00,0.00,-1.00): Cap Side[-109.2,-66.9] Veneer H1[-66.5,66.5] Cap Side[66.9,109.2]
+  face 3 (0.00,0.00,1.00): (none)
+    gap [-108.5,108.5] (217.0 mm): EXPOSED GAP
+H11#18 centre (1496.5,21.0,616.0) axis (0.00,0.00,-1.00) body ±507.5 mm ends A (1496.5,21.0,1124.0) B (1496.5,21.0,108.0)
+  face 0 (0.00,1.00,0.00): (none)
+    gap [-507.5,507.5] (1015.0 mm): EXPOSED GAP
+  face 1 (0.00,-1.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+  face 2 (1.00,0.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): EXPOSED GAP
+  face 3 (-1.00,0.00,0.00): Veneer H11[-1562.5,-549.5] Veneer H11[-506.5,506.5]
+    gap [-507.5,-506.5] (1.0 mm): EXPOSED GAP
+    gap [506.5,507.5] (1.0 mm): joint/connection
+  PENETRATION Cap End at (88.0,217.7,1144.0) into H11#0: 0.300 mm
+  PENETRATION Cap End at (88.0,217.7,1144.0) into H11#14: 0.300 mm
+  PENETRATION Cap End at (88.0,217.7,1144.0) into H15#16: 0.300 mm
+  PENETRATION Cap Side at (109.2,20.5,1144.0) into H11#8: 0.300 mm
+  PENETRATION Cap Side at (109.2,20.5,1144.0) into H11#13: 0.300 mm
+  PENETRATION Cap End at (88.0,217.7,2200.0) into H15#6: 0.300 mm
+  PENETRATION Cap End at (88.0,217.7,2200.0) into H11#14: 0.300 mm
+  PENETRATION Cap Side at (88.0,20.5,2221.2) into H15#3: 0.300 mm
+  PENETRATION Cap Side at (88.0,196.5,2221.2) into H15#6: 0.300 mm
+  PENETRATION Veneer H15 at (792.0,21.0,2179.3) into panel#15: 0.800 mm
+  PENETRATION Veneer H15 at (792.0,21.0,67.3) into panel#7: 0.800 mm
+  PENETRATION Veneer H11 at (67.3,21.0,616.0) into panel#14: 0.800 mm
+  PENETRATION Cap End at (88.0,217.7,88.0) into H11#0: 0.300 mm
+  PENETRATION Cap End at (88.0,217.7,88.0) into H15#7: 0.300 mm
+  PENETRATION Cap End at (1496.0,217.7,2200.0) into H15#6: 0.300 mm
+  PENETRATION Cap End at (1496.0,217.7,2200.0) into H11#10: 0.300 mm
+  PENETRATION Cap Side at (1517.2,20.5,2200.0) into H11#12: 0.300 mm
+  PENETRATION Cap Side at (1517.2,196.5,2200.0) into H11#10: 0.300 mm
+  PENETRATION Cap Side at (1496.0,20.5,2221.2) into H15#3: 0.300 mm
+  PENETRATION Cap Side at (1496.0,196.5,2221.2) into H15#6: 0.300 mm
+  PENETRATION Veneer H11 at (1475.3,21.0,1672.0) into panel#9: 0.800 mm
+  PENETRATION Veneer H11 at (67.3,21.0,1672.0) into panel#2: 0.800 mm
+  PENETRATION Cap End at (1496.0,217.7,1144.0) into H11#4: 0.300 mm
+  PENETRATION Cap End at (1496.0,217.7,1144.0) into H11#10: 0.300 mm
+  PENETRATION Cap End at (1496.0,217.7,1144.0) into H15#16: 0.300 mm
+  PENETRATION Cap Side at (1517.2,20.5,1144.0) into H11#12: 0.300 mm
+  PENETRATION Cap Side at (1517.2,20.5,1144.0) into H11#18: 0.300 mm
+  PENETRATION Cap Side at (1517.2,196.5,1144.0) into H11#4: 0.300 mm
+  PENETRATION Cap Side at (1517.2,196.5,1144.0) into H11#10: 0.300 mm
+  PENETRATION Veneer H15 at (792.0,175.8,1143.5) into panel#12: 0.800 mm
+  PENETRATION Cap End at (1496.0,217.7,88.0) into H11#4: 0.300 mm
+  PENETRATION Cap End at (1496.0,217.7,88.0) into H15#7: 0.300 mm
+  PENETRATION Cap Side at (1517.2,20.5,88.0) into H11#18: 0.300 mm
+  PENETRATION Cap Side at (1517.2,196.5,88.0) into H11#4: 0.300 mm
+  PENETRATION Veneer H11 at (1475.3,21.0,616.0) into panel#10: 0.800 mm
+Penetrations: 35 (lip seams under 0.6 mm against panels: 52)
+Exposed gaps over 5 mm: 37
+  render: user-code-iso.png
+  render: user-code-iso-under.png
+  render: user-code-front.png
+  render: user-code-top.png
+  render: user-code-side-south.png
+  render: user-code-side-north.png
+  render: user-code-side-east.png
+  render: user-code-side-west.png
+  render: user-code-low-beam-0.png
+  render: user-code-low-beam-1.png
+  render: user-code-low-beam-2.png
+  render: user-code-low-beam-3.png
+  render: user-code-low-beam-4.png
+  render: user-code-low-beam-5.png
+  render: user-code-corner-top.png
+  render: user-code-corner-under.png
+  render: user-code-seam-front.png
+  render: user-code-seam-back.png
+
+Errors/exceptions: 0

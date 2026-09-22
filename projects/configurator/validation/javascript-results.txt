@@ -1,0 +1,20 @@
+✔ local saves are acknowledged only after the browser filesystem callback (6.794ms)
+✔ both asynchronous quota errors and synchronous filesystem exceptions reach the save UI (2.351ms)
+✔ quote download preserves Unicode plain text and releases its temporary object URL (2.5641ms)
+✔ a blocked download also removes the anchor and schedules Blob cleanup (1.317ms)
+✔ a successful load opens the workspace, clears the watchdog and focuses the canvas (5.6281ms)
+✔ a missing loader offers reload with inert error text (1.0351ms)
+✔ a rejected runtime startup reports the error and does not open the canvas (9.093ms)
+✔ a long download can continue successfully after the reload option appears (1.2575ms)
+✔ offline and reconnect notices do not destroy an already running workspace (9.1517ms)
+✔ context loss after startup explains unsaved-change risk and exposes reload (2.0356ms)
+✔ a late successful startup cannot hide a fatal error (12.3615ms)
+✔ unsupported browsers and file URLs get an explanation without downloading Unity (6.3342ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 289.7861

@@ -9,6 +9,8 @@ public static class ConfigurationCodeSelfTestMenu
     public static void Run()
     {
         int total = ConfigurationCodeSelfTest.RunAll(out List<string> failures);
+        total += PiecePersistenceSelfTest.RunAll(out List<string> persistenceFailures);
+        failures.AddRange(persistenceFailures);
         if (failures.Count == 0)
         {
             Debug.Log($"ConfigCode selftest: {total} checks, 0 failures");

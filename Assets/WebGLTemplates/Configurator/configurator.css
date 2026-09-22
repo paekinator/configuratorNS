@@ -1,0 +1,26 @@
+:root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; color: #282d29; background: #ece8e0; }
+* { box-sizing: border-box; }
+html, body, #configurator { width: 100%; height: 100%; margin: 0; }
+body { overflow: hidden; }
+#unity-canvas { display: block; width: 100%; height: 100%; background: #ece8e0; outline: none; touch-action: none; }
+#loading-panel { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: #ece8e0; overflow-y: auto; }
+.loading-card { width: min(100%, 460px); padding: 36px; border: 1px solid #d9d4cb; border-radius: 16px; background: #faf9f5; box-shadow: 0 16px 70px #282d290b; }
+.wordmark { margin: 0 0 38px; font-size: 13px; letter-spacing: .2em; font-weight: 700; }
+h1 { margin: 0 0 14px; font-size: clamp(24px, 4vw, 30px); line-height: 1.2; font-weight: 500; }
+p { line-height: 1.5; }
+#loading-status { min-height: 24px; font-size: 15px; }
+#loading-hint { margin: 18px 0 0; font-size: 13px; color: #646960; }
+progress { display: block; width: 100%; height: 7px; margin-top: 24px; border: 0; border-radius: 5px; accent-color: #48644c; }
+progress::-webkit-progress-bar { background: #e5e7df; border-radius: 5px; }
+progress::-webkit-progress-value { background: #48644c; border-radius: 5px; }
+progress::-moz-progress-bar { background: #48644c; border-radius: 5px; }
+button { margin-top: 22px; border: 0; border-radius: 6px; padding: 12px 18px; background: #344d38; color: white; font: inherit; cursor: pointer; }
+button:hover { background: #263c2a; }
+button:focus-visible, summary:focus-visible { outline: 3px solid #6c9364; outline-offset: 3px; }
+details { margin-top: 22px; color: #646960; font-size: 12px; }
+summary { cursor: pointer; }
+pre { max-height: 140px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+#connection-notice { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 24px); margin: 0; padding: 10px 16px; border-radius: 6px; background: #fff8e1; color: #5d4a1a; font-size: 13px; box-shadow: 0 2px 12px #0001; }
+.no-script { position: fixed; inset: auto 24px 24px; text-align: center; }
+[hidden] { display: none !important; }
+@media (max-width: 480px) { .loading-card { padding: 26px; } }

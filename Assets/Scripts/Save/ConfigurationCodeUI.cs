@@ -192,7 +192,7 @@ public class ConfigurationCodeUI : MonoBehaviour
     /// pre-selected, so Ctrl+C (Cmd+C) works right away too. This replaces
     /// silent clipboard writes, which browsers block in WebGL builds.
     /// </summary>
-    public void ShowShareDialog(string title, string code)
+    public void ShowShareDialog(string title, string code, string hint = null)
     {
         if (_shareDialog == null)
             BuildShareDialog();
@@ -203,7 +203,7 @@ public class ConfigurationCodeUI : MonoBehaviour
 
         _shareTitle.text = title;
         _shareInput.text = code;
-        _shareFeedback.text = ShareHintText;
+        _shareFeedback.text = hint ?? ShareHintText;
         _shareFeedback.color = Muted;
 
         _backdrop.SetActive(true);
@@ -218,9 +218,23 @@ public class ConfigurationCodeUI : MonoBehaviour
 
     void OnShareCopyClicked()
     {
-        NativeClipboard.Copy(_shareInput.text);
-        _shareFeedback.text = "Copied · paste it anywhere with Ctrl+V (Cmd+V).";
-        _shareFeedback.color = Accent;
+        try
+        {
+            NativeClipboard.Copy(_shareInput.text);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // The browser clipboard request is asynchronous and may be
+            // refused. This bridge has no success callback to acknowledge.
+            _shareFeedback.text = "Copy requested. Paste to check it, or select the text and press Ctrl+C (Cmd+C).";
+#else
+            _shareFeedback.text = "Copied · paste it anywhere with Ctrl+V (Cmd+V).";
+#endif
+            _shareFeedback.color = Accent;
+        }
+        catch (System.Exception)
+        {
+            _shareFeedback.text = "Could not copy automatically. Select the text and press Ctrl+C (Cmd+C).";
+            _shareFeedback.color = Danger;
+        }
 
         // Re-select so manual Ctrl+C stays available as a fallback.
         _shareInput.Select();
@@ -355,7 +369,7 @@ public class ConfigurationCodeUI : MonoBehaviour
         {
             SelectionStatus.Set(
                 report.Summary + warningNote +
-                " Ctrl+Z (Cmd+Z) restores the previous build.", 8f);
+                (report.Succeeded ? " Ctrl+Z (Cmd+Z) restores the previous build." : string.Empty), 8f);
         });
         SelectionStatus.Set("Loading configuration…", 3f);
     }

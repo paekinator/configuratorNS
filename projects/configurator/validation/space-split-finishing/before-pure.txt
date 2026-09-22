@@ -1,0 +1,29 @@
+60 checks; 28 failures
+Space finish junction: V9 at 0 degrees: a real H peg on the 20 mm socket face must interrupt the inward veneer at its hole
+Space finish junction: V9 at 0 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V9 at 0 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V9 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V9 at 0 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V9 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V9 at 0 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space finish junction: V9 at 37 degrees: a real H peg on the 20 mm socket face must interrupt the inward veneer at its hole
+Space finish junction: V9 at 37 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V9 at 37 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V9 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V9 at 37 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V9 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V9 at 37 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 0 degrees: an installed H joint must not receive a Cap Side over its occupied socket
+Space finish junction: V25 at 0 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V25 at 0 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V25 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V25 at 0 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V25 at 0 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 37 degrees: an installed H joint must not receive a Cap Side over its occupied socket
+Space finish junction: V25 at 37 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V25 at 37 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V25 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V25 at 37 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V25 at 37 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket

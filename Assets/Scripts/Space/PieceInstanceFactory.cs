@@ -93,11 +93,15 @@ public class PieceInstanceFactory : MonoBehaviour
         restorer.Restore(check.Model, report =>
         {
             _building = false;
-            GameObject master = HarvestMaster(key);
+            // A rejected transactional restore leaves the previous scene intact.
+            // Never freeze that retained geometry as if it belonged to this piece.
+            GameObject master = report.Succeeded ? HarvestMaster(key) : null;
             if (master == null)
-                SelectionStatus.Set("This piece could not be prepared for placing.", 5f);
-            onReady?.Invoke(master);
-            ProcessQueue();
+                SelectionStatus.Set(report.Succeeded
+                    ? "This piece could not be prepared for placing."
+                    : "This piece could not be prepared for placing: " + report.Error, 6f);
+            try { onReady?.Invoke(master); }
+            finally { ProcessQueue(); }
         });
     }
 

@@ -35,8 +35,9 @@ public static class ConfigurationCapture
 
             if (!PartRegistry.TryGetCode(partId, out int code))
             {
-                Debug.LogWarning($"[ConfigCode] Part '{partId}' has no registry id · skipped from capture.");
-                continue;
+                throw new System.InvalidOperationException(
+                    $"Part '{partId}' is missing from the save catalogue. The piece was not saved; " +
+                    "update the part registry before saving this build.");
             }
 
             var record = new BeamRecord
@@ -80,18 +81,15 @@ public static class ConfigurationCapture
         return model;
     }
 
-    /// <summary>Finish (veneer) state today is a single toggle: are any strips shown?</summary>
+    /// <summary>
+    /// Finish state is the FinishController toggle (the generative veneer/cap
+    /// dressing). The old pre-baked strip system it replaced never populated
+    /// its strip lists, so reading those always said "off" and saved codes
+    /// silently dropped the finish.
+    /// </summary>
     static bool AnyFinishVisible()
     {
-        foreach (SelectableBeam sb in Object.FindObjectsByType<SelectableBeam>(FindObjectsSortMode.None))
-        {
-            if (sb == null)
-                continue;
-            foreach (GameObject strip in sb.veneerStrips)
-                if (strip != null && strip.activeSelf)
-                    return true;
-        }
-        return false;
+        return FinishController.Instance != null && FinishController.Instance.IsOn;
     }
 
     static int ToMm(float worldUnits) =>

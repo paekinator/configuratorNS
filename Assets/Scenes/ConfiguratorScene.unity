@@ -4361,7 +4361,11 @@ MonoBehaviour:
     price: 105
   - partId: H23
     price: 120
-  panelPrice: 0
+  panelPrice: 25
+  veneerPrice: 5
+  capSidePrice: 2
+  capEndPrice: 2
+  footPrice: 5
   refreshInterval: 0.25
 --- !u!114 &686929282
 MonoBehaviour:

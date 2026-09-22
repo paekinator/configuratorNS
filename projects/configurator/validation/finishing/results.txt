@@ -1,0 +1,8 @@
+Finish runtime: 28 checks, 0 failures.
+01-finish-off.png: rendered actual FBX fixture at 1024 × 768.
+02-finish-on-no-panel.png: rendered actual FBX fixture at 1024 × 768.
+No panel: 14 finish roots, 14 mesh renderers, 4 H7 veneers.
+03-finish-on-thin-shelf.png: rendered actual FBX fixture at 1024 × 768.
+Thin shelf: 16 finish roots, 2 H7 veneers, 0 rendered overlaps.
+04-after-panel-delete.png: rendered actual FBX fixture at 1024 × 768.
+Geometry intersections use actual axis-aligned FBX renderer bounds with a 0.005 mm overlap threshold. Rotation cases verify regeneration only.

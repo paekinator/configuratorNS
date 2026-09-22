@@ -1,16 +1,18 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// Live build summary: counts the placed parts in the scene and shows a running
-/// price in AUD. Every beam is priced from the official component price list
-/// (editable in the Inspector); twist beams use the price of the matching H
-/// size. Panels are included in the part count but are free for now.
-/// The scene is rescanned on a small interval, which keeps the readout correct
-/// no matter how parts are added or removed (build tool, delete key, undo...).
+/// estimated price in AUD from the local, Inspector-editable price list.
+/// Includes frames, panels and the finish parts actually installed. Twist
+/// beams use the price of the matching H size. Unpriced parts are
+/// disclosed instead of being presented as free. Changes are refreshed after
+/// deferred destruction completes, including undo/clear to an empty build.
 /// </summary>
-public class UIBuildStats : MonoBehaviour
+public class UIBuildStats : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [System.Serializable]
     public class PartPrice
@@ -57,8 +59,14 @@ public class UIBuildStats : MonoBehaviour
         new PartPrice("H23", 120f),
     };
 
-    [Tooltip("Panels are counted as parts but not priced (for now).")]
-    public float panelPrice = 0f;
+    [Header("Temporary unit estimates (AUD)")]
+    [Tooltip("Default for each panel, any size. Add a Panel H3xH1 entry above to override a size. Negative means unavailable; zero is explicitly free.")]
+    public float panelPrice = 25f;
+    [Tooltip("Default for each installed veneer, any size. Add e.g. Veneer H7 above to override a size.")]
+    public float veneerPrice = 5f;
+    public float capSidePrice = 2f;
+    public float capEndPrice = 2f;
+    public float footPrice = 5f;
 
     [Header("Refresh")]
     [Tooltip("Seconds between scene rescans.")]
@@ -66,77 +74,113 @@ public class UIBuildStats : MonoBehaviour
 
     public int PartCount { get; private set; }
     public float TotalPrice { get; private set; }
+    public int UnpricedPartCount { get; private set; }
+    public bool HasIncompletePricing => UnpricedPartCount > 0;
+    public BuildPartSummary Summary { get; private set; } = new BuildPartSummary(new BuildPartSummary.Line[0]);
+    public string PriceNote => HasIncompletePricing
+        ? $"AUD placeholder estimate · {UnpricedPartCount} unpriced parts · Click for parts & prices"
+        : "AUD placeholder estimate · Includes panels and installed finish · Click for parts & prices";
 
     Dictionary<string, float> _priceById;
     int _seenStructureVersion;
     int _seenPanelVersion;
+    int _seenFinishVersion;
+    float _nextRefresh;
+    int _refreshAtFrame = -1;
+    bool _needsRefresh = true;
+    bool _hovered;
+
+    void OnEnable()
+    {
+        BuildHistory.Changed += OnBuildChanged;
+        _needsRefresh = true;
+    }
+
+    void OnDisable()
+    {
+        BuildHistory.Changed -= OnBuildChanged;
+        _hovered = false;
+        CursorTooltip.Hide(this);
+    }
+
+    void OnBuildChanged()
+    {
+        _needsRefresh = true;
+        _refreshAtFrame = Time.frameCount + 1;
+    }
 
     void Start()
     {
-        Refresh();
+        // Existing baked scenes use a decorative pill. Enable pointer access
+        // to the itemized list without requiring a UI rebuild.
+        var background = GetComponent<Graphic>();
+        if (background != null)
+            background.raycastTarget = true;
+        if (priceText != null)
+        {
+            priceText.enableAutoSizing = true;
+            priceText.fontSizeMin = 10f;
+            priceText.fontSizeMax = priceText.fontSize;
+        }
+        RefreshNow();
     }
 
     void Update()
     {
-        // Count and price depend only on WHICH parts exist — and every beam
-        // spawn/destroy bumps the structure version, every panel the panel
-        // version. Idle frames cost two compares instead of a scene rescan
-        // every refresh interval.
-        if (_seenStructureVersion == AttachmentPoint.StructureVersion &&
-            _seenPanelVersion == PanelInstance.Version)
+        // SpaceModeController owns its refresh cadence. Keep this component
+        // enabled there so the pill remains clickable and hoverable.
+        if (SpaceModeController.Active) return;
+        // Change notifications cover restores even if their parts have no
+        // active attachment points. The versions also catch direct spawn or
+        // removal. Never read an intermediate multi-frame restore.
+        if ((BuildHistory.Instance != null && BuildHistory.Instance.IsRestoring) ||
+            Time.frameCount < _refreshAtFrame)
             return;
-        _seenStructureVersion = AttachmentPoint.StructureVersion;
-        _seenPanelVersion = PanelInstance.Version;
-        Refresh();
+        if (!_needsRefresh && _seenStructureVersion == AttachmentPoint.StructureVersion &&
+            _seenPanelVersion == PanelInstance.Version && _seenFinishVersion == FinishController.PartsVersion &&
+            Time.unscaledTime < _nextRefresh)
+            return;
+        RefreshNow();
     }
 
-    void Refresh()
+    /// <summary>Read the current stable scene, also before saving its metadata.</summary>
+    public void RefreshNow()
     {
+        if (BuildHistory.Instance != null && BuildHistory.Instance.IsRestoring) return;
+        // Saving/quoting may happen before FinishController.Update this frame.
+        // Synchronize the installed dressing before taking a single snapshot.
+        if (FinishController.Instance != null) FinishController.Instance.RefreshNow();
         RebuildPriceLookup();
-
-        int count = 0;
-        float total = 0f;
-
-        foreach (SelectableBeam beam in
-                 Object.FindObjectsByType<SelectableBeam>(FindObjectsSortMode.None))
-        {
-            Transform root = beam.transform.root;
-            string rootName = root.name;
-
-            // Skip the placement ghost and anything that isn't a placed beam.
-            if (rootName.Contains("_GhostInstance") || !BeamPartUtility.IsBeam(rootName))
-                continue;
-
-            count++;
-            total += PriceForPart(ParsePartId(rootName));
-        }
-
-        foreach (PanelInstance panel in
-                 Object.FindObjectsByType<PanelInstance>(FindObjectsSortMode.None))
-        {
-            count++;
-            total += panelPrice;
-        }
-
-        PartCount = count;
-        TotalPrice = total;
+        _seenStructureVersion = AttachmentPoint.StructureVersion;
+        _seenPanelVersion = PanelInstance.Version;
+        _seenFinishVersion = FinishController.PartsVersion;
+        _nextRefresh = Time.unscaledTime + Mathf.Max(0.05f, refreshInterval);
+        _needsRefresh = false;
+        _refreshAtFrame = -1;
+        Summary = BuildPartSummaryCollector.Capture(this);
+        PartCount = Summary.PartCount;
+        TotalPrice = (float)Summary.TotalPrice;
+        UnpricedPartCount = Summary.UnpricedPartCount;
 
         if (partCountText != null)
-            partCountText.text = count == 1 ? "1 part" : $"{count} parts";
+            partCountText.text = PartCount == 1 ? "1 part" : $"{PartCount} parts";
 
         if (priceText != null)
-            priceText.text = "$" + total.ToString("N0");
+            priceText.text = "Est. $" + Summary.TotalPrice.ToString("N0") + (HasIncompletePricing ? "*" : "");
+        if (_hovered)
+            CursorTooltip.Show(this, PriceNote);
     }
 
     void RebuildPriceLookup()
     {
-        if (_priceById != null && _priceById.Count == partPrices.Count)
-            return;
-
         _priceById = new Dictionary<string, float>(System.StringComparer.OrdinalIgnoreCase);
+        if (partPrices == null)
+            return;
         foreach (PartPrice entry in partPrices)
         {
-            if (entry != null && !string.IsNullOrEmpty(entry.partId))
+            // Keep invalid overrides, so a removed price cannot silently fall
+            // back to a plausible-looking placeholder.
+            if (entry != null && !string.IsNullOrWhiteSpace(entry.partId))
                 _priceById[entry.partId.Trim()] = entry.price;
         }
     }
@@ -144,11 +188,32 @@ public class UIBuildStats : MonoBehaviour
     /// <summary>Catalogue price of one part (also used by Space Mode dedup).</summary>
     public float PriceForPart(string partId)
     {
-        if (string.IsNullOrEmpty(partId))
-            return 0f;
+        return TryPriceForPart(partId, out float price) ? price : 0f;
+    }
 
-        if (_priceById.TryGetValue(partId, out float price))
-            return price;
+    /// <summary>False means no local price exists; zero can be an explicit price.</summary>
+    public bool TryPriceForPart(string partId, out float price)
+    {
+        price = 0f;
+        if (_priceById == null)
+            RebuildPriceLookup();
+        if (string.IsNullOrEmpty(partId))
+            return false;
+        partId = partId.Trim();
+
+        if (_priceById.TryGetValue(partId, out price))
+            return BuildPartSummary.IsValidPrice(price);
+
+        if (partId.StartsWith("Panel ", System.StringComparison.OrdinalIgnoreCase))
+            price = panelPrice;
+        else if (partId.StartsWith("Veneer H", System.StringComparison.OrdinalIgnoreCase) &&
+            int.TryParse(partId.Substring(8), out int size) && System.Array.IndexOf(CatalogueData.VeneerLengths, size) >= 0)
+            price = veneerPrice;
+        else if (partId.Equals("Cap Side", System.StringComparison.OrdinalIgnoreCase)) price = capSidePrice;
+        else if (partId.Equals("Cap End", System.StringComparison.OrdinalIgnoreCase)) price = capEndPrice;
+        else if (partId.Equals("Foot", System.StringComparison.OrdinalIgnoreCase)) price = footPrice;
+        else price = float.NaN;
+        if (!float.IsNaN(price)) return BuildPartSummary.IsValidPrice(price);
 
         // Twist beams are priced like the H beam of the same size.
         if (BeamPartUtility.IsTwist(partId))
@@ -158,22 +223,29 @@ public class UIBuildStats : MonoBehaviour
                 digitStart++;
 
             if (digitStart < partId.Length &&
-                _priceById.TryGetValue("H" + partId.Substring(digitStart), out float hPrice))
-                return hPrice;
+                _priceById.TryGetValue("H" + partId.Substring(digitStart), out price))
+                return BuildPartSummary.IsValidPrice(price);
         }
 
-        return 0f;
+        return false;
     }
 
-    /// <summary>Leading letters + first digit run, e.g. "H9(Clone)" -> "H9".</summary>
-    static string ParsePartId(string name)
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        int end = 0;
-        while (end < name.Length && char.IsLetter(name[end]))
-            end++;
-        while (end < name.Length && char.IsDigit(name[end]))
-            end++;
+        _hovered = true;
+        CursorTooltip.Show(this, PriceNote);
+    }
 
-        return name.Substring(0, end);
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        _hovered = false;
+        CursorTooltip.Hide(this);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button != PointerEventData.InputButton.Left) return;
+        CursorTooltip.Hide(this);
+        FindFirstObjectByType<WorkflowReviewUI>()?.ShowParts();
     }
 }

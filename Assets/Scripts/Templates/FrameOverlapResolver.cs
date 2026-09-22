@@ -239,7 +239,7 @@ public static class FrameOverlapResolver
     /// World positions of AP_Peg_A / AP_Peg_B when the prefab has them.
     /// EndA is always Peg A (attaches to H), EndB is always Peg B (attaches to V).
     /// </summary>
-    static bool TryPegEnds(Transform root, out Vector3 pegA, out Vector3 pegB)
+    internal static bool TryPegEnds(Transform root, out Vector3 pegA, out Vector3 pegB)
     {
         pegA = pegB = default;
         AttachmentPoint foundA = null, foundB = null;
@@ -272,10 +272,26 @@ public static class FrameOverlapResolver
             }
         }
 
-        if (foundA == null || foundB == null)
+        // Frozen Space pieces and merge-derived frames retain the prefab's
+        // marker transforms after all interactive components are stripped.
+        // Keep their physical endpoints and A/B polarity instead of replacing
+        // them with an unsigned, world-AABB skeleton approximation.
+        Transform markerA = foundA != null ? foundA.transform : null;
+        Transform markerB = foundB != null ? foundB.transform : null;
+        if (markerA == null || markerB == null)
+            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            {
+                string name = child.name;
+                if (string.IsNullOrEmpty(name)) continue;
+                if (markerA == null && name.IndexOf("Peg_A", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    markerA = child;
+                else if (markerB == null && name.IndexOf("Peg_B", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    markerB = child;
+            }
+        if (markerA == null || markerB == null)
             return false;
-        pegA = foundA.transform.position;
-        pegB = foundB.transform.position;
+        pegA = markerA.position;
+        pegB = markerB.position;
         return true;
     }
 

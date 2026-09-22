@@ -22,7 +22,7 @@ Unity-based 3D configurator for assembling a modular **V/H beam** system with st
 - H-only floor/roof rectangles are still problematic (top priority)
 - “Any rectangle” generalization still needed (graph-based rectangle detection; interior beams must split rectangles)
 - Persistence/save-load and undo/redo not implemented yet (or incomplete)
-- **Veneers**: rules defined; implementation in progress
+- **Finish (veneers, caps, feet)**: implemented on the Rhino NSFINISH rules — see §7
 
 ---
 
@@ -216,189 +216,58 @@ Slot detection must generalize to “any rectangle”:
 
 ---
 
-## 7) Veneers (Automated Frame Finish)
+## 7) Finish (Veneers, Caps, Feet)
 
-### 7.1 Goal
-Veneers are an **automated finish system** that covers every eligible exposed beam face area, **excluding occupied areas** (panel-facing exclusions, forbidden faces).
+The **Finish** toggle (Parts tab) dresses every placed frame automatically and
+keeps the dressing in step with the build; Space Mode pieces are always
+dressed. The rules are the NEOSPACE Rhino NSFINISH rules
+(`docs/system/04-finishing.md` of the Rhino configurator), adapted to the
+supplied simplified meshes.
 
-UI for now: one button  
-✅ **“Apply Veneers”** → generate/update all veneers in the scene.
+### 7.1 Parts and models
+- Models load from `Assets/Resources/Finish`: `Veneer H1` … `Veneer H15`,
+  `Cap Side`, `Cap End`, `Foot`. Every produced veneer size is listed in
+  `CatalogueData.VeneerLengths` (1–15); adding a size means adding the FBX
+  and the number there.
+- A veneer of size n covers **n + 1 modules** of one channel: contact length
+  `(n + 1) × 88 − 41` mm. The simplified plates are 1 mm thick, 42.26 mm
+  wide (a 0.63 mm lip past the 41 mm profile) and 2.09 mm shorter than the
+  contact length, so a hairline reveal at each end is by design.
+- Cap Side and Cap End are 42.3 mm squares; the Foot is 41 × 41 × 10 mm.
 
-Users do not manually place veneer parts.
+### 7.2 Rules (from the Rhino reference)
+- **V posts**: Cap End on the top extrusion end (and on a floating bottom),
+  Foot under a grounded bottom; the visible floor sinks by the foot height.
+  Every channel is divided at the two end holes and at **every connection
+  level of the post** — a Cap Side sits at each divider on every free face
+  (never on the face a joint occupies) and veneers fill the sections between
+  (`Finishing.CoverSegment`: fewest parts, then most balanced). A level pair
+  one module apart drops the optional divider instead of leaving a bare
+  strip (`FinishGenerator.SplitAllChannelsAtConnections`).
+- **H / twist beams**: default coverage of the body on all four channels
+  (one veneer, or two with a mid Cap Side); body ends are joints and never
+  capped. The covering breaks where a body presses on a face: stacked
+  posts, and connectors plugging into the beam's own side holes.
+- **Panels**: a channel facing into a panelled bay is skipped over the
+  length actually behind the board, never the whole channel; boards beside a
+  face (edge within 2 mm of the profile, `SeamToleranceMm`, which absorbs the
+  whole-millimetre code quantization) do not hide it, boards covering a
+  face do. A single-sided bay shows the bare inward channels from its open
+  side, exactly like the physical product.
+- Parts dedupe by position, so re-applying never stacks duplicates.
 
----
-
-## 7.2 Veneer Coverage Domain (What gets veneered)
-Veneers cover **all exposed beam faces**, with exceptions:
-
-1) **Panel-facing surfaces**
-- If a panel occupies a slot, the panel-facing inner faces of the framing beams receive **no veneers** on their panel-facing side (only that side/region).
-
-2) **H beams**
-- Top and bottom square faces (peg faces) → **no veneer**
-
-3) **V beams**
-- Top square face → **Top Cap**
-- Bottom square face → **Foot**
-
----
-
-## 7.3 Veneer Parts (Prefabs)
-Prefabs provided:
-- `H1 interior veneer` ... `H15 interior veneer`
-- `H1 exterior veneer` ... `H15 exterior veneer`
-- `top cap`
-- `side cap`
-- `foot`
-
-Naming clarification:
-- Veneer strips are named **H[number]** because **two strips equal the length of the corresponding H beam**.
-- These strips apply to vertical beams as well (universal lengths), but veneer runs cannot cross beam-type boundaries.
-
----
-
-## 7.4 Strip Length System (Sizing)
-The lengths listed in the project spec are **BEAM lengths**, not veneer lengths.
-
-Rule:
-- `StripLength(Hk) = BeamLength(Hk) / 2`
-
-Example:
-- H3 beam length = 311 → H3 strip length = 155.5
-
-If a veneer strip number is needed that does not exist as a beam, its strip length is defined by interpolation between neighbors.
-
----
-
-## 7.5 Strip End Types + Connection Rules (Hard Rules)
-
-### 7.5.1 Strip end types
-Each strip has:
-- **one Flat end**
-- **one Functional (chamfered) end**
-
-Interior strip:
-- Functional end = **Accept**
-- other end = **Flat**
-
-Exterior strip:
-- Functional end = **Cover/Tongue**
-- other end = **Flat**
-
-### 7.5.2 Strip-to-strip connections
-✅ **Strips may connect to other strips ONLY via Flat ↔ Flat.**  
-This is the only legal strip-to-strip connection.
-
-❌ Not allowed:
-- Interior Accept ↔ Interior Accept
-- Interior Accept ↔ Exterior Cover
-- Exterior Cover ↔ any strip end
-
-So: **no cover/accept strip-to-strip joining**.
-
-### 7.5.3 Passive Interior Endpoint (PIE) logic
-A **Passive Interior Endpoint (PIE)** is an “interior endpoint surface” created by a **completed veneer set** (often involving caps).  
-Exterior cover ends are allowed to terminate onto a PIE.
-
-PIE is not “an interior strip by itself.” It is the endpoint behavior of a fully satisfied assembly.
-
-### 7.5.4 Completion definition (No1 — Completion)
-A veneer solution is valid only if:
-- Every **Flat end** meets another **Flat end**
-- Every functional end (Accept/Cover) terminates against a valid endpoint surface (caps / PIE)
-- No strip end is left dangling
-- No parts violate placement constraints (side caps only on holes)
-
-No single strip can terminate alone.
-
----
-
-## 7.6 Caps + Foot Rules
-
-### Top Cap
-- Interior type
-- Covers the top face of the highest V endpoint
-- Can act as an endpoint in completion logic
-
-### Side Cap (easy wording)
-- Interior-type cap used mainly as a **terminal endpoint for exterior veneers** (so exterior pieces have a valid place to end).
-- Not exclusive to V beams — it’s commonly used at V beam endpoints, but the important idea is:
-  - **side caps exist to provide a clean endpoint** so a veneer run doesn’t end “in the air”.
-- Placement constraint: side caps can only be placed where there is a **hole attachment point**.
-- Size: square side length **41**.
-
-### Foot
-- Neutral (no chamfer logic)
-- Covers the bottom face of the lowest V endpoint
-
----
-
-## 7.7 Run Segmentation Rule (Cannot cross beam types)
-A veneer strip run cannot apply across different beam types.
-
-Example: `H3 → V1 → H3`
-- Veneer run cannot continue from the first H3 across the V1 to the second H3.
-
-Priority behavior:
-1) Solve/complete veneers on **V beam segments first** (vertical sections).
-2) Then **H beams** treat the completed vertical veneer endpoints / PIE surfaces as valid termination surfaces.
-
-This is the “puzzle” behavior: vertical completion creates valid endpoints for horizontal runs.
-
----
-
-## 7.8 Optimization Rule (No2 — Minimize Part Count)
-The veneer generator must always use the **minimum number of parts** while covering all eligible areas and satisfying No1 completion.
-
-Implications:
-- A run can be tiled with multiple strips, but always choose the combination with the fewest parts.
-- Side caps only where genuinely required to satisfy endpoints.
-- No redundant overlaps or double-coverage.
-
-Example length decomposition:
-- If a single face run length is **399**:
-  - H7 strip = 663/2 = 331.5
-  - H1 strip = 135/2 = 67.5
-  - 331.5 + 67.5 = 399
-  - Minimum parts = **2 strips** (H7 + H1), then endpoints must be resolved via caps/PIE.
-
----
-
-## 7.9 Veneer Implementation Plan (Algorithm Shape)
-
-### Inputs
-- Placed beams (V/H) and their world transforms
-- Exposed face regions per beam (minus exclusions)
-- Panels and panel planes to exclude panel-facing sides
-- Available veneer prefabs and their lengths
-- Attachment point locations (for side cap eligibility)
-
-### Outputs
-- A set of instantiated veneer prefabs parented under `VeneersRoot`
-- Deterministic placement so re-applying produces stable results
-
-### Core steps (high level)
-1) Collect geometry
-   - Find all placed beams (exclude ghost layer)
-   - Determine exposed faces via ray probes or visibility rules
-   - Subtract panel-facing regions
-2) Segment into “runs”
-   - Each run is a contiguous exposed region along a single beam face
-   - Runs must not cross beam-type boundaries
-3) Solve each run
-   - Determine run length in world units
-   - Choose strip combo that sums to run length with minimum part count
-   - Enforce chaining via **Flat↔Flat only**
-4) Resolve endpoints
-   - Place caps/foot/top cap where required and allowed
-   - Allow exterior cover termination only onto PIE surfaces
-5) Validate completion
-   - No dangling flat ends
-   - All required caps placed legally (side caps only at holes)
-6) Instantiate
-   - Spawn veneers with colliders disabled
-   - Parent under VeneersRoot
-   - Make re-apply idempotent (clear + rebuild, or diff update)
+### 7.3 Implementation
+- `FinishGenerator` (pure planning from frame/panel records),
+  `FinishController` (model measurement, placement, live refresh, floor
+  drop), `FinishPanelMasking` (exact swept-box panel tests),
+  `NeospaceCore/Finishing` (coverability maths ported from Rhino).
+- Verification: **Tools → Configurator → Run Finish Diagnostics** builds a
+  wall bay, single-sided bay, two-level shelf ring, V17 cabinet, twist
+  branch, a yawed bay and a Space-Mode arrangement, then writes a per-channel
+  coverage report and renders to `Logs/finish-diagnostics`. The self-tests
+  and play-mode regressions run through `ConfiguratorValidation.Run`.
+- `Assets/Scripts/Veneer/` (VeneerManager, VeneerPrefabLibrary) is the
+  retired strip-based prototype and is not used.
 
 ---
 
@@ -442,16 +311,12 @@ Example length decomposition:
   - `UIToolbarController.cs`
   - `PartSelectorUI.cs`
 
-### Veneers (New)
-- `VeneerPrefabLibrary.cs` (planned/new)
-  - references to strip/cap prefabs
-  - strip length measurement / mapping
-- `VeneerManager.cs` (planned/new)
-  - “Apply Veneers” pipeline
-  - exposure + panel exclusion
-  - run segmentation + minimum-part solving
-  - PIE endpoint logic
-  - instantiate + rebuild management
+### Finish
+- `Finish/FinishGenerator.cs` — pure planner (Rhino NSFINISH rules on frame/panel records)
+- `Finish/FinishController.cs` — model measurement, placement, live refresh, floor drop
+- `Finish/FinishPanelMasking.cs`, `NeospaceCore/Finishing.cs` — panel sweep tests, coverability maths
+- `Finish/FinishDiagnosticsHost.cs` + `Editor/FinishDiagnostics.cs` — coverage report and renders
+- `Veneer/VeneerManager.cs`, `Veneer/VeneerPrefabLibrary.cs` — retired prototype, unused
 
 ---
 
@@ -477,15 +342,10 @@ Example length decomposition:
 - `floorYBucketSize` tolerant (e.g., 0.02)
 - `preservePanelsOnSlotLoss` ON (recommended)
 
-### Veneers (when implemented)
-- A scene object `VeneerSystem` with:
-  - `VeneerPrefabLibrary` assigned with all veneer prefabs
-  - `VeneerManager` assigned referencing the library
-- UI Button `Apply Veneers` calls `VeneerManager.ApplyVeneers()`
-- Veneers must not interfere with build/selection:
-  - colliders disabled (recommended)
-  - not in selection raycast masks
-  - not in overlap checks
+### Finish
+- No scene setup needed: `FinishController` bootstraps itself and loads models from `Resources/Finish`
+- The Parts tab **Finish** card toggles it; Space Mode is always finished
+- Finish parts are pure dressing: colliders disabled, no part identity, parented under `FinishRoot`
 
 ---
 
@@ -536,18 +396,8 @@ Edit workflow:
 - interior beams must split rectangles
 - slot selection overlap edge cases
 
-### B) Veneers — Current Session Focus
-- Implement `Apply Veneers` end-to-end
-- Exposure detection + panel-facing exclusion
-- Run segmentation (cannot cross beam types)
-- Minimum-part solver for run length coverage
-- Endpoint resolution:
-  - top cap / side cap (hole-only) / foot
-  - passive interior endpoint (PIE) logic
-- Ensure veneers do not break Build/Select:
-  - colliders off
-  - not in raycast masks
-  - not in overlap checks
+### B) Finish — Done
+- Finish toggle dresses the build on the Rhino NSFINISH rules (§7); verify with **Tools → Configurator → Run Finish Diagnostics**
 
 ### C) Persistence — Save/Load (Near-Term)
 - Save beam placement: partId, transform, connection info

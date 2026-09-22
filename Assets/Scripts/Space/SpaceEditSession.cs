@@ -32,6 +32,7 @@ public class SpaceEditSession : MonoBehaviour
     bool _busy;
     string _originalCode;
     string _pieceName;
+    string _pendingLibraryRecordId;
     readonly List<SpaceInstance> _targets = new List<SpaceInstance>();
 
     // Editing bar UI
@@ -103,6 +104,7 @@ public class SpaceEditSession : MonoBehaviour
 
         _originalCode = selected[0].code;
         _pieceName = selected[0].pieceName;
+        _pendingLibraryRecordId = null;
         _targets.Clear();
         _targets.AddRange(selected);
 
@@ -126,9 +128,24 @@ public class SpaceEditSession : MonoBehaviour
 
         var restorer = ConfigurationCode.GetOrCreateRestorer(buildController);
         bool done = false;
-        restorer.Restore(check.Model, _ => done = true);
+        ConfigurationRestorer.Report restoreReport = default;
+        restorer.Restore(check.Model, report => { restoreReport = report; done = true; });
         while (!done)
             yield return null;
+
+        if (!restoreReport.Succeeded)
+        {
+            // The original builder objects are retained by the restorer, and
+            // the space instances have not changed. Return without opening an edit.
+            modeController.EnterSpaceMode();
+            float deadline = Time.unscaledTime + 3f;
+            while (!SpaceModeController.Active && Time.unscaledTime < deadline)
+                yield return null;
+            _busy = false;
+            _targets.Clear();
+            SelectionStatus.Set(restoreReport.Summary, 8f);
+            yield break;
+        }
 
         _editing = true;
         _busy = false;
@@ -146,16 +163,36 @@ public class SpaceEditSession : MonoBehaviour
         if (!_editing || _busy)
             return;
 
-        ConfigurationModel model = ConfigurationCapture.Capture(buildController);
-        if (model.Beams.Count == 0 && model.Panels.Count == 0)
+        var restorer = FindFirstObjectByType<ConfigurationRestorer>();
+        if ((BuildHistory.Instance != null && BuildHistory.Instance.IsRestoring) ||
+            (restorer != null && restorer.IsRunning))
         {
-            SelectionStatus.Set("The grid is empty · the edited piece needs at least one part.", 4f);
+            SelectionStatus.Set("Wait for the current change to finish before applying the edit.", 5f);
             return;
         }
 
-        string newCode = ConfigurationCode.Encode(model);
+        ConfigurationModel model;
+        string newCode;
+        try
+        {
+            model = ConfigurationCapture.Capture(buildController);
+            if (model.Beams.Count == 0 && model.Panels.Count == 0)
+            {
+                SelectionStatus.Set("The grid is empty · the edited piece needs at least one part.", 4f);
+                return;
+            }
+            newCode = ConfigurationCode.Encode(model);
+        }
+        catch (System.Exception error)
+        {
+            SelectionStatus.Set("Could not apply this edit. Your edit stays open. " + error.Message, 8f);
+            return;
+        }
+
         var stats = FindFirstObjectByType<UIBuildStats>();
-        float newPrice = stats != null ? stats.TotalPrice : 0f;
+        if (stats != null) stats.RefreshNow();
+        BuildPartSummary summary = stats != null ? stats.Summary : null;
+        float newPrice = summary != null ? (float)summary.TotalPrice : 0f;
 
         // Map target instance refs to indices in the live instance list.
         var targetIndices = new HashSet<int>();
@@ -173,8 +210,31 @@ public class SpaceEditSession : MonoBehaviour
             : targetIndices.Count;
 
         if (updateAll)
-            UpdateLibraryPiece(newCode, model, newPrice);
+        {
+            _busy = true;
+            SelectionStatus.Set("Saving the library update on this device… keep this window open.", 0f);
+            UpdateLibraryPiece(newCode, model, summary, error =>
+            {
+                if (this == null) return;
+                _busy = false;
+                if (error != null)
+                {
+                    SelectionStatus.Set("Library save not confirmed. Your edit stays open. " + error, 12f);
+                    FindFirstObjectByType<ConfigurationCodeUI>()?.ShowShareDialog(
+                        "Save backup code", newCode,
+                        "The library update was not confirmed. Copy and keep this code before closing.");
+                    return;
+                }
+                CompleteApply(newStates, affected, updateAll);
+            });
+            return;
+        }
 
+        CompleteApply(newStates, affected, updateAll);
+    }
+
+    void CompleteApply(List<SpaceHistory.InstanceState> newStates, int affected, bool updateAll)
+    {
         _editing = false;
         HideBar();
         StartCoroutine(ReturnRoutine(newStates, affected, updateAll));
@@ -233,38 +293,65 @@ public class SpaceEditSession : MonoBehaviour
     }
 
     /// <summary>Keep the library in step: the piece with the old code takes the edit.</summary>
-    void UpdateLibraryPiece(string newCode, ConfigurationModel model, float newPrice)
+    void UpdateLibraryPiece(string newCode, ConfigurationModel model, BuildPartSummary summary, System.Action<string> completed)
     {
-        foreach (PieceLibrary.PieceRecord record in PieceLibrary.LoadAll())
+        try
         {
-            if (record.code != _originalCode)
-                continue;
-
-            record.code = newCode;
-            record.modifiedUtc = PieceLibrary.NowUtc();
-            record.beamCount = model.Beams.Count;
-            record.panelCount = model.Panels.Count;
-            record.price = newPrice;
-
-            if (StructureBounds.TryCompute(buildController, out StructureBounds.Info info))
+            foreach (PieceLibrary.PieceRecord record in PieceLibrary.LoadAll())
             {
-                record.widthMm = Mathf.RoundToInt(info.WidthMm);
-                record.depthMm = Mathf.RoundToInt(info.DepthMm);
-                record.heightMm = Mathf.RoundToInt(info.HeightMm);
-            }
+                if (record.code != _originalCode && record.id != _pendingLibraryRecordId)
+                    continue;
 
-            Camera cam = buildController != null && buildController.cam != null
-                ? buildController.cam : Camera.main;
-            Texture2D thumb = PieceLibrary.CaptureThumbnail(cam);
-            if (thumb != null)
-            {
-                PieceLibrary.SaveThumbnail(record.id, thumb);
-                record.hasThumbnail = true;
-                Destroy(thumb);
-            }
+                // A failed browser flush may already change the in-memory file's code.
+                // Retain its ID so retry still confirms that record instead of skipping it.
+                _pendingLibraryRecordId = record.id;
+                record.code = newCode;
+                record.modifiedUtc = PieceLibrary.NowUtc();
+                // This is the same freshly captured summary used for the
+                // space instances above, before any asynchronous save work.
+                record.beamCount = summary != null ? summary.FrameCount : model.Beams.Count;
+                record.panelCount = summary != null ? summary.PanelCount : model.Panels.Count;
+                record.finishCount = summary != null ? summary.FinishCount : 0;
+                record.price = summary != null ? (float)summary.TotalPrice : 0f;
 
-            PieceLibrary.Save(record);
-            break;
+                if (StructureBounds.TryCompute(buildController, out StructureBounds.Info info))
+                {
+                    record.widthMm = Mathf.RoundToInt(info.WidthMm);
+                    record.depthMm = Mathf.RoundToInt(info.DepthMm);
+                    record.heightMm = Mathf.RoundToInt(info.HeightMm);
+                }
+
+                Texture2D thumb = null;
+                try
+                {
+                    Camera cam = buildController != null && buildController.cam != null
+                        ? buildController.cam : Camera.main;
+                    thumb = PieceLibrary.CaptureThumbnail(cam);
+                    if (thumb != null)
+                    {
+                        PieceLibrary.SaveThumbnail(record.id, thumb);
+                        record.hasThumbnail = true;
+                    }
+                }
+                catch (System.Exception error)
+                {
+                    // A thumbnail is optional; the recoverable configuration is the save contract.
+                    Debug.LogWarning("[Space edit] Thumbnail could not be updated: " + error.Message);
+                }
+                finally
+                {
+                    if (thumb != null) Destroy(thumb);
+                }
+
+                PieceLibrary.SaveConfirmed(record, completed);
+                return;
+            }
+            // Shared/imported pieces may have no corresponding record on this device.
+            completed(_pendingLibraryRecordId == null ? null : "The library record could not be read for retry. Keep a backup code before closing.");
+        }
+        catch (System.Exception error)
+        {
+            completed(error.Message);
         }
     }
 

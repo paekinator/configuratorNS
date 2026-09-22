@@ -25,15 +25,21 @@ public static class PieceLibrary
         public string modifiedUtc;
         public int beamCount;
         public int panelCount;
+        public int finishCount;      // generated veneers, caps and feet; absent in legacy JSON = 0
         public int widthMm;
         public int depthMm;
         public int heightMm;
         public float price;          // AUD, from the live stats readout
         public bool hasThumbnail;
+        [NonSerialized] public bool recovered;
+
+        public int PartCount => beamCount + panelCount + finishCount;
     }
 
     public static string Folder =>
         Path.Combine(Application.persistentDataPath, "Pieces");
+
+    public static string LastLoadWarning { get; private set; }
 
     // ------------------------------------------------------------------
     // Records
@@ -42,21 +48,34 @@ public static class PieceLibrary
     /// <summary>All pieces, newest modification first.</summary>
     public static List<PieceRecord> LoadAll()
     {
+        LastLoadWarning = null;
         var list = new List<PieceRecord>();
         if (!Directory.Exists(Folder))
             return list;
 
-        foreach (string file in Directory.GetFiles(Folder, "*.json"))
+        var ids = new HashSet<string>();
+        foreach (string file in Directory.GetFiles(Folder, "*.json*"))
+        {
+            string filename = Path.GetFileName(file);
+            int suffix = filename.IndexOf(".json", StringComparison.Ordinal);
+            if (suffix > 0 && IsValidId(filename.Substring(0, suffix)))
+                ids.Add(filename.Substring(0, suffix));
+        }
+        foreach (string id in ids)
         {
             try
             {
-                var record = JsonUtility.FromJson<PieceRecord>(File.ReadAllText(file));
-                if (record != null && !string.IsNullOrEmpty(record.id))
-                    list.Add(record);
+                string json = RecoverableFile.Read(JsonPath(id), text => ValidRecord(text, id), out bool recovered);
+                var record = JsonUtility.FromJson<PieceRecord>(json);
+                record.recovered = recovered;
+                list.Add(record);
+                if (recovered)
+                    LastLoadWarning = "Recovered a saved piece from its previous valid copy. Check it before updating.";
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"[Pieces] Skipping unreadable piece file {file}: {e.Message}");
+                LastLoadWarning = "A saved piece could not be read. Its files were kept for recovery.";
+                Debug.LogWarning($"[Pieces] Unable to read {id}: {e.Message}");
             }
         }
 
@@ -66,14 +85,27 @@ public static class PieceLibrary
 
     public static void Save(PieceRecord record)
     {
-        Directory.CreateDirectory(Folder);
-        File.WriteAllText(JsonPath(record.id), JsonUtility.ToJson(record, prettyPrint: true));
+        if (record == null) throw new ArgumentNullException(nameof(record));
+        RequireValidId(record.id);
+        RecoverableFile.Write(JsonPath(record.id), JsonUtility.ToJson(record, prettyPrint: true),
+            text => ValidRecord(text, record.id));
+    }
+
+    /// <summary>Success means local disk, or browser IndexedDB, acknowledged the write.</summary>
+    public static void SaveConfirmed(PieceRecord record, Action<string> completed)
+    {
+        try { Save(record); }
+        catch (Exception e) { completed?.Invoke(e.Message); return; }
+        LocalSavePersistence.Flush(completed);
     }
 
     public static void Delete(string id)
     {
-        if (File.Exists(JsonPath(id)))
-            File.Delete(JsonPath(id));
+        RequireValidId(id);
+        // Remove staging/recovery copies too, otherwise LoadAll would bring
+        // the explicitly deleted piece back on the next open.
+        foreach (string suffix in new[] { ".tmp", ".bak.tmp", ".bak", "" })
+            if (File.Exists(JsonPath(id) + suffix)) File.Delete(JsonPath(id) + suffix);
         if (File.Exists(ThumbnailPath(id)))
             File.Delete(ThumbnailPath(id));
     }
@@ -87,6 +119,7 @@ public static class PieceLibrary
 
     public static void SaveThumbnail(string id, Texture2D texture)
     {
+        RequireValidId(id);
         Directory.CreateDirectory(Folder);
         File.WriteAllBytes(ThumbnailPath(id), texture.EncodeToPNG());
     }
@@ -94,17 +127,19 @@ public static class PieceLibrary
     /// <summary>Caller owns (and should Destroy) the returned texture.</summary>
     public static Texture2D LoadThumbnail(string id)
     {
+        RequireValidId(id);
         string path = ThumbnailPath(id);
         if (!File.Exists(path))
             return null;
 
         var tex = new Texture2D(2, 2, TextureFormat.RGB24, false);
-        if (!tex.LoadImage(File.ReadAllBytes(path)))
+        try
         {
-            UnityEngine.Object.Destroy(tex);
-            return null;
+            if (tex.LoadImage(File.ReadAllBytes(path))) return tex;
         }
-        return tex;
+        catch (Exception e) { Debug.LogWarning("[Pieces] Thumbnail unavailable: " + e.Message); }
+        UnityEngine.Object.Destroy(tex);
+        return null;
     }
 
     /// <summary>Render the camera's current view (no UI) into a small texture.</summary>
@@ -181,6 +216,25 @@ public static class PieceLibrary
         {
             UnityEngine.Object.Destroy(go);
         }
+    }
+
+    internal static bool ValidRecord(string json, string expectedId)
+    {
+        try
+        {
+            var record = JsonUtility.FromJson<PieceRecord>(json);
+            return record != null && record.id == expectedId && IsValidId(record.id) &&
+                !string.IsNullOrWhiteSpace(record.name) && ConfigurationCode.Validate(record.code).IsValid;
+        }
+        catch (Exception) { return false; }
+    }
+
+    internal static bool IsValidId(string id) =>
+        id != null && id.Length == 32 && Guid.TryParseExact(id, "N", out _);
+
+    static void RequireValidId(string id)
+    {
+        if (!IsValidId(id)) throw new ArgumentException("Invalid saved piece identifier.", nameof(id));
     }
 
     static string JsonPath(string id) => Path.Combine(Folder, id + ".json");

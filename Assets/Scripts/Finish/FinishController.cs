@@ -43,6 +43,52 @@ public class FinishController : MonoBehaviour
 
     public bool IsOn { get; private set; }
 
+    /// <summary>Changes when the installed dressing is regenerated or removed.</summary>
+    public static int PartsVersion { get; private set; }
+
+    /// <summary>
+    /// Synchronize before counting or saving. Does not create history entries;
+    /// an in-progress restore or Space drag must finish before its dressing does.
+    /// </summary>
+    public void RefreshNow()
+    {
+        if (BuildHistory.Instance != null && BuildHistory.Instance.IsRestoring) return;
+        if (SpaceModeController.Active && SpaceBusy()) return;
+        if (!EffectiveOn)
+        {
+            if (_wasEffective)
+            {
+                _wasEffective = false;
+                ClearParts();
+                _desiredFloorDrop = 0f;
+                ApplyFloorDrop(0f);
+            }
+            return;
+        }
+        _wasEffective = true;
+        bool spaceMode = SpaceModeController.Active;
+        if (_lastSpaceMode != spaceMode || _root == null || StructureFingerprint() != _lastFingerprint)
+        {
+            _lastSpaceMode = spaceMode;
+            Regenerate(announce: false);
+        }
+    }
+
+    /// <summary>
+    /// Count only successfully installed model roots. Old objects awaiting
+    /// Destroy and unloaded/unavailable models never contribute to the bill.
+    /// </summary>
+    public void CollectUsedParts(Dictionary<string, int> quantities)
+    {
+        if (_root == null || !_root.gameObject.activeInHierarchy) return;
+        foreach (Transform part in _root)
+        {
+            if (!part.gameObject.activeInHierarchy) continue;
+            quantities.TryGetValue(part.name, out int count);
+            quantities[part.name] = count + 1;
+        }
+    }
+
     /// <summary>
     /// Space Mode is ALWAYS dressed: placed pieces are finished furniture,
     /// not bare frames, so the finish there doesn't depend on the toggle.
@@ -66,6 +112,8 @@ public class FinishController : MonoBehaviour
         public Vector3 LengthAxis;       // world axis of max extent at base pose
         public Vector3 NormalAxis;       // world axis of min extent at base pose
         public Vector3 CenterOffset;     // bounds centre at base pose
+        public float HalfLength;         // half extent along LengthAxis
+        public float HalfWidth;          // half extent across the visible plate
         public float HalfThickness;      // half extent along NormalAxis
     }
 
@@ -109,8 +157,6 @@ public class FinishController : MonoBehaviour
     // Floor drop (feet raise the configuration off the visible ground)
     // ------------------------------------------------------------------
 
-    int _seenStructureVersion;
-    int _seenPanelVersion;
     bool _pollForced = true;
 
     float _desiredFloorDrop;
@@ -186,10 +232,14 @@ public class FinishController : MonoBehaviour
     /// </summary>
     public static void NotifyStructureChanged()
     {
-        if (Instance != null && Instance.IsOn)
+        if (Instance != null && Instance.EffectiveOn)
         {
             Instance._nextPoll = 0f;
             Instance._pollForced = true;
+            // SpaceMerge invokes this after hiding originals and creating
+            // replacement parts. Finish that committed layout immediately,
+            // including when only Space Mode makes finishing effective.
+            if (SpaceModeController.Active) Instance.RefreshNow();
         }
     }
 
@@ -218,6 +268,7 @@ public class FinishController : MonoBehaviour
             if (announce)
                 SelectionStatus.Set("Finish removed · frames are bare again.", 3f);
         }
+        BuildHistory.NotifyChanged();
     }
 
     void Update()
@@ -241,9 +292,8 @@ public class FinishController : MonoBehaviour
         }
         _wasEffective = true;
 
-        // Mid-manipulation (drag or placement ghost) the merge hasn't landed
-        // yet — hold regeneration; the poll right after release catches the
-        // final part layout.
+        // During a drag the merge hasn't landed yet. An armed placement
+        // preview stays outside the installed geometry and does not hold this.
         if (spaceMode && SpaceBusy())
             return;
 
@@ -258,27 +308,13 @@ public class FinishController : MonoBehaviour
             return;
         }
 
-        if (Time.unscaledTime < _nextPoll)
+        if (!_pollForced && Time.unscaledTime < _nextPoll)
             return;
         _nextPoll = Time.unscaledTime + PollInterval;
+        _pollForced = false;
 
-        // In build mode every change is announced (spawn/destroy bumps the
-        // version counters, moves ping through BuildHistory), so the position
-        // fingerprint is only recomputed when something actually happened.
-        // Space Mode keeps the plain poll: pieces are dragged around without
-        // notifications, and their count is small.
-        if (!spaceMode)
-        {
-            bool changed = _pollForced ||
-                           _seenStructureVersion != AttachmentPoint.StructureVersion ||
-                           _seenPanelVersion != PanelInstance.Version;
-            if (!changed)
-                return;
-            _pollForced = false;
-            _seenStructureVersion = AttachmentPoint.StructureVersion;
-            _seenPanelVersion = PanelInstance.Version;
-        }
-
+        // Direct transform edits and frozen Space geometry do not necessarily
+        // publish a placement event. Poll the actual planner inputs as well.
         int fp = StructureFingerprint();
         if (fp != _lastFingerprint)
             Regenerate(announce: false);
@@ -300,15 +336,10 @@ public class FinishController : MonoBehaviour
         // Same planner in both modes, different part source: the live build,
         // or the frozen (merge-resolved) parts inside placed Space pieces.
         bool spaceMode = SpaceModeController.Active;
-        int ghostMask = GhostMask();
-        List<FrameOverlapResolver.FrameRecord> frames = spaceMode
-            ? FinishGenerator.CollectSpaceFrames()
-            : FrameOverlapResolver.CollectFrames(ghostMask);
-        List<FinishGenerator.PanelBox> panels = spaceMode
-            ? FinishGenerator.CollectSpacePanels()
-            : FinishGenerator.CollectPanels(ghostMask);
+        CollectFinishInputs(spaceMode, out List<FrameOverlapResolver.FrameRecord> frames,
+            out List<FinishGenerator.PanelBox> panels);
 
-        FinishGenerator.Result plan = FinishGenerator.Plan(frames, panels);
+        FinishGenerator.Result plan = FinishGenerator.Plan(frames, panels, MeasuredModelDimensions());
 
         ClearParts();
         EnsureRoot();
@@ -323,6 +354,7 @@ public class FinishController : MonoBehaviour
             if (p.Model == "Foot")
                 anyFeet = true;
         }
+        PartsVersion++;
 
         // One breadcrumb per rebuild: which mode fed it, what it saw, what it
         // produced — the first thing to read when dressing looks wrong.
@@ -488,13 +520,41 @@ public class FinishController : MonoBehaviour
     {
         if (_root == null)
             return;
+        PartsVersion++;
         for (int i = _root.childCount - 1; i >= 0; i--)
-            Destroy(_root.GetChild(i).gameObject);
+        {
+            GameObject part = _root.GetChild(i).gameObject;
+            // Destroy is deferred. Hide the old run immediately so a rebuild
+            // cannot draw intersecting old veneers over its replacement.
+            part.SetActive(false);
+            Destroy(part);
+        }
     }
 
     // ------------------------------------------------------------------
     // Model loading + measurement
     // ------------------------------------------------------------------
+
+    Dictionary<string, FinishGenerator.PartDimensions> MeasuredModelDimensions()
+    {
+        var dimensions = new Dictionary<string, FinishGenerator.PartDimensions>();
+        foreach (int size in CatalogueData.VeneerLengths)
+            Add("Veneer H" + size);
+        Add("Cap Side");
+        Add("Cap End");
+        return dimensions;
+
+        void Add(string name)
+        {
+            if (!TryGetModel(name, out ModelInfo info)) return;
+            dimensions[name] = new FinishGenerator.PartDimensions
+            {
+                HalfLengthMm = NeospaceUnits.ToMm(info.HalfLength),
+                HalfWidthMm = NeospaceUnits.ToMm(info.HalfWidth),
+                HalfThicknessMm = NeospaceUnits.ToMm(info.HalfThickness)
+            };
+        }
+    }
 
     bool TryGetModel(string name, out ModelInfo info)
     {
@@ -549,6 +609,8 @@ public class FinishController : MonoBehaviour
             LengthAxis = lengthAxis,
             NormalAxis = normalAxis,
             CenterOffset = b.center,
+            HalfLength = Mathf.Abs(Vector3.Dot(e, lengthAxis)) * 0.5f,
+            HalfWidth = Mathf.Abs(Vector3.Dot(e, Vector3.Cross(lengthAxis, normalAxis))) * 0.5f,
             HalfThickness = thickness * 0.5f
         };
         _models[name] = info;
@@ -562,84 +624,66 @@ public class FinishController : MonoBehaviour
     int GhostMask() => _buildController != null ? _buildController.ghostLayerMask.value : 0;
 
     /// <summary>
-    /// Cheap order-independent hash of every placed beam and panel pose.
-    /// Changes whenever the structure the finish dresses has changed. In
-    /// Space Mode the parts are the frozen children of piece instances —
-    /// hashing their names and world positions catches placements, moves,
-    /// rotations, duplicates, deletions, undo/redo AND every part the merge
-    /// solver rewrote (split beams, re-cut panels, dedup-hidden parts).
+    /// Collect exactly the geometry used by the planner, including active merge
+    /// results. Duplicate BeamConnections must not contribute the same root twice.
+    /// </summary>
+    void CollectFinishInputs(bool spaceMode, out List<FrameOverlapResolver.FrameRecord> frames,
+        out List<FinishGenerator.PanelBox> panels)
+    {
+        int ghostMask = GhostMask();
+        frames = spaceMode ? FinishGenerator.CollectSpaceFrames() : FrameOverlapResolver.CollectFrames(ghostMask);
+        panels = spaceMode ? FinishGenerator.CollectSpacePanels() : FinishGenerator.CollectPanels(ghostMask);
+        var seen = new HashSet<Transform>();
+        frames.RemoveAll(frame => frame.Root == null || !frame.Root.gameObject.activeInHierarchy || !seen.Add(frame.Root));
+    }
+
+    /// <summary>
+    /// Hash planner geometry, not just object positions: rotating a frame in
+    /// place or resizing a centered panel changes its finishing requirements.
     /// </summary>
     int StructureFingerprint()
     {
-        if (SpaceModeController.Active)
+        bool spaceMode = SpaceModeController.Active;
+        CollectFinishInputs(spaceMode, out List<FrameOverlapResolver.FrameRecord> frames,
+            out List<FinishGenerator.PanelBox> panels);
+
+        unchecked
         {
-            int spaceHash = 0x5A0F1;
-            foreach (SpaceInstance inst in FindObjectsByType<SpaceInstance>(FindObjectsSortMode.None))
+            int hash = (spaceMode ? 0x5A0F1 : 17) * 31 + frames.Count * 397 + panels.Count;
+            // Sum independent record hashes so enumeration order cannot cause a
+            // rebuild. Counts preserve multiplicity (XOR cancels duplicate pairs).
+            foreach (FrameOverlapResolver.FrameRecord frame in frames)
             {
-                if (inst == null || !inst.gameObject.activeInHierarchy)
-                    continue;
-                foreach (Transform child in inst.transform)
-                {
-                    if (!child.gameObject.activeSelf || child.name == "SelectionPad")
-                        continue;
-                    spaceHash ^= PoseHash(child.name.GetHashCode(), child.position);
-                }
+                int part = (frame.PartId?.GetHashCode() ?? 0) * 31 + frame.Size;
+                part = VectorHash(part, frame.Center, 1000f);
+                part = VectorHash(part, frame.EndA, 1000f);
+                part = VectorHash(part, frame.EndB, 1000f);
+                part = VectorHash(part, frame.LengthAxis, 10000f);
+                part = VectorHash(part, frame.LocalY, 10000f);
+                part = VectorHash(part, frame.Root.right, 10000f);
+                part = VectorHash(part, frame.Root.lossyScale, 10000f);
+                hash += part;
             }
-
-            // The merge's derived visuals (split segments, re-cut panels) are
-            // part of the physical configuration too — a merge that only
-            // rewrites them must still retrigger the dressing.
-            Transform derived = SpaceMerge.DerivedRoot;
-            if (derived != null && derived.gameObject.activeInHierarchy)
+            foreach (FinishGenerator.PanelBox panel in panels)
             {
-                foreach (Transform child in derived)
-                {
-                    if (!child.gameObject.activeSelf)
-                        continue;
-                    spaceHash ^= PoseHash(child.name.GetHashCode() * 131, child.position);
-                }
+                int part = VectorHash(7919, panel.Center, 1000f);
+                part = VectorHash(part, panel.Normal, 10000f);
+                part = VectorHash(part, panel.AxisU, 10000f);
+                part = VectorHash(part, panel.AxisV, 10000f);
+                part = VectorHash(part, new Vector3(panel.HalfU, panel.HalfV, panel.HalfN), 1000f);
+                hash += part;
             }
-            return spaceHash;
+            return hash;
         }
+    }
 
-        int ghostMask = GhostMask();
-        int hash = 17;
-
-        foreach (BeamConnections conn in FindObjectsByType<BeamConnections>(FindObjectsSortMode.None))
+    static int VectorHash(int seed, Vector3 vector, float precision)
+    {
+        unchecked
         {
-            if (conn == null)
-                continue;
-            Transform root = conn.transform.root;
-            if (!root.gameObject.activeInHierarchy)
-                continue;
-            if ((ghostMask & (1 << root.gameObject.layer)) != 0)
-                continue;
-            string id = StructureClipboard.CleanPartId(root.name);
-            if (id == null)
-                continue;
-            hash ^= PoseHash(id.GetHashCode(), root.position);
-        }
-
-        foreach (PanelInstance pi in FindObjectsByType<PanelInstance>(FindObjectsSortMode.None))
-        {
-            if (pi == null || !pi.gameObject.activeInHierarchy)
-                continue;
-            if ((ghostMask & (1 << pi.gameObject.layer)) != 0)
-                continue;
-            hash ^= PoseHash(pi.side * 31, pi.transform.position);
-        }
-        return hash;
-
-        static int PoseHash(int seed, Vector3 p)
-        {
-            unchecked
-            {
-                int h = seed;
-                h = h * 486187739 + Mathf.RoundToInt(p.x * 500f);
-                h = h * 486187739 + Mathf.RoundToInt(p.y * 500f);
-                h = h * 486187739 + Mathf.RoundToInt(p.z * 500f);
-                return h;
-            }
+            int hash = seed * 486187739 + Mathf.RoundToInt(vector.x * precision);
+            hash = hash * 486187739 + Mathf.RoundToInt(vector.y * precision);
+            return hash * 486187739 + Mathf.RoundToInt(vector.z * precision);
         }
     }
 }

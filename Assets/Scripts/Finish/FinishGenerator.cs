@@ -3,23 +3,26 @@ using UnityEngine;
 
 /// <summary>
 /// Plans the finishing parts (veneers, Cap Sides, Cap Ends, Feet) a placed
-/// build needs, ported from Rhino neospace_rhino/finishing_gen.py with the
-/// owner's current rules: one veneer model per size (no chamfer variants),
-/// and a Foot wrapping every grounded post bottom.
+/// build needs, adapted from Rhino neospace_rhino/finishing_gen.py using the
+/// supplied simplified H1-H15 meshes (one model per size, no chamfer variants)
+/// and a Foot under every grounded post bottom.
 ///
 /// Planning is pure — it reads frame/panel records and emits placements.
 /// <see cref="FinishController"/> turns placements into scene objects.
 ///
 /// Per frame:
-///  - V posts: Cap End on the top body end (and on a floating bottom).
-///    Each of the four side channels is divided at the two end holes plus
-///    every hole a connector plugs into; a Cap Side sits at each divider
-///    (unless the joint itself occupies that face, or a panel hides it) and
-///    veneers fill the sections between, split by a mid Cap Side where one
-///    veneer cannot reach.
+///  - V posts: Cap End on the top body end (and on a floating bottom), a
+///    Foot under a grounded bottom. Every channel is divided at the two end
+///    holes plus every connection level of the post (the Rhino rule — see
+///    <see cref="SplitAllChannelsAtConnections"/>). A Cap Side sits at each
+///    divider (unless the joint itself occupies that face, or a panel hides
+///    it) and veneers fill the sections between, split by a mid Cap Side
+///    where one veneer cannot reach.
 ///  - H/HT/T beams: each of the four channels gets default coverage across
 ///    the body — one veneer, or two with a mid Cap Side. Beam ends are
-///    joints, never capped.
+///    joints, never capped. The covering breaks where a body presses on a
+///    face: stacked posts, and connectors (H from either end, twist Peg A)
+///    plugging into the beam's side holes.
 ///  - Panel masking: a channel facing into a panelled space is skipped over
 ///    the length range actually behind the panel, never the whole channel.
 /// </summary>
@@ -28,20 +31,62 @@ public static class FinishGenerator
     /// <summary>Half the frame profile: channel faces sit here (mm).</summary>
     const float HalfProfileMm = 20.5f;
 
+    /// <summary>
+    /// Rhino NSFINISH divides every channel of a post at every connection
+    /// level (a Cap Side on each free face, veneers split around the ring).
+    /// False keeps a connector's level on the channel it plugs into only,
+    /// letting the other three faces run one long veneer past it (fewer
+    /// parts, but a different finish from the Rhino tool).
+    /// </summary>
+    public static readonly bool SplitAllChannelsAtConnections = true;
+
     /// <summary>Position tolerance for joints/holes, generous for meshes.</summary>
     const float TolMm = 6f;
 
-    /// <summary>Masking tolerance along a channel (Rhino used 0.5 mm).</summary>
-    const float MaskTolMm = 1f;
+    /// <summary>
+    /// How far a board edge may reach over a frame face and still count as
+    /// lying BESIDE it rather than covering it (mm). Restored designs and
+    /// Space pieces carry up to ±0.5 mm of code quantization per part, so a
+    /// board nominally 20.64 mm from a beam axis can sit at 20.1 mm; a
+    /// hard 20.5 mm edge test then stripped whole outward channels (the
+    /// bottom ring of a panelled plinth). A board that truly covers a face
+    /// overlaps it by tens of millimetres, far beyond this allowance.
+    /// </summary>
+    public const float SeamToleranceMm = 2f;
+
+    // Numerical contact tolerance, not a fitting allowance: live boards can
+    // be only 1 mm thick, so a 1 mm tolerance would ignore an entire shelf.
+    const float MaskTolMm = 0.001f;
 
     /// <summary>
-    /// Physical plate half-lengths along the channel, for the span-aware
-    /// board mask. A veneer's plate is its catalogue contact length
-    /// ((m+1) modules minus one profile), leaving a profile-wide seat at
-    /// each end hole — which is exactly the Cap Side's width.
+    /// Measured visible plate dimensions. Nominal contact lengths describe
+    /// the modular seats; collision checks must use the actual imported mesh.
     /// </summary>
-    const float CapHalfMm = CatalogueData.HalfProfileMm;
-    static float VeneerHalfMm(int m) => Skeleton.VeneerContactLength(m) * 0.5f;
+    public struct PartDimensions
+    {
+        public float HalfLengthMm;
+        public float HalfWidthMm;
+        public float HalfThicknessMm;
+    }
+
+    static PartDimensions Dimensions(string model, Dictionary<string, PartDimensions> measured)
+    {
+        if (measured != null && measured.TryGetValue(model, out PartDimensions value))
+            return value;
+
+        // Bounds of the supplied Simplified Veneers FBXs. Runtime planning
+        // supplies measured imported bounds instead; these defaults also let
+        // offline planning use the real visible plate, not its longer nominal
+        // contact length. Cap Side similarly overhangs the 41 mm profile.
+        bool veneer = model.StartsWith("Veneer H", System.StringComparison.Ordinal);
+        int size = veneer ? int.Parse(model.Substring(8)) : 0;
+        return new PartDimensions
+        {
+            HalfLengthMm = veneer ? (Skeleton.VeneerContactLength(size) - 2.08575f) * 0.5f : 21.1504f,
+            HalfWidthMm = veneer ? 21.12959f : 21.15f,
+            HalfThicknessMm = 0.5f
+        };
+    }
 
     public struct Placement
     {
@@ -87,7 +132,8 @@ public static class FinishGenerator
     // Entry point
     // ------------------------------------------------------------------
 
-    public static Result Plan(List<FrameOverlapResolver.FrameRecord> frames, List<PanelBox> panels)
+    public static Result Plan(List<FrameOverlapResolver.FrameRecord> frames, List<PanelBox> panels,
+                              Dictionary<string, PartDimensions> modelDimensions = null)
     {
         var result = new Result();
         if (frames == null || frames.Count == 0)
@@ -97,23 +143,24 @@ public static class FinishGenerator
         {
             if (BeamPartUtility.IsVertical(frame.PartId))
             {
-                PlanVEnds(frame, frames, result);
-                PlanVChannels(frame, frames, panels, result);
+                PlanVEnds(frame, frames, panels, result, modelDimensions);
+                PlanVChannels(frame, frames, panels, result, modelDimensions);
             }
             else
             {
-                PlanHChannels(frame, frames, panels, result);
+                PlanHChannels(frame, frames, panels, result, modelDimensions);
             }
         }
         return result;
     }
 
     // ------------------------------------------------------------------
-    // V frame ends (Cap End; Foot reserved for later)
+    // V frame ends (exposed Cap End, grounded Foot)
     // ------------------------------------------------------------------
 
     static void PlanVEnds(in FrameOverlapResolver.FrameRecord v,
-                          List<FrameOverlapResolver.FrameRecord> all, Result result)
+                          List<FrameOverlapResolver.FrameRecord> all, List<PanelBox> panels,
+                          Result result, Dictionary<string, PartDimensions> modelDimensions)
     {
         float halfBody = NeospaceUnits.Mm(Skeleton.VBodyLength(v.Size)) * 0.5f;
         Vector3 axis = v.LengthAxis;
@@ -121,21 +168,59 @@ public static class FinishGenerator
         Vector3 bottomEnd = v.Center - axis * halfBody;
         float tol = NeospaceUnits.Mm(TolMm);
 
+        // Square end parts follow the post's own faces: a yawed post needs its
+        // Cap End and Foot yawed with it, or their corners stick out past the
+        // 41 mm profile. (A world-fixed perpendicular only matched posts on
+        // the grid axes.)
+        Vector3 across = FaceNormals(v)[0];
+
         if (!ContinuedBeyond(v, all, topEnd, axis, tol) && !RestsOnBeamFace(v, all, topEnd, axis))
-            result.Add("Cap End", topEnd, PerpendicularOf(axis), axis);
+            AddEndCapIfExposed(topEnd, across, axis, panels, result, modelDimensions);
 
         bool grounded = bottomEnd.y < tol;
         if (grounded)
         {
-            // Normal points up: the foot wraps the post's lowest stretch
-            // (Unity posts sit on the floor; nothing lifts them 10 mm).
-            result.Add("Foot", bottomEnd, PerpendicularOf(axis), axis);
+            // Normal points up. The controller seats the foot under the post
+            // and lowers the visible floor without moving the build geometry.
+            result.Add("Foot", bottomEnd, across, axis);
         }
         else if (!ContinuedBeyond(v, all, bottomEnd, -axis, tol) &&
                  !RestsOnBeamFace(v, all, bottomEnd, -axis))
         {
-            result.Add("Cap End", bottomEnd, PerpendicularOf(axis), -axis);
+            AddEndCapIfExposed(bottomEnd, across, -axis, panels, result, modelDimensions);
         }
+    }
+
+    static void AddEndCapIfExposed(Vector3 end, Vector3 lengthDir, Vector3 outward,
+        List<PanelBox> panels, Result result, Dictionary<string, PartDimensions> modelDimensions)
+    {
+        PartDimensions size = Dimensions("Cap End", modelDimensions);
+        // Match Place: the actual cap sits beyond the post's body end by its
+        // half thickness plus the 0.2 mm visual lift. A shelf can cover that
+        // end even when no other frame continues past it.
+        Vector3 center = end + outward * NeospaceUnits.Mm(size.HalfThicknessMm + 0.2f);
+        Vector3 widthDir = Vector3.Cross(lengthDir, outward).normalized;
+        if (panels != null)
+            foreach (PanelBox panel in panels)
+            {
+                // A board parallel to the extrusion end masks the nominal
+                // 41 mm end face, not the simplified cap's overhanging lip.
+                // At a normal shelf corner the board edge is 20.6415 mm from
+                // the post center: the 20.5 mm profile remains exposed even
+                // though the wider cap mesh's envelope reaches into the seam,
+                // and the same placement allowance as for channels keeps a
+                // slightly off-grid board from stealing the cap. Keep actual
+                // cap thickness/offset and retain full measured bounds for
+                // panels crossing the end at other orientations.
+                bool parallelEnd = Mathf.Abs(Vector3.Dot(panel.Normal.normalized, outward.normalized)) >= 0.9999f;
+                float halfLengthMm = parallelEnd ? HalfProfileMm - SeamToleranceMm : size.HalfLengthMm;
+                float halfWidthMm = parallelEnd ? HalfProfileMm - SeamToleranceMm : size.HalfWidthMm;
+                if (FinishPanelMasking.Intersects(center, lengthDir, widthDir, outward,
+                    NeospaceUnits.Mm(halfLengthMm), NeospaceUnits.Mm(halfWidthMm),
+                    NeospaceUnits.Mm(size.HalfThicknessMm), panel))
+                    return;
+            }
+        result.Add("Cap End", end, lengthDir, outward);
     }
 
     /// <summary>
@@ -203,14 +288,14 @@ public static class FinishGenerator
 
     static void PlanVChannels(in FrameOverlapResolver.FrameRecord v,
                               List<FrameOverlapResolver.FrameRecord> all,
-                              List<PanelBox> panels, Result result)
+                              List<PanelBox> panels, Result result,
+                              Dictionary<string, PartDimensions> modelDimensions)
     {
         int n = v.Size;
         Vector3 axis = v.LengthAxis;
         Vector3[] faceNormals = FaceNormals(v);
 
-        // Connection levels and the (level, face) each joint occupies.
-        var levels = new SortedSet<int>();
+        // The (level, face) each joint occupies.
         var joints = new HashSet<(int level, int face)>();
         float tol = NeospaceUnits.Mm(TolMm);
         float module = NeospaceUnits.ModuleMeters;
@@ -231,19 +316,48 @@ public static class FinishGenerator
                 if (i < 0 || i > n - 1)
                     continue;
                 Vector3 hole = v.Center + axis * HoleOffset(i, n);
-                if ((hole - end).magnitude > tol)
+                // Prefab peg markers sit near the post FACE (about 20 mm
+                // from its axis), not necessarily at the hole's centreline.
+                // Accept a tip entering that face, while still requiring it
+                // to line up with the actual hole in both transverse axes.
+                // Otherwise a valid split-frame joint gets capped/veneered.
+                int face = DominantFace(h.Center - hole, faceNormals);
+                Vector3 delta = end - hole;
+                float depth = Vector3.Dot(delta, faceNormals[face]);
+                Vector3 across = delta - faceNormals[face] * depth;
+                if (depth < -tol || depth > NeospaceUnits.Mm(HalfProfileMm) + tol || across.magnitude > tol)
                     continue;
-                levels.Add(i);
-                joints.Add((i, DominantFace(h.Center - end, faceNormals)));
+                joints.Add((i, face));
             }
         }
 
-        List<int> dividers = Finishing.DividerLevels(n - 1, levels);
         var masked = MaskedRanges(v, axis, faceNormals, panels);
 
         for (int fi = 0; fi < 4; fi++)
         {
             Vector3 fn = faceNormals[fi];
+            var mask = new ChannelMask(v.Center, axis, fn, fi, masked, panels, modelDimensions);
+
+            // Dividers follow the Rhino NSFINISH rule: a connection point is
+            // a position on the post, not a hole, so every connection level
+            // divides all four channels — Cap Sides ring the post at each
+            // level (except on the face the joint itself occupies) and the
+            // veneer joints line up around it. The joints on THIS face are
+            // mandatory dividers; the levels of the other faces are optional
+            // ones that a free-placing Unity build may have to skip: two
+            // levels one module apart (a placement Rhino would have refused)
+            // would leave an uncoverable 1-module section between two caps,
+            // so the optional divider gives way and the veneer runs on.
+            var mandatory = new SortedSet<int> { 0, n - 1 };
+            var optional = new SortedSet<int>();
+            foreach ((int level, int face) in joints)
+            {
+                if (face == fi)
+                    mandatory.Add(level);
+                else if (SplitAllChannelsAtConnections)
+                    optional.Add(level);
+            }
+            List<int> dividers = DividerLevels(mandatory, optional);
 
             // Veneers first: each cap exists to seat the veneer runs meeting
             // at its hole, so caps are decided after we know which veneers
@@ -257,7 +371,9 @@ public static class FinishGenerator
             for (int s = 0; s + 1 < dividers.Count; s++)
             {
                 int a = dividers[s], b = dividers[s + 1];
-                if (!TileSection(a, b, runs, capHoles))
+                if (!TileSection(a, b, runs, capHoles, (pos, size) =>
+                    !mask.Overlaps($"Veneer H{size}",
+                        (HoleOffsetMm(pos, n) + HoleOffsetMm(pos + size + 1, n)) * 0.5f)))
                 {
                     result.Warnings.Add($"{v.PartId}: a {b - a}-module channel section has no veneer combination.");
                     continue;
@@ -266,12 +382,17 @@ public static class FinishGenerator
                 foreach ((int pos, int m) in runs)
                 {
                     float centreMm = (HoleOffsetMm(pos, n) + HoleOffsetMm(pos + m + 1, n)) * 0.5f;
-                    if (!MaskedAt(masked, fi, centreMm, VeneerHalfMm(m)))
-                    {
-                        result.Add($"Veneer H{m}", FacePoint(v.Center, axis, fn, centreMm), axis, fn);
-                        seated.Add(pos);
-                        seated.Add(pos + m + 1);
-                    }
+                    result.Add($"Veneer H{m}", FacePoint(v.Center, axis, fn, centreMm), axis, fn);
+                    seated.Add(pos);
+                    seated.Add(pos + m + 1);
+                }
+
+                // A bare 1-interval section has no veneer to seat its caps:
+                // seat both holes so the caps still close the lone module.
+                if (b - a == 1)
+                {
+                    seated.Add(a);
+                    seated.Add(b);
                 }
             }
 
@@ -285,11 +406,9 @@ public static class FinishGenerator
                 if (joints.Contains((d, fi)) || (!lone && !seated.Contains(d)))
                     continue;
                 float offMm = HoleOffsetMm(d, n);
-                if (MaskedAt(masked, fi, offMm, CapHalfMm))
+                if (mask.Overlaps("Cap Side", offMm))
                     continue;
                 Vector3 capCenter = FacePoint(v.Center, axis, fn, offMm);
-                if (InPanelDressedBand(capCenter, fn, v, panels))
-                    continue;
                 result.Add("Cap Side", capCenter, axis, fn);
             }
         }
@@ -301,7 +420,8 @@ public static class FinishGenerator
 
     static void PlanHChannels(in FrameOverlapResolver.FrameRecord h,
                               List<FrameOverlapResolver.FrameRecord> all,
-                              List<PanelBox> panels, Result result)
+                              List<PanelBox> panels, Result result,
+                              Dictionary<string, PartDimensions> modelDimensions)
     {
         int intervals = h.Size + 1;
         Vector3 axis = h.LengthAxis;
@@ -352,9 +472,41 @@ public static class FinishGenerator
             }
         }
 
+        // A connector's peg plugging into one of this beam's side-channel
+        // holes — a regular H from either end, a twist from Peg A (Peg B only
+        // ever enters a post) — presses its body on that face around the
+        // ring exactly like a stacked post, so the covering must break there
+        // too. Without this, the channel veneer runs straight through the
+        // mounted beam. Chained connectors on the same line share no channel
+        // and are excluded by the axis test.
+        foreach (FrameOverlapResolver.FrameRecord o in all)
+        {
+            if (o.Root == h.Root || BeamPartUtility.IsVertical(o.PartId))
+                continue;
+            if (Mathf.Abs(Vector3.Dot(o.LengthAxis, axis)) > 0.7f)
+                continue;
+            int ends = BeamPartUtility.IsTwist(o.PartId) ? 1 : 2;
+            for (int e = 0; e < ends; e++)
+            {
+                Vector3 end = e == 0 ? o.EndA : o.EndB;
+                Vector3 toEnd = end - h.Center;
+                float tAlong = Vector3.Dot(toEnd, axis);
+                Vector3 off = toEnd - axis * tAlong;
+                if (off.magnitude > halfProfile + tol)
+                    continue; // peg tip must reach into this beam's profile
+                int j = Mathf.RoundToInt(tAlong / NeospaceUnits.ModuleMeters + intervals / 2f);
+                if (j <= 0 || j >= intervals)
+                    continue;
+                if (Mathf.Abs(BoundaryMm(j) - NeospaceUnits.ToMm(tAlong)) > TolMm)
+                    continue;
+                joints.Add((j, DominantFace(o.Center - end, faceNormals)));
+            }
+        }
+
         for (int fi = 0; fi < 4; fi++)
         {
             Vector3 fn = faceNormals[fi];
+            var mask = new ChannelMask(h.Center, axis, fn, fi, masked, panels, modelDimensions);
 
             var dividers = new SortedSet<int> { 0, intervals };
             foreach ((int boundary, int face) in joints)
@@ -373,7 +525,9 @@ public static class FinishGenerator
             for (int s = 0; s + 1 < divList.Count; s++)
             {
                 int a = divList[s], b = divList[s + 1];
-                if (!TileSection(a, b, runs, capBoundaries))
+                if (!TileSection(a, b, runs, capBoundaries, (pos, size) =>
+                    !mask.Overlaps($"Veneer H{size}",
+                        (BoundaryMm(pos) + BoundaryMm(pos + size + 1)) * 0.5f)))
                 {
                     result.Warnings.Add($"{h.PartId}: a {b - a}-module body section has no veneer combination.");
                     continue;
@@ -382,12 +536,18 @@ public static class FinishGenerator
                 foreach ((int pos, int m) in runs)
                 {
                     float centreMm = (BoundaryMm(pos) + BoundaryMm(pos + m + 1)) * 0.5f;
-                    if (!MaskedAt(masked, fi, centreMm, VeneerHalfMm(m)))
-                    {
-                        result.Add($"Veneer H{m}", FacePoint(h.Center, axis, fn, centreMm), axis, fn);
-                        seated.Add(pos);
-                        seated.Add(pos + m + 1);
-                    }
+                    result.Add($"Veneer H{m}", FacePoint(h.Center, axis, fn, centreMm), axis, fn);
+                    seated.Add(pos);
+                    seated.Add(pos + m + 1);
+                }
+
+                // A bare 1-interval section has no veneer to seat its caps:
+                // seat both boundaries so a mid cap can still close it (body
+                // ends and joint boundaries stay filtered below).
+                if (b - a == 1)
+                {
+                    seated.Add(a);
+                    seated.Add(b);
                 }
             }
 
@@ -397,11 +557,37 @@ public static class FinishGenerator
                     continue; // beam body ends are joints, never capped
                 if (joints.Contains((pos, fi)) || !seated.Contains(pos))
                     continue;
-                if (MaskedAt(masked, fi, BoundaryMm(pos), CapHalfMm))
+                if (mask.Overlaps("Cap Side", BoundaryMm(pos)))
                     continue;
                 result.Add("Cap Side", FacePoint(h.Center, axis, fn, BoundaryMm(pos)), axis, fn);
             }
         }
+    }
+
+    /// <summary>
+    /// Sorted divider holes of one channel: every mandatory level, plus each
+    /// optional level that leaves at least two modules to its neighbours on
+    /// both sides (a single module has no veneer, so such a divider would
+    /// only add a bare strip between two caps). Optional levels are taken in
+    /// ascending order, so of two adjacent ones the lower survives.
+    /// </summary>
+    static List<int> DividerLevels(SortedSet<int> mandatory, SortedSet<int> optional)
+    {
+        var kept = new SortedSet<int>(mandatory);
+        foreach (int level in optional)
+        {
+            if (kept.Contains(level))
+                continue;
+            int prev = int.MinValue, next = int.MaxValue;
+            foreach (int k in kept)
+            {
+                if (k < level) prev = k;
+                else { next = k; break; }
+            }
+            if (level - prev >= 2 && next - level >= 2)
+                kept.Add(level);
+        }
+        return new List<int>(kept);
     }
 
     // ------------------------------------------------------------------
@@ -409,49 +595,84 @@ public static class FinishGenerator
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// Veneer runs (start hole, size) covering the section [a, b], plus the
-    /// cap holes the tiling introduces. Uses the exact catalogue combination
-    /// when one exists — with the full H1-H15 veneer range that is every
-    /// section of 2+ intervals. Sections with no combination (1 interval,
-    /// or any hole left by a slimmer future catalogue) degrade gracefully
-    /// instead of leaving the whole channel bare: every interval but one is
-    /// tiled and the single bare module near the middle is closed off with
-    /// a Cap Side at each of its holes. Returns false only when nothing
-    /// fits at all.
+    /// Tile exposed portions of [a,b] with real catalogue parts. Test each
+    /// candidate's entire plate before choosing it, so a panel in the middle
+    /// splits the run instead of discarding a long veneer and its exposed
+    /// remainder. Never shorten or stretch an FBX to fit a nonmodular gap.
     /// </summary>
     static bool TileSection(int a, int b, List<(int start, int size)> runs,
-                            SortedSet<int> capHoles)
+                            SortedSet<int> capHoles, System.Func<int, int, bool> canPlace)
     {
         runs.Clear();
         int L = b - a;
 
-        List<int> sizes = Finishing.CoverSegment(L);
-        if (sizes != null)
+        if (L == 1)
         {
-            int pos = a;
-            for (int k = 0; k < sizes.Count; k++)
-            {
-                runs.Add((pos, sizes[k]));
-                pos += sizes[k] + 1;
-                if (k < sizes.Count - 1)
-                    capHoles.Add(pos);
-            }
+            capHoles.Add(a);
+            capHoles.Add(b);
             return true;
         }
 
-        if (L < 3)
+        List<int> sizes = Finishing.CoverSegment(L);
+        if (sizes != null)
+        {
+            // Keep the catalogue's fewest/balanced-part preference when its
+            // complete run is exposed (the normal unpanelled case).
+            int pos = a;
+            bool clear = true;
+            foreach (int size in sizes)
+            {
+                if (!canPlace(pos, size)) { clear = false; break; }
+                pos += size + 1;
+            }
+            if (clear)
+            {
+                AppendRuns(a, sizes, runs, capHoles);
+                return true;
+            }
+        }
+
+        if (L < 2)
             return false;
 
-        // Best-effort split: even stretches below and above a 1-interval
-        // gap, the gap sitting at (or just above) the section's middle.
-        int lowLen = ((L - 1) / 2 + 1) & ~1;
-        int hiLen = L - 1 - lowLen;
-
-        AppendRuns(a, Finishing.CoverSegment(lowLen), runs, capHoles);
-        capHoles.Add(a + lowLen);
-        capHoles.Add(a + lowLen + 1);
-        if (hiLen > 0)
-            AppendRuns(a + lowLen + 1, Finishing.CoverSegment(hiLen), runs, capHoles);
+        // Dynamic programming over hole boundaries. Skipping a masked
+        // interval is allowed; maximize coverage, then minimize part count
+        // and prefer balanced sizes. This also retains separate exposed
+        // islands between multiple panels and handles off-grid board edges.
+        var covered = new int[L + 1];
+        var count = new int[L + 1];
+        var imbalance = new int[L + 1];
+        var chosen = new int[L];
+        for (int i = L - 1; i >= 0; i--)
+        {
+            chosen[i] = -1;
+            covered[i] = covered[i + 1];
+            count[i] = count[i + 1];
+            imbalance[i] = imbalance[i + 1];
+            foreach (int size in CatalogueData.VeneerLengths)
+            {
+                int span = size + 1;
+                if (i + span > L || !canPlace(a + i, size)) continue;
+                int c = span + covered[i + span];
+                int n = 1 + count[i + span];
+                int balance = span * span + imbalance[i + span];
+                if (c < covered[i] || (c == covered[i] && n > count[i]) ||
+                    (c == covered[i] && n == count[i] && balance >= imbalance[i])) continue;
+                covered[i] = c;
+                count[i] = n;
+                imbalance[i] = balance;
+                chosen[i] = size;
+            }
+        }
+        for (int i = 0; i < L;)
+        {
+            int size = chosen[i];
+            if (size < 0) { i++; continue; }
+            runs.Add((a + i, size));
+            capHoles.Add(a + i);
+            i += size + 1;
+            capHoles.Add(a + i);
+        }
         return true;
     }
 
@@ -461,10 +682,82 @@ public static class FinishGenerator
         int pos = start;
         for (int k = 0; k < sizes.Count; k++)
         {
+            capHoles.Add(pos);
             runs.Add((pos, sizes[k]));
             pos += sizes[k] + 1;
-            if (k < sizes.Count - 1)
-                capHoles.Add(pos);
+            capHoles.Add(pos);
+        }
+    }
+
+    /// <summary>
+    /// A face's channel coverage plus physical transverse obstructions.
+    /// A board beside the frame does not occupy its exposed coplanar faces:
+    /// the simplified plates' wider lips must not erase an entire channel.
+    /// </summary>
+    sealed class ChannelMask
+    {
+        readonly Vector3 _center, _axis, _normal;
+        readonly int _face;
+        readonly Dictionary<int, List<(float lo, float hi)>> _semantic;
+        readonly List<PanelBox> _panels;
+        readonly Dictionary<string, PartDimensions> _dimensions;
+        readonly Dictionary<string, List<(float lo, float hi)>> _physical =
+            new Dictionary<string, List<(float, float)>>();
+
+        public ChannelMask(Vector3 center, Vector3 axis, Vector3 normal, int face,
+            Dictionary<int, List<(float lo, float hi)>> semantic, List<PanelBox> panels,
+            Dictionary<string, PartDimensions> dimensions)
+        {
+            _center = center; _axis = axis; _normal = normal; _face = face;
+            _semantic = semantic; _panels = panels; _dimensions = dimensions;
+        }
+
+        public bool Overlaps(string model, float offsetMm)
+        {
+            PartDimensions size = Dimensions(model, _dimensions);
+            if (MaskedAt(_semantic, _face, offsetMm, size.HalfLengthMm)) return true;
+            if (_panels == null || _panels.Count == 0) return false;
+            if (!_physical.TryGetValue(model, out var ranges))
+            {
+                ranges = new List<(float, float)>();
+                // Must match FinishController.Place's thickness offset.
+                Vector3 origin = _center + _normal *
+                    NeospaceUnits.Mm(HalfProfileMm + size.HalfThicknessMm + 0.2f);
+                Vector3 width = Vector3.Cross(_axis, _normal).normalized;
+                foreach (PanelBox panel in _panels)
+                {
+                    if (IsAdjacentPanelSeam(panel, width)) continue;
+                    if (FinishPanelMasking.TrySweep(origin, _axis, width, _normal,
+                        NeospaceUnits.Mm(size.HalfWidthMm), NeospaceUnits.Mm(size.HalfThicknessMm),
+                        panel, out float lo, out float hi))
+                        ranges.Add((NeospaceUnits.ToMm(lo), NeospaceUnits.ToMm(hi)));
+                }
+                _physical.Add(model, ranges);
+            }
+            foreach (var range in ranges)
+                if (offsetMm + size.HalfLengthMm > range.lo + MaskTolMm &&
+                    offsetMm - size.HalfLengthMm < range.hi - MaskTolMm) return true;
+            return false;
+        }
+
+        bool IsAdjacentPanelSeam(PanelBox panel, Vector3 width)
+        {
+            // E.g. the top of an H beam beside a shelf. Only a face parallel
+            // to the board can have this seam; a shelf crossing a V post is
+            // perpendicular to its channel faces and still uses full SAT.
+            if (Mathf.Abs(Vector3.Dot(panel.Normal, _normal)) < 0.999f) return false;
+
+            float panelHalfWidth = Mathf.Abs(Vector3.Dot(panel.AxisU, width)) * panel.HalfU +
+                                   Mathf.Abs(Vector3.Dot(panel.AxisV, width)) * panel.HalfV +
+                                   Mathf.Abs(Vector3.Dot(panel.Normal, width)) * panel.HalfN;
+            float nearEdge = Mathf.Abs(Vector3.Dot(panel.Center - _center, width)) - panelHalfWidth;
+
+            // The board is beside the actual 41 mm frame footprint (within
+            // the placement allowance). Its boundary can graze the 42.259 mm
+            // simplified veneer lip; that does not hide the top/bottom
+            // channel. A board extending over the frame footprint remains a
+            // real physical obstruction.
+            return nearEdge >= NeospaceUnits.Mm(HalfProfileMm - SeamToleranceMm);
         }
     }
 
@@ -525,14 +818,6 @@ public static class FinishGenerator
             }
         }
         return best;
-    }
-
-    static Vector3 PerpendicularOf(Vector3 axis)
-    {
-        Vector3 p = Vector3.Cross(axis, Vector3.up);
-        if (p.sqrMagnitude < 1e-4f)
-            p = Vector3.Cross(axis, Vector3.right);
-        return p.normalized;
     }
 
     // ------------------------------------------------------------------
@@ -620,58 +905,6 @@ public static class FinishGenerator
     }
 
     /// <summary>
-    /// True when a post divider cap would sit on the MASKED side of the ring
-    /// band a resting board dresses. A board mounted over a ring of beams
-    /// slides its edge into their inward channels: those go bare, and the
-    /// coplanar post strips between the beam joints must stay bare too — a
-    /// lone white cap there breaks the band (the classic table-edge junction
-    /// post seen from below). The band is the profile-deep stretch just
-    /// behind the board's mounting face, near the board's footprint.
-    ///
-    /// Direction matters: only faces looking INTO the boarded area sit on
-    /// that masked side. Outward faces of edge and corner posts are coplanar
-    /// with the ring's VENEERED outer channels — their caps complete the
-    /// white band and must stay. Boards parallel to the post (wall panels)
-    /// never trigger this — their flanking post faces keep normal covering.
-    /// </summary>
-    static bool InPanelDressedBand(Vector3 capCenter, Vector3 faceNormal,
-                                   in FrameOverlapResolver.FrameRecord v,
-                                   List<PanelBox> panels)
-    {
-        if (panels == null)
-            return false;
-        Vector3 axis = v.LengthAxis;
-        foreach (PanelBox p in panels)
-        {
-            if (Mathf.Abs(Vector3.Dot(p.Normal, axis)) < 0.7f)
-                continue; // board must lie across the post
-
-            // Depth behind the board's plane, measured toward the post body
-            // (the side the structure is on). The board mid-plane rides
-            // 18 mm off the ring face and the ring runs one profile deep:
-            // the dressed band is ~[18, 59] mm behind the plane.
-            float side = Mathf.Sign(Vector3.Dot(v.Center - p.Center, p.Normal));
-            float depthMm = NeospaceUnits.ToMm(Vector3.Dot(capCenter - p.Center, p.Normal)) * side;
-            if (depthMm < 16f || depthMm > 61f)
-                continue;
-
-            Vector3 q = capCenter - p.Center;
-            float margin = NeospaceUnits.Mm(45f);
-            if (Mathf.Abs(Vector3.Dot(q, p.AxisU)) > p.HalfU + margin ||
-                Mathf.Abs(Vector3.Dot(q, p.AxisV)) > p.HalfV + margin)
-                continue; // board is nowhere near this post
-
-            // The cap's face must look toward the board's interior (in the
-            // board's plane) to sit on the masked side of the band.
-            Vector3 toBoard = p.Center - capCenter;
-            toBoard -= p.Normal * Vector3.Dot(toBoard, p.Normal);
-            if (Vector3.Dot(toBoard, faceNormal) > 0f)
-                return true;
-        }
-        return false;
-    }
-
-    /// <summary>
     /// True when a part centred at <paramref name="offsetMm"/> whose plate
     /// runs <paramref name="halfExtentMm"/> each way overlaps a masked range
     /// on this face. Span-aware: a cap centred just OUTSIDE a board still
@@ -713,10 +946,10 @@ public static class FinishGenerator
 
     /// <summary>
     /// Oriented box for one panel object: transform axes give the plate
-    /// basis, rendered bounds give the extents. Works for live build panels
+    /// basis, mesh-local bounds give the extents. Works for live build panels
     /// and for frozen panel children inside Space piece instances alike.
     /// </summary>
-    static bool TryPanelBox(Transform t, out PanelBox box)
+    public static bool TryPanelBox(Transform t, out PanelBox box)
     {
         box = default;
 
@@ -724,35 +957,43 @@ public static class FinishGenerator
         if (rends.Length == 0)
             return false;
 
-        Bounds b = rends[0].bounds;
-        for (int i = 1; i < rends.Length; i++)
-            b.Encapsulate(rends[i].bounds);
-
         Vector3 nrm = t.forward.normalized;
         Vector3 u = t.right.normalized;
         Vector3 v = t.up.normalized;
-
-        float halfU = 0f, halfV = 0f, halfN = 0f;
-        Vector3 e = b.extents;
-        for (int sx = -1; sx <= 1; sx += 2)
-        for (int sy = -1; sy <= 1; sy += 2)
-        for (int sz = -1; sz <= 1; sz += 2)
+        Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+        Vector3 max = -min;
+        bool found = false;
+        foreach (Renderer renderer in rends)
         {
-            Vector3 d = Vector3.Scale(e, new Vector3(sx, sy, sz));
-            halfU = Mathf.Max(halfU, Mathf.Abs(Vector3.Dot(d, u)));
-            halfV = Mathf.Max(halfV, Mathf.Abs(Vector3.Dot(d, v)));
-            halfN = Mathf.Max(halfN, Mathf.Abs(Vector3.Dot(d, nrm)));
+            if (!renderer.enabled) continue;
+            // Never reproject Renderer.bounds: it is already a world AABB,
+            // which fattens a rotated 1 mm board into a large solid volume.
+            Bounds local = renderer.localBounds;
+            for (int sx = -1; sx <= 1; sx += 2)
+            for (int sy = -1; sy <= 1; sy += 2)
+            for (int sz = -1; sz <= 1; sz += 2)
+            {
+                Vector3 corner = local.center + Vector3.Scale(local.extents, new Vector3(sx, sy, sz));
+                Vector3 d = renderer.transform.TransformPoint(corner) - t.position;
+                Vector3 projected = new Vector3(Vector3.Dot(d, u), Vector3.Dot(d, v), Vector3.Dot(d, nrm));
+                min = Vector3.Min(min, projected);
+                max = Vector3.Max(max, projected);
+                found = true;
+            }
         }
+        if (!found) return false;
+        Vector3 centre = (min + max) * 0.5f;
+        Vector3 half = (max - min) * 0.5f;
 
         box = new PanelBox
         {
-            Center = b.center,
+            Center = t.position + u * centre.x + v * centre.y + nrm * centre.z,
             Normal = nrm,
             AxisU = u,
             AxisV = v,
-            HalfU = halfU,
-            HalfV = halfV,
-            HalfN = halfN
+            HalfU = half.x,
+            HalfV = half.y,
+            HalfN = half.z
         };
         return true;
     }

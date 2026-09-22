@@ -204,7 +204,13 @@ public static class SpaceMerge
             }
             else
             {
-                rec.Axis = bounds.size.x >= bounds.size.z ? Vector3.right : Vector3.forward;
+                if (FrameOverlapResolver.TryPegEnds(child, out Vector3 pegA, out Vector3 pegB))
+                {
+                    rec.Center = (pegA + pegB) * 0.5f;
+                    rec.Axis = SnapAxis(pegB - pegA);
+                }
+                else
+                    rec.Axis = bounds.size.x >= bounds.size.z ? Vector3.right : Vector3.forward;
                 rec.HalfSpan = NeospaceUnits.Mm(Skeleton.HSkeletonLength(rec.Size)) * 0.5f;
             }
             return true;
@@ -1142,7 +1148,7 @@ public static class SpaceMerge
 
         foreach (KeyValuePair<int, List<BeamSplit.Segment>> kv in o.BeamPlans)
             SpawnBeamSegments(recs[kv.Key], kv.Value, partDatabase,
-                recs[kv.Key].Center, recs[kv.Key].Axis);
+                recs[kv.Key].Center, recs[kv.Key].Axis, preserveSingleTwistEnd: true);
 
         foreach (LineRebuild lr in o.LineRebuilds)
             SpawnBeamSegments(recs[lr.TemplateIdx], lr.Segments, partDatabase,
@@ -1272,12 +1278,22 @@ public static class SpaceMerge
     }
 
     static void SpawnBeamSegments(in PartRecord beam, List<BeamSplit.Segment> plan, PartDatabase db,
-        Vector3 runCenter, Vector3 runAxis)
+        Vector3 runCenter, Vector3 runAxis, bool preserveSingleTwistEnd = false)
     {
         string prefix = beam.Id.Substring(0, beam.Id.Length - beam.Size.ToString().Length);
-        foreach (BeamSplit.Segment seg in plan)
+        int twistSegment = -1;
+        if (preserveSingleTwistEnd && BeamPartUtility.IsTwist(beam.Id) && plan.Count > 1 && beam.Tr != null &&
+            FrameOverlapResolver.TryPegEnds(beam.Tr, out Vector3 originalPegA, out _))
         {
-            string segId = prefix + seg.Size;
+            // Only the original outer Peg A still meets an H host. Every
+            // internal cut meets the new V post and needs regular H ends.
+            bool positiveEnd = Vector3.Dot(originalPegA - beam.Center, runAxis) > 0f;
+            twistSegment = positiveEnd ? plan.Count - 1 : 0;
+        }
+        for (int segmentIndex = 0; segmentIndex < plan.Count; segmentIndex++)
+        {
+            BeamSplit.Segment seg = plan[segmentIndex];
+            string segId = (twistSegment >= 0 && segmentIndex != twistSegment ? "H" : prefix) + seg.Size;
             GameObject prefab = db != null ? db.GetRealPrefab(segId) : null;
             if (prefab == null)
             {
@@ -1298,7 +1314,9 @@ public static class SpaceMerge
             if (TryMeshBounds(go.transform, out Bounds b))
             {
                 Vector3 desired = runCenter + runAxis * NeospaceUnits.Mm(seg.CenterOffsetMm);
-                go.transform.position = desired - b.center;
+                Vector3 center = FrameOverlapResolver.TryPegEnds(go.transform, out Vector3 pegA, out Vector3 pegB)
+                    ? (pegA + pegB) * 0.5f : b.center;
+                go.transform.position = desired - center;
             }
             PriceDelta += PriceOfBeam(segId);
         }
@@ -1463,6 +1481,7 @@ public static class SpaceMerge
     static float PanelPrice()
     {
         UIBuildStats stats = Stats();
-        return stats != null ? stats.panelPrice : 0f;
+        float price = stats != null ? stats.panelPrice : 0f;
+        return price > 0f && !float.IsNaN(price) && !float.IsInfinity(price) ? price : 0f;
     }
 }

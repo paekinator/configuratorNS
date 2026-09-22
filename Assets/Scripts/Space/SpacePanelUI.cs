@@ -330,7 +330,7 @@ public class SpacePanelUI : MonoBehaviour
         nameRt.sizeDelta = new Vector2(-114f, 20f);
         name.overflowMode = TextOverflowModes.Ellipsis;
 
-        string meta = $"{record.beamCount + record.panelCount} parts";
+        string meta = $"{record.PartCount} parts";
         if (record.price > 0f)
             meta += $" · ${record.price:N0}";
         TextMeshProUGUI metaText = CreateText(rt, "Meta", meta, 10.5f, Muted, false);

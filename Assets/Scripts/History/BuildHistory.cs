@@ -44,6 +44,7 @@ public class BuildHistory : MonoBehaviour
     {
         public readonly List<BeamState> Beams = new List<BeamState>();
         public readonly List<PanelState> Panels = new List<PanelState>();
+        public bool FinishApplied;
         public string Signature;
         public bool IsEmpty => Beams.Count == 0 && Panels.Count == 0;
     }
@@ -52,8 +53,10 @@ public class BuildHistory : MonoBehaviour
     int _index = -1;
     int _captureAtFrame = -1;
     bool _restoring;
+    bool _externalRestore;
 
     public static BuildHistory Instance { get; private set; }
+    public bool IsRestoring => _restoring;
 
     /// <summary>
     /// While true (Space Mode), the piece-build history is fully dormant: no
@@ -110,6 +113,13 @@ public class BuildHistory : MonoBehaviour
 
     void HandleShortcuts()
     {
+        // Text editing owns Ctrl/Cmd+Z while a name, code or dimension field
+        // is focused; typing must never undo the structure behind a dialog.
+        GameObject selected = UnityEngine.EventSystems.EventSystem.current != null
+            ? UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject : null;
+        if (selected != null && selected.activeInHierarchy && (selected.GetComponentInParent<TMPro.TMP_InputField>() != null ||
+            selected.GetComponentInParent<UnityEngine.UI.InputField>() != null))
+            return;
         bool mod = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) ||
                    Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand);
         if (!mod)
@@ -158,6 +168,7 @@ public class BuildHistory : MonoBehaviour
     Snapshot ReadScene()
     {
         var snap = new Snapshot();
+        snap.FinishApplied = FinishController.Instance != null && FinishController.Instance.IsOn;
         int ghostMask = buildController != null ? buildController.ghostLayerMask.value : 0;
 
         foreach (BeamConnections conn in FindObjectsByType<BeamConnections>(FindObjectsSortMode.None))
@@ -208,6 +219,7 @@ public class BuildHistory : MonoBehaviour
         lines.Sort(System.StringComparer.Ordinal);
 
         var sb = new StringBuilder(lines.Count * 32);
+        sb.AppendLine(snap.FinishApplied ? "F|1" : "F|0");
         foreach (string line in lines)
             sb.AppendLine(line);
         return sb.ToString();
@@ -227,29 +239,41 @@ public class BuildHistory : MonoBehaviour
     {
         if (_restoring || Suspended)
             return;
-        if (!CanUndo)
-        {
-            SelectionStatus.Set("Nothing to undo.", 2f);
-            return;
-        }
-
-        _index--;
-        StartCoroutine(RestoreRoutine(_timeline[_index],
-            $"Undo · {_timeline.Count - 1 - _index} redo step{(_timeline.Count - 1 - _index == 1 ? "" : "s")} available."));
+        StartCoroutine(StepRoutine(undo: true));
     }
 
     public void Redo()
     {
         if (_restoring || Suspended)
             return;
-        if (!CanRedo)
+        StartCoroutine(StepRoutine(undo: false));
+    }
+
+    IEnumerator StepRoutine(bool undo)
+    {
+        _restoring = true;
+        // A button/shortcut may run before the next-frame capture of the
+        // previous action. Settle that action (including deferred Destroy)
+        // before selecting a history step, otherwise Undo can skip it.
+        if (_captureAtFrame >= 0)
         {
-            SelectionStatus.Set("Nothing to redo.", 2f);
-            return;
+            yield return null;
+            CaptureNow();
+            _captureAtFrame = -1;
         }
 
-        _index++;
-        StartCoroutine(RestoreRoutine(_timeline[_index], "Redo."));
+        if (undo ? !CanUndo : !CanRedo)
+        {
+            _restoring = false;
+            SelectionStatus.Set(undo ? "Nothing to undo." : "Nothing to redo.", 2f);
+            yield break;
+        }
+
+        _index += undo ? -1 : 1;
+        string message = undo
+            ? $"Undo · {_timeline.Count - 1 - _index} redo step{(_timeline.Count - 1 - _index == 1 ? "" : "s")} available."
+            : "Redo.";
+        yield return RestoreRoutine(_timeline[_index], message);
     }
 
     /// <summary>Remove every placed beam and panel. Undoable like any action.</summary>
@@ -258,31 +282,40 @@ public class BuildHistory : MonoBehaviour
         if (_restoring || Suspended)
             return;
 
+        StartCoroutine(ClearRoutine());
+    }
+
+    IEnumerator ClearRoutine()
+    {
+        _restoring = true;
+        if (_captureAtFrame >= 0)
+        {
+            yield return null;
+            CaptureNow();
+            _captureAtFrame = -1;
+        }
+
         Snapshot current = ReadScene();
         if (current.IsEmpty)
         {
+            _restoring = false;
             SelectionStatus.Set("The grid is already empty.", 2f);
-            return;
+            yield break;
         }
 
         int total = current.Beams.Count + current.Panels.Count;
-        StartCoroutine(ClearRoutine(total));
-    }
 
-    IEnumerator ClearRoutine(int total)
-    {
-        _restoring = true;
-
-        var veneers = FindObjectsByType<VeneerManager>(FindObjectsSortMode.None);
-        foreach (VeneerManager vm in veneers)
-            if (vm != null) vm.ClearVeneers();
-
+        // Finish dressing follows the structure automatically: clearing all
+        // parts triggers FinishController's rebuild, which dresses nothing.
         DestroyAllParts();
         yield return null;
 
         if (panelSlotManager != null)
             panelSlotManager.RebuildConnectionsAndRescanSlots();
 
+        // Empty restores do not pass through placement code. Announce their
+        // completed scene too, while still suppressing a new history step.
+        NotifyChanged();
         _restoring = false;
         _captureAtFrame = -1;
         CaptureNow();
@@ -331,10 +364,48 @@ public class BuildHistory : MonoBehaviour
         }
 
         yield return null;
+        if (FinishController.Instance != null || snap.FinishApplied)
+            FinishController.Ensure().SetOn(snap.FinishApplied, announce: false);
+        NotifyChanged();
         _restoring = false;
         _captureAtFrame = -1;
 
         SelectionStatus.Set(doneMessage, 3f);
+    }
+
+    /// <summary>Reserve history while an external load replays several frames.</summary>
+    public bool TryBeginExternalRestore()
+    {
+        if (_restoring || Suspended)
+            return false;
+        _restoring = true;
+        _externalRestore = true;
+        return true;
+    }
+
+    /// <summary>
+    /// Call after yielding one frame, before the external loader mutates parts.
+    /// This preserves an action whose deferred capture was still pending.
+    /// </summary>
+    public void CaptureBeforeExternalRestore()
+    {
+        if (!_externalRestore)
+            return;
+        CaptureNow();
+        _captureAtFrame = -1;
+    }
+
+    /// <summary>Call once the complete loaded (or rolled-back) scene is stable.</summary>
+    public void EndExternalRestore(bool recordChange)
+    {
+        if (!_externalRestore)
+            return;
+        NotifyChanged();
+        _captureAtFrame = -1;
+        if (recordChange)
+            CaptureNow();
+        _externalRestore = false;
+        _restoring = false;
     }
 
     void DestroyAllParts()

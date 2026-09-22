@@ -1,0 +1,14 @@
+Pure checks: 641
+Runtime suites: history/summary, restore/rollback, configurator-scene UI, physical finishing/refresh, exposed top/bottom channels, installed parts/pricing, merged Space parts/pricing, actual split-frame finishing, Space finish lifecycle
+Failures: 0
+
+Editor-only search diagnostics: 1
+ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+System.Collections.Generic.List`1[T].get_Item (System.Int32 index) (at <816f70bc2a9c4332b0bd119906a8d40e>:0)
+UnityEditor.Search.SearchDatabase+<EnumerateAll>d__75.MoveNext () (at <63b660f4a395488d8fa8f1e1bdf475bd>:0)
+System.Linq.Enumerable.TryGetFirst[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Boolean& found) (at <fe644d7ad1cf499ebe4e7ad937bc03bf>:0)
+System.Linq.Enumerable.First[TSource] (System.Collections.Generic.IEnumerable`1[T] source) (at <fe644d7ad1cf499ebe4e7ad937bc03bf>:0)
+UnityEditor.Search.SearchDatabase.GetDefaultSearchDatabase () (at <63b660f4a395488d8fa8f1e1bdf475bd>:0)
+UnityEditor.Search.SearchInit.IndexationOnStartup () (at <63b660f4a395488d8fa8f1e1bdf475bd>:0)
+UnityEditor.EditorApplication.Internal_CallDelayFunctions () (at <cd9a5dfa62e34daeb7c2d29ef5f4929b>:0)

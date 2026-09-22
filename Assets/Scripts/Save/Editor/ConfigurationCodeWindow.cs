@@ -43,17 +43,25 @@ public class ConfigurationCodeWindow : EditorWindow
                 }
                 else
                 {
-                    var model = ConfigurationCapture.Capture(build);
-                    if (model.Beams.Count == 0 && model.Panels.Count == 0)
+                    try
                     {
-                        SetStatus("The grid is empty — nothing to encode.", MessageType.Warning);
-                        _generated = string.Empty;
+                        var model = ConfigurationCapture.Capture(build);
+                        if (model.Beams.Count == 0 && model.Panels.Count == 0)
+                        {
+                            SetStatus("The grid is empty — nothing to encode.", MessageType.Warning);
+                            _generated = string.Empty;
+                        }
+                        else
+                        {
+                            _generated = ConfigurationCode.Encode(model);
+                            SetStatus($"Encoded {model.Beams.Count} beams, {model.Panels.Count} panels " +
+                                      $"({_generated.Length} characters).", MessageType.Info);
+                        }
                     }
-                    else
+                    catch (System.Exception e)
                     {
-                        _generated = ConfigurationCode.Encode(model);
-                        SetStatus($"Encoded {model.Beams.Count} beams, {model.Panels.Count} panels " +
-                                  $"({_generated.Length} characters).", MessageType.Info);
+                        _generated = string.Empty;
+                        SetStatus(e.Message, MessageType.Error);
                     }
                 }
             }
@@ -132,9 +140,7 @@ public class ConfigurationCodeWindow : EditorWindow
         {
             ConfigurationCode.Load(_pasted, build, report =>
             {
-                SetStatus(report.Summary, report.BeamsSkipped + report.PanelsSkipped > 0
-                    ? MessageType.Warning
-                    : MessageType.Info);
+                SetStatus(report.Summary, report.Succeeded ? MessageType.Info : MessageType.Error);
                 Repaint();
             });
             SetStatus("Loading…", MessageType.Info);

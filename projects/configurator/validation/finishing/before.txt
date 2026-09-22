@@ -1,0 +1,16 @@
+406 checks; 15 failures
+Finishing: partial side panel preserves the exposed lower +X channel
+Finishing: partial side panel preserves the exposed upper +X channel
+Finishing: opposite panel does not extend the +X mask above its own range
+Finishing: opposite panel does not extend the -X mask below its own range
+Finishing: both exposed ends survive on the +X channel
+Finishing: both exposed ends survive on the -X channel
+Finishing: overlapping board ranges preserve both exposed ends
+Finishing: an exposed bay between two panels keeps its veneer
+Finishing: separate board ranges preserve the external exposed bays too
+Finishing: horizontal shelf leaves no +X veneer/cap through the board thickness
+Finishing: horizontal shelf leaves no +Z veneer/cap through the board thickness
+Finishing: H7 partial panel preserves both exposed channel lengths
+Finishing: T7 partial panel preserves both exposed channel lengths
+Finishing: rotated panel OBB preserves actual in-plane half extents
+Finishing: rotated panel OBB preserves its 8 mm thickness

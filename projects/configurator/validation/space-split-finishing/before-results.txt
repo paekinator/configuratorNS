@@ -1,0 +1,94 @@
+Pure joint checks: 60
+Runtime suites: actual split-frame finishing, Space finish lifecycle
+Failures: 54
+Space finish junction: V9 at 0 degrees: a real H peg on the 20 mm socket face must interrupt the inward veneer at its hole
+Space finish junction: V9 at 0 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V9 at 0 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V9 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V9 at 0 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V9 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V9 at 0 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space finish junction: V9 at 37 degrees: a real H peg on the 20 mm socket face must interrupt the inward veneer at its hole
+Space finish junction: V9 at 37 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V9 at 37 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V9 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V9 at 37 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V9 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V9 at 37 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 0 degrees: an installed H joint must not receive a Cap Side over its occupied socket
+Space finish junction: V25 at 0 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V25 at 0 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V25 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V25 at 0 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 0 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V25 at 0 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 37 degrees: an installed H joint must not receive a Cap Side over its occupied socket
+Space finish junction: V25 at 37 degrees: physical face-tip and nominal axis-tip H joints produce identical post finishing
+Space finish junction: V25 at 37 degrees: normal imported AP rounding still recognizes the socket connection
+Space finish junction: V25 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side 1
+Space finish junction: V25 at 37 degrees: twist Peg B on side 1 has no veneer or cap over its occupied socket
+Space finish junction: V25 at 37 degrees: physical twist Peg B produces the nominal joint coverage on side -1
+Space finish junction: V25 at 37 degrees: twist Peg B on side -1 has no veneer or cap over its occupied socket
+Space split finishing: H7 yaw 0: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: H7 yaw 0: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: H7 yaw 37: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: H7 yaw 37: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: H7 yaw 90: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: H7 yaw 90: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: H7 yaw 180: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: H7 yaw 180: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: H7 yaw 270: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: H7 yaw 270: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: T7 yaw 0: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: T7 yaw 0: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: T7 yaw 37: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: T7 yaw 37: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: T7 yaw 90: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: T7 yaw 90: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: T7 yaw 180: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: T7 yaw 180: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: T7 yaw 270: freezing preserves the exact center, signed axis and both physical peg endpoints
+Space split finishing: T7 yaw 270: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+Space split finishing: H15 split yaw 0: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 0: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 90: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 90: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 180: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 180: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 270: H7 derived record follows its actual stripped marker transforms
+Space split finishing: H15 split yaw 270: H7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 0: single twist split retains one T7 and uses H7 at the new post connection
+Space split finishing: T15 split yaw 0: retained twist Peg A stays at the original H-host connection
+Space split finishing: T15 split yaw 0: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 0: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 0: joint-facing veneer stops at the beam but survives above and below (1.00, 0.00, 0.00)
+Space split finishing: T15 split yaw 90: single twist split retains one T7 and uses H7 at the new post connection
+Space split finishing: T15 split yaw 90: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 90: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 90: joint-facing veneer stops at the beam but survives above and below (0.00, 0.00, 1.00)
+Space split finishing: T15 split yaw 180: single twist split retains one T7 and uses H7 at the new post connection
+Space split finishing: T15 split yaw 180: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 180: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 180: joint-facing veneer stops at the beam but survives above and below (1.00, 0.00, 0.00)
+Space split finishing: T15 split yaw 270: single twist split retains one T7 and uses H7 at the new post connection
+Space split finishing: T15 split yaw 270: retained twist Peg A stays at the original H-host connection
+Space split finishing: T15 split yaw 270: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 270: T7 derived record follows its actual stripped marker transforms
+Space split finishing: T15 split yaw 270: joint-facing veneer stops at the beam but survives above and below (0.00, 0.00, 1.00)
+Finish Space lifecycle: committing a shelf while placement stays armed immediately replaces crossing long veneers
+Finish Space lifecycle: a second placement refreshes finishing after the panel split with the ghost still armed
+Finish Space lifecycle: abandoning a drag through deselection restores the last accepted pose and releases finishing
+Finish Space lifecycle: losing focus cancels an unfinished drag without latching Busy
+Finish Space lifecycle: disabling the interaction controller cancels its unfinished drag
+Finish Space lifecycle: a missed release edge completes the last accepted drag without moving to a stale cursor
+Finish Space lifecycle: missed-release completion creates one undoable move
+Editor-only search diagnostics: 1
+ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection.
+Parameter name: index
+System.Collections.Generic.List`1[T].get_Item (System.Int32 index) (at <816f70bc2a9c4332b0bd119906a8d40e>:0)
+UnityEditor.Search.SearchDatabase+<EnumerateAll>d__75.MoveNext () (at <63b660f4a395488d8fa8f1e1bdf475bd>:0)
+System.Linq.Enumerable.TryGetFirst[TSource] (System.Collections.Generic.IEnumerable`1[T] source, System.Boolean& found) (at <fe644d7ad1cf499ebe4e7ad937bc03bf>:0)
+System.Linq.Enumerable.First[TSource] (System.Collections.Generic.IEnumerable`1[T] source) (at <fe644d7ad1cf499ebe4e7ad937bc03bf>:0)
+UnityEditor.Search.SearchDatabase.GetDefaultSearchDatabase () (at <63b660f4a395488d8fa8f1e1bdf475bd>:0)
+UnityEditor.Search.SearchInit.IndexationOnStartup () (at <63b660f4a395488d8fa8f1e1bdf475bd>:0)
+UnityEditor.EditorApplication.Internal_CallDelayFunctions () (at <cd9a5dfa62e34daeb7c2d29ef5f4929b>:0)

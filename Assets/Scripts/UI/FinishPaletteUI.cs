@@ -17,7 +17,7 @@ using UnityEngine.UI;
 public class FinishPaletteUI : MonoBehaviour
 {
     const float PanelWidth = 340f;
-    const float PanelHeight = 408f;
+    const float PanelHeight = 474f;
     const float Margin = 18f;
 
     static FinishPaletteUI _instance;
@@ -29,6 +29,7 @@ public class FinishPaletteUI : MonoBehaviour
     TMP_FontAsset _font;
 
     RectTransform _panel;
+    TextMeshProUGUI _materialNote;
     readonly System.Collections.Generic.Dictionary<string, Image> _themeChips =
         new System.Collections.Generic.Dictionary<string, Image>();
     readonly System.Collections.Generic.Dictionary<string, Image> _panelRings =
@@ -146,6 +147,11 @@ public class FinishPaletteUI : MonoBehaviour
         BuildThemeChips();
         BuildSwatchRow("Panels", -264f, panels: true);
         BuildSwatchRow("Veneers & caps", -336f, panels: false);
+
+        _materialNote = CreateText(_panel, "MaterialNote", "", 11f, Muted, false);
+        PlaceTop(_materialNote.rectTransform, 20f, -402f, PanelWidth - 40f, 58f);
+        _materialNote.textWrappingMode = TextWrappingModes.Normal;
+        RegisterMuted(_materialNote);
 
         RefreshSelection();
     }
@@ -380,6 +386,10 @@ public class FinishPaletteUI : MonoBehaviour
 
         HighlightRow(_panelRings, FinishStyle.PanelSwatchId);
         HighlightRow(_dressingRings, FinishStyle.DressingSwatchId);
+        if (_materialNote != null)
+            _materialNote.text = $"Panels: {FinishStyle.PanelSwatch.Label}" +
+                (FinishStyle.PanelSwatch.Frosted ? " (translucent preview)" : " (opaque preview)") +
+                $". Veneers & caps: {FinishStyle.DressingSwatch.Label}. Confirm physical samples and material specifications before ordering.";
     }
 
     static void HighlightRow(System.Collections.Generic.Dictionary<string, Image> row, string selectedId)

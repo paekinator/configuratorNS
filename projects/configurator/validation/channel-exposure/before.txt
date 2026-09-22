@@ -1,0 +1,25 @@
+503 checks; 24 failures
+Channel exposure: H7 at 0 degrees: upper board preserves the exact full top channel run
+Channel exposure: H7 at 0 degrees: lower board preserves the exact full bottom channel run
+Channel exposure: H7 at 0 degrees: both boards preserves the exact full top channel run
+Channel exposure: H7 at 0 degrees: both boards preserves the exact full bottom channel run
+Channel exposure: H7 at 37 degrees: upper board preserves the exact full top channel run
+Channel exposure: H7 at 37 degrees: lower board preserves the exact full bottom channel run
+Channel exposure: H7 at 37 degrees: both boards preserves the exact full top channel run
+Channel exposure: H7 at 37 degrees: both boards preserves the exact full bottom channel run
+Channel exposure: H23 at 0 degrees: upper board preserves the exact full top channel run
+Channel exposure: H23 at 0 degrees: lower board preserves the exact full bottom channel run
+Channel exposure: H23 at 0 degrees: both boards preserves the exact full top channel run
+Channel exposure: H23 at 0 degrees: both boards preserves the exact full bottom channel run
+Channel exposure: H23 at 37 degrees: upper board preserves the exact full top channel run
+Channel exposure: H23 at 37 degrees: lower board preserves the exact full bottom channel run
+Channel exposure: H23 at 37 degrees: both boards preserves the exact full top channel run
+Channel exposure: H23 at 37 degrees: both boards preserves the exact full bottom channel run
+Channel exposure: T7 at 0 degrees: upper board preserves the exact full top channel run
+Channel exposure: T7 at 0 degrees: lower board preserves the exact full bottom channel run
+Channel exposure: T7 at 0 degrees: both boards preserves the exact full top channel run
+Channel exposure: T7 at 0 degrees: both boards preserves the exact full bottom channel run
+Channel exposure: T7 at 37 degrees: upper board preserves the exact full top channel run
+Channel exposure: T7 at 37 degrees: lower board preserves the exact full bottom channel run
+Channel exposure: T7 at 37 degrees: both boards preserves the exact full top channel run
+Channel exposure: T7 at 37 degrees: both boards preserves the exact full bottom channel run

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ece8e0">
+  <title>NEOSPACE Configurator</title>
+  <link rel="stylesheet" href="configurator.css">
+</head>
+<body>
+  <main id="configurator" aria-label="NEOSPACE Configurator">
+    <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1" aria-label="3D design workspace"></canvas>
+    <section id="loading-panel" aria-labelledby="loading-title">
+      <div class="loading-card">
+        <p class="wordmark">NEOSPACE</p>
+        <h1 id="loading-title">Preparing your workspace</h1>
+        <p id="loading-status" role="status" aria-live="polite">Loading the configurator…</p>
+        <progress id="loading-progress" max="1" value="0" aria-label="Configurator loading progress"></progress>
+        <p id="loading-hint">Your first visit may take a little longer.</p>
+        <button id="retry-button" type="button" hidden>Reload configurator</button>
+        <details id="error-details" hidden>
+          <summary>Technical details</summary>
+          <pre id="error-message"></pre>
+        </details>
+      </div>
+    </section>
+    <p id="connection-notice" role="status" aria-live="polite" hidden></p>
+  </main>
+  <noscript><p class="no-script">Enable JavaScript to open the configurator.</p></noscript>
+  <script src="configurator-loader.js" onerror="document.getElementById('loading-status').textContent = 'The loading page could not finish downloading. Reload to try again.'; var button = document.getElementById('retry-button'); button.hidden = false; button.onclick = function () { location.reload(); };"></script>
+  <script>
+    if (window.NeoConfiguratorLoader) window.NeoConfiguratorLoader.start({
+      loaderUrl: "Build/" + {{{ JSON.stringify(LOADER_FILENAME).replace(/</g, '\\u003c') }}},
+      dataUrl: "Build/" + {{{ JSON.stringify(DATA_FILENAME).replace(/</g, '\\u003c') }}},
+      frameworkUrl: "Build/" + {{{ JSON.stringify(FRAMEWORK_FILENAME).replace(/</g, '\\u003c') }}},
+      codeUrl: "Build/" + {{{ JSON.stringify(CODE_FILENAME).replace(/</g, '\\u003c') }}},
+#if MEMORY_FILENAME
+      memoryUrl: "Build/" + {{{ JSON.stringify(MEMORY_FILENAME).replace(/</g, '\\u003c') }}},
+#endif
+#if SYMBOLS_FILENAME
+      symbolsUrl: "Build/" + {{{ JSON.stringify(SYMBOLS_FILENAME).replace(/</g, '\\u003c') }}},
+#endif
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: {{{ JSON.stringify(COMPANY_NAME).replace(/</g, '\\u003c') }}},
+      productName: {{{ JSON.stringify(PRODUCT_NAME).replace(/</g, '\\u003c') }}},
+      productVersion: {{{ JSON.stringify(PRODUCT_VERSION).replace(/</g, '\\u003c') }}}
+    });
+  </script>
+</body>
+</html>

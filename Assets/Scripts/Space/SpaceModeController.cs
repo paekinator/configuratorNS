@@ -12,7 +12,7 @@ using UnityEngine.UI;
 ///  - every builder tool/controller is put to sleep and its history is
 ///    suspended (top-bar Undo/Redo/Clear route to the space history instead),
 ///  - the left panel switches to the "My Pieces" list,
-///  - the price readout shows the sum of the placed piece instances.
+///  - the summary counts and prices the actual merged physical parts.
 ///
 /// Camera, floor and top bar stay — same room, different work.
 /// </summary>
@@ -32,7 +32,7 @@ public class SpaceModeController : MonoBehaviour
         typeof(BuildController), typeof(FreePartSession),
         typeof(MarqueeSelectionController), typeof(PanelLayerMover),
         typeof(MoveGizmoController), typeof(AttachmentMarkerController),
-        typeof(StructureDimensionsController), typeof(UIBuildStats),
+        typeof(StructureDimensionsController),
         typeof(TemplateSession), typeof(GuidedModeController),
         typeof(TemplateGhostPreview), typeof(TemplatePreviewGuide),
         typeof(StructureClipboard), typeof(GhostController)
@@ -453,19 +453,9 @@ public class SpaceModeController : MonoBehaviour
         if (_stats == null)
             return;
 
-        int count = interaction.InstanceCount;
-        float total = 0f;
-        foreach (SpaceInstance inst in interaction.Instances)
-            total += inst.price;
-
-        // Merged pieces are priced as ONE structure: hidden shared/covered
-        // parts are deducted, catalogue pieces spawned by beam splits and
-        // panel divisions are added.
-        total = Mathf.Max(0f, total + SpaceMerge.PriceDelta);
-
-        if (_stats.partCountText != null)
-            _stats.partCountText.text = count == 1 ? "1 piece" : $"{count} pieces";
-        if (_stats.priceText != null)
-            _stats.priceText.text = "$" + total.ToString("N0");
+        // Saved card prices can be older than the current placeholder rates,
+        // and merges change both the frames and their generated finishes.
+        // The shared summary reads the active physical parts in this mode.
+        _stats.RefreshNow();
     }
 }

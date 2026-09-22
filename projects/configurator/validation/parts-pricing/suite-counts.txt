@@ -1,0 +1,8 @@
+Configurator pure validation: 581 checks, 0 failures
+History/summary regression: 54 checks executed.
+Configuration restore regression: 15 checks executed.
+Workflow UI smoke: 43 checks executed at 640 × 480; rectangle/wiring checks only.
+Finish runtime regression: 28 checks, 0 failures; evidence in Logs/finish-runtime.
+Channel exposure runtime regression: 139 checks, 0 failures.
+Build part summary regression: 155 checks, 0 failures.
+Space part summary regression: 10 checks, 0 failures.

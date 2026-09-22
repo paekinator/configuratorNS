@@ -454,7 +454,10 @@ public class SpaceInteractionController : MonoBehaviour
 
         if (_dragging)
         {
-            if (TryFloorPoint(Input.mousePosition, out Vector3 point))
+            bool held = Input.GetMouseButton(0);
+            // A release edge may be missed while focus or UI changes. Keep
+            // the last validated pose in that case, not a new cursor sample.
+            if ((held || Input.GetMouseButtonUp(0)) && TryFloorPoint(Input.mousePosition, out Vector3 point))
             {
                 Vector3 delta = SnapDelta(point - _grabPoint);
                 if (delta != _lastDragDelta && !MoveBlocked(delta))
@@ -465,7 +468,7 @@ public class SpaceInteractionController : MonoBehaviour
                 }
             }
 
-            if (Input.GetMouseButtonUp(0))
+            if (!held)
             {
                 _dragging = false;
                 _pressInstance = null;
@@ -483,6 +486,7 @@ public class SpaceInteractionController : MonoBehaviour
                     history.Record(CurrentStates());
                     UpdateSelectionStatus();
                 }
+                ResetDragInput();
             }
             return;
         }
@@ -584,11 +588,43 @@ public class SpaceInteractionController : MonoBehaviour
 
     public void DeselectAll()
     {
+        CancelDrag();
         foreach (SpaceInstance inst in _selected)
             if (inst != null)
                 inst.SetSelected(false);
         _selected.Clear();
         UpdateSelectionStatus();
+    }
+
+    // Deselecting, leaving the mode or losing focus abandons the gesture.
+    // Restore the last committed poses; cancellation must not add an undo
+    // step or leave Busy suppressing finishing for subsequent placements.
+    void CancelDrag()
+    {
+        bool wasDragging = _dragging;
+        if (wasDragging)
+            for (int i = 0; i < _selected.Count && i < _dragStartPositions.Count; i++)
+                if (_selected[i] != null)
+                    _selected[i].transform.position = _dragStartPositions[i];
+        ResetDragInput();
+        // Re-seat split/hidden parts after restoring poses, then let the
+        // normal merge notification regenerate finish with Busy released.
+        if (wasDragging && SpaceModeController.Active) ApplyMerge();
+    }
+
+    void ResetDragInput()
+    {
+        _dragging = false;
+        _pressInstance = null;
+        _pressWithShift = false;
+        _lastDragDelta = Vector3.zero;
+        _dragStartPositions.Clear();
+        _dragStartGroups.Clear();
+    }
+
+    void OnApplicationFocus(bool focused)
+    {
+        if (!focused) CancelDrag();
     }
 
     void UpdateSelectionStatus()
@@ -621,6 +657,8 @@ public class SpaceInteractionController : MonoBehaviour
     {
         if (_selected.Count == 0)
             return;
+
+        CancelDrag();
 
         if (!TryFindDuplicateOffset(out Vector3 offset))
         {
@@ -658,6 +696,8 @@ public class SpaceInteractionController : MonoBehaviour
     {
         if (_selected.Count == 0)
             return;
+
+        CancelDrag();
 
         // Turn around the selection's VISUAL centre (footprint centres, not
         // pivots) so a single piece spins in place instead of swinging around
@@ -762,10 +802,15 @@ public class SpaceInteractionController : MonoBehaviour
         if (_selected.Count == 0)
             return;
 
+        CancelDrag();
+
         int n = _selected.Count;
         foreach (SpaceInstance inst in _selected)
         {
             _instances.Remove(inst);
+            // Scene collectors must stop seeing the removed physical parts
+            // immediately; Destroy itself does not settle until frame end.
+            inst.gameObject.SetActive(false);
             Destroy(inst.gameObject);
         }
         _selected.Clear();
@@ -813,7 +858,10 @@ public class SpaceInteractionController : MonoBehaviour
         DeselectAll();
         foreach (SpaceInstance inst in _instances)
             if (inst != null)
+            {
+                inst.gameObject.SetActive(false);
                 Destroy(inst.gameObject);
+            }
         _instances.Clear();
 
         int pending = states.Count;
@@ -910,7 +958,11 @@ public class SpaceInteractionController : MonoBehaviour
     // ------------------------------------------------------------------
 
     void OnEnable() => UIThemeController.ThemeChanged += HandleThemeChanged;
-    void OnDisable() => UIThemeController.ThemeChanged -= HandleThemeChanged;
+    void OnDisable()
+    {
+        UIThemeController.ThemeChanged -= HandleThemeChanged;
+        CancelDrag();
+    }
 
     void HandleThemeChanged()
     {

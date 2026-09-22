@@ -44,6 +44,7 @@ public class PieceUI : MonoBehaviour
     readonly List<Texture2D> _thumbnails = new List<Texture2D>();
     readonly List<Behaviour> _suppressedCameraControls = new List<Behaviour>();
     string _openPieceId;
+    bool _saving;
 
     Color Ink => _theme != null ? CurrentPalette.ink : FallbackInk;
     Color Surface => _theme != null ? CurrentPalette.surface : FallbackSurface;
@@ -171,52 +172,83 @@ public class PieceUI : MonoBehaviour
 
     void SaveNewPiece()
     {
-        ConfigurationModel model = ConfigurationCapture.Capture(buildController);
-        if (model.Beams.Count == 0 && model.Panels.Count == 0)
-        {
-            SelectionStatus.Set("The grid is empty · build something before saving a piece.", 4f);
-            return;
-        }
-
-        string name = _nameInput != null ? _nameInput.text.Trim() : string.Empty;
-        if (string.IsNullOrEmpty(name))
-            name = $"Piece {PieceLibrary.LoadAll().Count + 1}";
-
-        var record = new PieceLibrary.PieceRecord
-        {
-            id = System.Guid.NewGuid().ToString("N"),
-            name = name,
-            createdUtc = PieceLibrary.NowUtc()
-        };
-
-        FillFromCurrentBuild(record, model);
-        PieceLibrary.Save(record);
-        _openPieceId = record.id;
-
-        // The name went into the saved piece; a stale name in the box would
-        // silently mislabel the next save.
-        if (_nameInput != null)
-            _nameInput.text = string.Empty;
-
-        Refresh();
-        SelectionStatus.Set($"Saved piece \"{record.name}\".", 4f);
+        SaveCurrent(null);
     }
 
     void OverwritePiece(PieceLibrary.PieceRecord record)
     {
-        ConfigurationModel model = ConfigurationCapture.Capture(buildController);
-        if (model.Beams.Count == 0 && model.Panels.Count == 0)
+        SaveCurrent(record);
+    }
+
+    void SaveCurrent(PieceLibrary.PieceRecord previous)
+    {
+        if (_saving || ConfigurationCode.GetOrCreateRestorer(buildController).IsRunning ||
+            (BuildHistory.Instance != null && BuildHistory.Instance.IsRestoring))
         {
-            SelectionStatus.Set("The grid is empty · nothing to overwrite the piece with.", 4f);
+            SelectionStatus.Set("Please wait for the current save or load to finish.", 4f);
             return;
         }
+        StartCoroutine(SaveCurrentRoutine(previous));
+    }
 
-        FillFromCurrentBuild(record, model);
-        PieceLibrary.Save(record);
-        _openPieceId = record.id;
+    IEnumerator SaveCurrentRoutine(PieceLibrary.PieceRecord previous)
+    {
+        _saving = true;
+        // A delete/undo may have used deferred Destroy this frame. Capture
+        // after it settles so the saved code and refreshed summary agree.
+        yield return null;
+        if (ConfigurationCode.GetOrCreateRestorer(buildController).IsRunning ||
+            (BuildHistory.Instance != null && BuildHistory.Instance.IsRestoring))
+        {
+            _saving = false;
+            SelectionStatus.Set("The build is still loading. Save again when it finishes.", 5f);
+            yield break;
+        }
+        try
+        {
+            ConfigurationModel model = ConfigurationCapture.Capture(buildController);
+            if (model.Beams.Count == 0 && model.Panels.Count == 0)
+            {
+                _saving = false;
+                SelectionStatus.Set("The grid is empty · build something before saving a piece.", 4f);
+                yield break;
+            }
+            var record = previous != null
+                ? JsonUtility.FromJson<PieceLibrary.PieceRecord>(JsonUtility.ToJson(previous))
+                : new PieceLibrary.PieceRecord
+                {
+                    id = System.Guid.NewGuid().ToString("N"),
+                    name = _nameInput != null ? _nameInput.text.Trim() : string.Empty,
+                    createdUtc = PieceLibrary.NowUtc()
+                };
+            if (string.IsNullOrWhiteSpace(record.name))
+                record.name = $"Piece {PieceLibrary.LoadAll().Count + 1}";
 
-        Refresh();
-        SelectionStatus.Set($"Updated \"{record.name}\" to match the current build.", 4f);
+            FillFromCurrentBuild(record, model);
+            _saving = true;
+            SelectionStatus.Set("Saving on this device… keep this window open.", 0f);
+            PieceLibrary.SaveConfirmed(record, error =>
+            {
+                _saving = false;
+                if (error != null)
+                {
+                    SelectionStatus.Set("Save not confirmed. " + error + " Use the piece ID/code for an independent backup.", 12f);
+                    FindFirstObjectByType<ConfigurationCodeUI>()?.ShowShareDialog(
+                        "Save backup code", record.code,
+                        "Local save was not confirmed. Copy and keep this code before closing.");
+                    return;
+                }
+                _openPieceId = record.id;
+                if (previous == null && _nameInput != null) _nameInput.text = string.Empty;
+                Refresh();
+                SelectionStatus.Set($"Saved \"{record.name}\" on this device. Use ID to keep a separate backup.", 7f);
+            });
+        }
+        catch (System.Exception e)
+        {
+            _saving = false;
+            SelectionStatus.Set("Could not save the piece: " + e.Message, 8f);
+        }
     }
 
     /// <summary>Code + metadata + fresh thumbnail from the live scene.</summary>
@@ -224,8 +256,13 @@ public class PieceUI : MonoBehaviour
     {
         record.code = ConfigurationCode.Encode(model);
         record.modifiedUtc = PieceLibrary.NowUtc();
-        record.beamCount = model.Beams.Count;
-        record.panelCount = model.Panels.Count;
+
+        var stats = FindFirstObjectByType<UIBuildStats>();
+        if (stats != null) stats.RefreshNow();
+        record.beamCount = stats != null ? stats.Summary.FrameCount : model.Beams.Count;
+        record.panelCount = stats != null ? stats.Summary.PanelCount : model.Panels.Count;
+        record.finishCount = stats != null ? stats.Summary.FinishCount : 0;
+        record.price = stats != null ? (float)stats.Summary.TotalPrice : 0f;
 
         bool hasBounds = StructureBounds.TryCompute(buildController, out StructureBounds.Info info);
         if (hasBounds)
@@ -234,9 +271,6 @@ public class PieceUI : MonoBehaviour
             record.depthMm = Mathf.RoundToInt(info.DepthMm);
             record.heightMm = Mathf.RoundToInt(info.HeightMm);
         }
-
-        var stats = FindFirstObjectByType<UIBuildStats>();
-        record.price = stats != null ? stats.TotalPrice : 0f;
 
         Camera cam = buildController != null && buildController.cam != null
             ? buildController.cam
@@ -249,14 +283,23 @@ public class PieceUI : MonoBehaviour
             : PieceLibrary.CaptureThumbnail(cam);
         if (thumb != null)
         {
-            PieceLibrary.SaveThumbnail(record.id, thumb);
-            record.hasThumbnail = true;
-            Destroy(thumb);
+            try
+            {
+                PieceLibrary.SaveThumbnail(record.id, thumb);
+                record.hasThumbnail = true;
+            }
+            catch (System.Exception e) { Debug.LogWarning("[Pieces] Saving without a new thumbnail: " + e.Message); }
+            finally { Destroy(thumb); }
         }
     }
 
     void OpenPiece(PieceLibrary.PieceRecord record)
     {
+        if (_saving)
+        {
+            SelectionStatus.Set("Please wait for the save to finish.", 4f);
+            return;
+        }
         ConfigurationCodeValidation check = ConfigurationCode.Validate(record.code);
         if (!check.IsValid)
         {
@@ -278,12 +321,14 @@ public class PieceUI : MonoBehaviour
         restorer.Restore(check.Model, report =>
         {
             SelectionStatus.Set(
-                $"Opened \"{record.name}\" · {report.Summary} Ctrl+Z (Cmd+Z) restores the previous build.", 7f);
+                report.Succeeded
+                    ? $"Opened \"{record.name}\" · {report.Summary} Ctrl+Z (Cmd+Z) restores the previous build."
+                    : report.Summary, 7f);
 
             // Older pieces (or failed captures) may have no thumbnail; the
             // piece is now fully rebuilt in the scene, so this is the perfect
             // moment to backfill one.
-            if (!record.hasThumbnail)
+            if (report.Succeeded && !record.hasThumbnail)
                 BackfillThumbnail(record);
         });
 
@@ -302,19 +347,36 @@ public class PieceUI : MonoBehaviour
         if (thumb == null)
             return;
 
-        PieceLibrary.SaveThumbnail(record.id, thumb);
-        Destroy(thumb);
-        record.hasThumbnail = true;
-        PieceLibrary.Save(record);
+        try
+        {
+            PieceLibrary.SaveThumbnail(record.id, thumb);
+            record.hasThumbnail = true;
+            PieceLibrary.SaveConfirmed(record, error =>
+            {
+                if (error != null) Debug.LogWarning("[Pieces] Thumbnail update was not saved: " + error);
+            });
+        }
+        catch (System.Exception e) { Debug.LogWarning("[Pieces] Thumbnail unavailable: " + e.Message); }
+        finally { Destroy(thumb); }
     }
 
     void DeletePiece(PieceLibrary.PieceRecord record)
     {
-        PieceLibrary.Delete(record.id);
-        if (_openPieceId == record.id)
-            _openPieceId = null;
-        Refresh();
-        SelectionStatus.Set($"Deleted piece \"{record.name}\".", 4f);
+        if (_saving) return;
+        try
+        {
+            PieceLibrary.Delete(record.id);
+            _saving = true;
+            LocalSavePersistence.Flush(error =>
+            {
+                _saving = false;
+                if (_openPieceId == record.id) _openPieceId = null;
+                Refresh();
+                SelectionStatus.Set(error == null ? $"Deleted piece \"{record.name}\"."
+                    : "Deletion was not confirmed by local storage: " + error, 7f);
+            });
+        }
+        catch (System.Exception e) { SelectionStatus.Set("Could not delete the piece: " + e.Message, 7f); }
     }
 
     // ------------------------------------------------------------------
@@ -358,8 +420,8 @@ public class PieceUI : MonoBehaviour
             _theme.inkTexts.Add(title);
 
         TextMeshProUGUI hint = CreateText(_panel, "Hint",
-            "A piece is one saved furniture item. Open replaces the current build (undoable).",
-            11f, Muted, false);
+            "Saved on this device/browser only. Clearing site data removes saves. Keep an ID code backup. Open is undoable.",
+            10f, Muted, false);
         PlaceTop(hint.rectTransform, 20f, -46f, 332f, 30f);
         hint.textWrappingMode = TextWrappingModes.Normal;
         if (_theme != null)
@@ -469,7 +531,15 @@ public class PieceUI : MonoBehaviour
         for (int i = _listContent.childCount - 1; i >= 0; i--)
             Destroy(_listContent.GetChild(i).gameObject);
 
-        List<PieceLibrary.PieceRecord> records = PieceLibrary.LoadAll();
+        List<PieceLibrary.PieceRecord> records;
+        try { records = PieceLibrary.LoadAll(); }
+        catch (System.Exception e)
+        {
+            SelectionStatus.Set("Cannot read saved pieces: " + e.Message, 8f);
+            return;
+        }
+        if (!string.IsNullOrEmpty(PieceLibrary.LastLoadWarning))
+            SelectionStatus.Set(PieceLibrary.LastLoadWarning, 9f);
         if (_emptyLabel != null)
             _emptyLabel.gameObject.SetActive(records.Count == 0);
 
@@ -522,8 +592,9 @@ public class PieceUI : MonoBehaviour
         nameRt.sizeDelta = new Vector2(-92f - 186f, 20f);
         name.overflowMode = TextOverflowModes.Ellipsis;
 
-        int parts = record.beamCount + record.panelCount;
+        int parts = record.PartCount;
         string meta = $"{parts} parts · {record.widthMm}×{record.depthMm}×{record.heightMm} mm";
+        if (record.recovered) meta = "Recovered · " + meta;
         if (record.price > 0f)
             meta += $" · ${record.price:N0}";
         TextMeshProUGUI metaText = CreateText(rt, "Meta", meta, 10.5f, Muted, false);

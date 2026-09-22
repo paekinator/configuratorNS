@@ -1,0 +1,13 @@
+{
+  "workspace": "C:\\Users\\Nebula PC\\Documents\\configurator beta 1.0.0",
+  "validationProject": "C:\\Users\\Nebula PC\\Documents\\configurator beta 1.0.0\\tmp\\task-validation",
+  "verifiedAtUtc": "2026-09-15T06:21:36.2391086Z",
+  "comparedFiles": 460,
+  "scope": [
+    "Assets/Scripts",
+    "Assets/Prefabs",
+    "Assets/Resources/Finish",
+    "Assets/Scenes/ConfiguratorScene.unity"
+  ],
+  "mismatches": []
+}

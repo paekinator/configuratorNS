@@ -1,0 +1,11 @@
+{
+    "unityVersion": "6000.5.0f1",
+    "productVersion": "0.1.0",
+    "target": "StandaloneWindows64",
+    "entryScene": "Assets/Scenes/ConfiguratorScene.unity",
+    "development": false,
+    "builtAtUtc": "2026-09-14T14:39:55.1602278Z",
+    "totalBytes": "169462570",
+    "warnings": 676,
+    "errors": 0
+}

@@ -1,0 +1,47 @@
+Space split finishing: 237 checks, 46 failures.
+H7 yaw 0: freezing preserves the exact center, signed axis and both physical peg endpoints
+H7 yaw 0: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+H7 yaw 37: freezing preserves the exact center, signed axis and both physical peg endpoints
+H7 yaw 37: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+H7 yaw 90: freezing preserves the exact center, signed axis and both physical peg endpoints
+H7 yaw 90: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+H7 yaw 180: freezing preserves the exact center, signed axis and both physical peg endpoints
+H7 yaw 180: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+H7 yaw 270: freezing preserves the exact center, signed axis and both physical peg endpoints
+H7 yaw 270: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+T7 yaw 0: freezing preserves the exact center, signed axis and both physical peg endpoints
+T7 yaw 0: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+T7 yaw 37: freezing preserves the exact center, signed axis and both physical peg endpoints
+T7 yaw 37: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+T7 yaw 90: freezing preserves the exact center, signed axis and both physical peg endpoints
+T7 yaw 90: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+T7 yaw 180: freezing preserves the exact center, signed axis and both physical peg endpoints
+T7 yaw 180: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+T7 yaw 270: freezing preserves the exact center, signed axis and both physical peg endpoints
+T7 yaw 270: frozen endpoints retain Peg A/Peg B identity at their actual transforms
+H15 split yaw 0: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 0: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 90: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 90: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 180: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 180: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 270: H7 derived record follows its actual stripped marker transforms
+H15 split yaw 270: H7 derived record follows its actual stripped marker transforms
+T15 split yaw 0: single twist split retains one T7 and uses H7 at the new post connection
+T15 split yaw 0: retained twist Peg A stays at the original H-host connection
+T15 split yaw 0: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 0: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 0: joint-facing veneer stops at the beam but survives above and below (1.00, 0.00, 0.00)
+T15 split yaw 90: single twist split retains one T7 and uses H7 at the new post connection
+T15 split yaw 90: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 90: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 90: joint-facing veneer stops at the beam but survives above and below (0.00, 0.00, 1.00)
+T15 split yaw 180: single twist split retains one T7 and uses H7 at the new post connection
+T15 split yaw 180: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 180: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 180: joint-facing veneer stops at the beam but survives above and below (1.00, 0.00, 0.00)
+T15 split yaw 270: single twist split retains one T7 and uses H7 at the new post connection
+T15 split yaw 270: retained twist Peg A stays at the original H-host connection
+T15 split yaw 270: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 270: T7 derived record follows its actual stripped marker transforms
+T15 split yaw 270: joint-facing veneer stops at the beam but survives above and below (0.00, 0.00, 1.00)

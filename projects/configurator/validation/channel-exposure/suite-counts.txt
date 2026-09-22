@@ -1,0 +1,5 @@
+History/summary regression: 54 checks executed.
+Configuration restore regression: 15 checks executed.
+Workflow UI smoke: 31 checks executed at 640 × 480; rectangle/wiring checks only.
+Finish runtime regression: 28 checks, 0 failures; evidence in Logs/finish-runtime.
+Channel exposure runtime regression: 139 checks, 0 failures.
