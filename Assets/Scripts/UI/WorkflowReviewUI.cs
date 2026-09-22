@@ -29,13 +29,94 @@ public class WorkflowReviewUI : MonoBehaviour
     {
         _canvas = FindFirstObjectByType<Canvas>();
         _theme = FindFirstObjectByType<UIThemeController>();
-        var menu = FindFirstObjectByType<UITopBarMenu>();
-        if (_canvas == null || menu == null || menu.panel == null) return;
-        AddMenuItem(menu, "Btn_SpaceSize", "Set space size", SpacePlanningUI.Show);
-        AddMenuItem(menu, "Btn_PartsPrices", "Parts & prices", ShowParts);
-        AddMenuItem(menu, "Btn_BuildGuide", "Build & save guide", ShowGuide);
-        AddMenuItem(menu, "Btn_Quote", "Prepare quote", ShowQuote);
-        ArrangeMenu(menu);
+        if (_canvas == null) return;
+
+        // The old top-bar overflow menu is gone; the utility rail on the
+        // right is where the chrome actions live now. These four hang off
+        // it below the baked buttons, cloned from one of them so they share
+        // its size, hover and hint behaviour.
+        Transform rail = UIChrome.Rail(_canvas.transform);
+        if (rail == null) return;
+        Transform template = UIChrome.FindButton(_canvas.transform, "Btn_Projects");
+        if (template == null || !template.IsChildOf(rail))
+            template = UIChrome.FindButton(_canvas.transform, "Btn_Settings");
+        if (template == null || !template.IsChildOf(rail)) return;
+
+        int added = 0;
+        if (rail.Find("Sep_Workflow") == null)
+        {
+            Transform separator = rail.Find("Sep_Actions");
+            if (separator != null)
+            {
+                GameObject sep = Instantiate(separator.gameObject, rail);
+                sep.name = "Sep_Workflow";
+                added++;
+            }
+        }
+        added += AddRailButton(rail, template, "Btn_SpaceSize", "Size", "Set space size", SpacePlanningUI.Show);
+        added += AddRailButton(rail, template, "Btn_PartsPrices", "Parts", "Parts & prices", ShowParts);
+        added += AddRailButton(rail, template, "Btn_BuildGuide", "Guide", "Build & save guide", ShowGuide);
+        added += AddRailButton(rail, template, "Btn_Quote", "Quote", "Prepare quote", ShowQuote);
+
+        // The rail is a fixed-height column sized for its baked rows; grow it
+        // by the rows we appended (the layout group stacks them downward).
+        if (added > 0 && rail is RectTransform railRect)
+        {
+            float rows = added * (UIChrome.RowHeight + 1f);
+            railRect.sizeDelta = new Vector2(railRect.sizeDelta.x, railRect.sizeDelta.y + rows);
+        }
+    }
+
+    /// <summary>
+    /// A rail row for one workflow action: cloned from a baked rail button
+    /// (so it keeps RailButtonVisual's hover, hint and status flash), shown
+    /// as a short text label because the baked icons are editor-only sprites.
+    /// Returns 1 when a row was created, 0 when an existing one was rewired.
+    /// </summary>
+    int AddRailButton(Transform rail, Transform template, string name, string label, string hint,
+        UnityEngine.Events.UnityAction action)
+    {
+        Transform existing = rail.Find(name);
+        bool created = existing == null;
+        GameObject go = created ? Instantiate(template.gameObject, rail) : existing.gameObject;
+        go.name = name;
+        go.SetActive(true);
+
+        Button button = go.GetComponent<Button>();
+        if (button != null)
+        {
+            // The template's baked listeners (its own panel toggle) must not
+            // fire from the clone; runtime listeners are not copied.
+            for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+                button.onClick.SetPersistentListenerState(i, UnityEngine.Events.UnityEventCallState.Off);
+            button.onClick.RemoveListener(action);
+            button.onClick.AddListener(action);
+        }
+
+        var visual = go.GetComponent<RailButtonVisual>();
+        if (visual != null)
+        {
+            visual.watchedPanelName = null;
+            visual.hint = hint;
+        }
+
+        if (created)
+        {
+            Transform icon = go.transform.Find("Icon");
+            if (icon != null) icon.gameObject.SetActive(false);
+            var text = go.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (text != null)
+            {
+                text.gameObject.SetActive(true);
+                text.text = label;
+                text.fontSize = 8.5f;
+                text.enableAutoSizing = false;
+                text.alignment = TextAlignmentOptions.Center;
+                text.raycastTarget = false;
+                if (visual != null) visual.icon = text;
+            }
+        }
+        return created ? 1 : 0;
     }
 
     void Update()
@@ -45,12 +126,12 @@ public class WorkflowReviewUI : MonoBehaviour
 
     public void ShowGuide()
     {
-        Show("Build, save and review", "1. SET YOUR SPACE\nChoose Set space size from the menu and enter width, depth and height. The remaining fit compares the design's overall dimensions with that space; allow additional installation clearance.\n\n" +
-            "2. BUILD\nUse Tools for guided frames and panels, or Parts to place individual beams. Press Esc to put a tool down. Ctrl+Z (Cmd+Z) undoes a change.\n\n" +
+        Show("Build, save and review", "1. SET YOUR SPACE\nClick Size on the right-hand rail and enter width, depth and height. The remaining fit compares the design's overall dimensions with that space; allow additional installation clearance.\n\n" +
+            "2. BUILD\nIn Pro mode use the Build tab's tools for guided frames and panels, or place individual beams. Press Esc to put a tool down. Ctrl+Z (Cmd+Z) undoes a change.\n\n" +
             "3. FINISH\nTurn Finish on to add veneers and caps. Open Palette to choose panel and frame-dressing colours. Colours on screen are previews; confirm samples before ordering.\n\n" +
-            "4. SAVE\nOpen My Pieces, name your design and choose Save as piece. Pieces are stored on this device/browser. Keep a separate copy of the piece's ID code for a portable backup. Local data can be lost if browser storage is cleared.\n\n" +
-            "5. REOPEN\nUse Open in My Pieces, or Load code from the menu. Opening a piece replaces the current build and can be undone. Check its parts, panels and finish before continuing.\n\n" +
-            "6. REVIEW\nClick the parts/price total or choose Parts & prices from the menu to review frames, panels, veneers, caps and feet. Prices are placeholders. In Piece Mode, choose Prepare quote to copy or download the design and its parts list for your supplier; checkout is not connected.", false);
+            "4. SAVE\nOpen My Projects (folder on the rail), name your design and choose Save project. Reusable modules are saved from the Blocks tab. Saves are stored on this device/browser. Keep a separate copy of the design's code for a portable backup. Local data can be lost if browser storage is cleared.\n\n" +
+            "5. REOPEN\nUse Open in My Projects, or Open from code there. Opening a design replaces the current build and can be undone. Check its parts, panels and finish before continuing.\n\n" +
+            "6. REVIEW\nClick Parts on the rail to review frames, panels, veneers, caps and feet. Prices are placeholders. In Pro mode, click Quote on the rail to copy or download the design and its parts list for your supplier; checkout is not connected.", false);
     }
 
     /// <summary>Open the current bill of parts from the menu or summary pill.</summary>
@@ -270,28 +351,6 @@ public class WorkflowReviewUI : MonoBehaviour
         text.alignment = TextAlignmentOptions.Midline;
         Stretch(text.rectTransform, new Vector2(8, 0), new Vector2(-8, 0));
         return button;
-    }
-
-    void AddMenuItem(UITopBarMenu menu, string name, string label, UnityEngine.Events.UnityAction action)
-    {
-        if (menu.panel.transform.Find(name) != null) return;
-        Button button = Button(menu.panel.transform, label, () => { menu.Close(); action(); });
-        button.name = name;
-    }
-
-    static void ArrangeMenu(UITopBarMenu menu)
-    {
-        Transform root = menu.panel.transform;
-        float y = -8;
-        foreach (string name in new[] { "Btn_LoadCode", "Btn_SpaceSize", "Btn_PartsPrices", "Btn_BuildGuide", "Btn_Quote", "Btn_ClearAll" })
-        {
-            if (!(root.Find(name) is RectTransform row)) continue;
-            Place(row, new Vector2(0, 1), Vector2.one, new Vector2(8, y - 44), new Vector2(-8, y));
-            y -= 48;
-        }
-        Transform divider = root.Find("Divider");
-        if (divider != null) divider.gameObject.SetActive(false);
-        ((RectTransform)root).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, -y + 4);
     }
 
     static void Stretch(RectTransform rt, Vector2 min, Vector2 max) => Place(rt, Vector2.zero, Vector2.one, min, max);

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03ab36f0a03bfd4a9dd904b6bf8229b, type: 3}
+  m_Name: 05 IBM Plex Sans + IBM Plex Mono
+  m_EditorClassIdentifier: Assembly-CSharp::NeospaceTypographySet
+  displayName: IBM Plex Sans + IBM Plex Mono
+  character: Engineered and highly coherent, with a strong technical association.
+  primaryRegular: {fileID: 11400000, guid: 1b37cedd1ea385741880940e75038e19, type: 2}
+  primaryMedium: {fileID: 11400000, guid: d73ee25156038cc4a97b17c4a4fdaddb, type: 2}
+  primarySemiBold: {fileID: 11400000, guid: f894540466fee0c44b8ae24b5f966d89, type: 2}
+  technicalRegular: {fileID: 11400000, guid: bf646336912b56d478f9ac9ba2b5a11e, type: 2}
+  technicalMedium: {fileID: 11400000, guid: 557e7430c89ee4e41a60336f6a121661, type: 2}
+  technicalSemiBold: {fileID: 11400000, guid: c187916bf245b8443b43f1bc97a81bb9, type: 2}
+  displayMedium: {fileID: 0}
+  displaySemiBold: {fileID: 0}

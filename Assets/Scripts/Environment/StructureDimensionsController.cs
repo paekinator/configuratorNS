@@ -31,6 +31,9 @@ public class StructureDimensionsController : MonoBehaviour
     public Color lineColor = new Color(0.55f, 0.52f, 0.47f, 0.75f);
     public Color labelColor = new Color(0.42f, 0.40f, 0.36f, 0.95f);
 
+    [Tooltip("Typography-set technical face. Falls back to the Evo preset when empty.")]
+    public TMP_FontAsset typographyFont;
+
     [Header("Timing (seconds)")]
     [Tooltip("How long the annotations stay after a change before fading.")]
     public float holdSeconds = 4f;
@@ -101,9 +104,13 @@ public class StructureDimensionsController : MonoBehaviour
 
     void Awake()
     {
-        var preset = Resources.Load<Evo.UI.StylerPreset>("Styler Presets/Default");
-        if (preset != null && !preset.TryGetFont("Inter - Semi Bold", out _font))
-            preset.TryGetFont("Inter - Bold", out _font);
+        _font = typographyFont;
+        if (_font == null)
+        {
+            var preset = Resources.Load<Evo.UI.StylerPreset>("Styler Presets/Default");
+            if (preset != null && !preset.TryGetFont("Inter - Semi Bold", out _font))
+                preset.TryGetFont("Inter - Bold", out _font);
+        }
 
         _material = new Material(Shader.Find("Sprites/Default"));
 

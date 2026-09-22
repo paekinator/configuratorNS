@@ -10,11 +10,11 @@ using UnityEngine.UI;
 /// Entering Space Mode:
 ///  - the current piece build is hidden (kept intact, restored on exit),
 ///  - every builder tool/controller is put to sleep and its history is
-///    suspended (top-bar Undo/Redo/Clear route to the space history instead),
-///  - the left panel switches to the "My Pieces" list,
-///  - the summary counts and prices the actual merged physical parts.
+///    suspended (the rail's Undo/Redo route to the space history instead),
+///  - the dock's tabs switch to the block library,
+///  - the shared summary counts and prices the actual merged physical parts.
 ///
-/// Camera, floor and top bar stay — same room, different work.
+/// Camera, floor and chrome stay — same room, different work.
 /// </summary>
 public class SpaceModeController : MonoBehaviour
 {
@@ -26,6 +26,16 @@ public class SpaceModeController : MonoBehaviour
 
     public static bool Active { get; private set; }
 
+    /// <summary>
+    /// Raised whenever the mode changes, with the new value of
+    /// <see cref="Active"/> — true for Lite (Space), false for Pro (Piece).
+    ///
+    /// Added so the dock can swap its tab set with the mode. Mode used to be
+    /// readable only by polling the static, which meant anything that cared
+    /// had to check it every frame or be told by hand.
+    /// </summary>
+    public static event System.Action<bool> ModeChanged;
+
     // Builder components put to sleep while Space Mode runs.
     static readonly System.Type[] SleepTypes =
     {
@@ -36,26 +46,40 @@ public class SpaceModeController : MonoBehaviour
         typeof(TemplateSession), typeof(GuidedModeController),
         typeof(TemplateGhostPreview), typeof(TemplatePreviewGuide),
         typeof(StructureClipboard), typeof(GhostController)
-        // AdaptiveGridController stays awake: the grid adapts to placed
-        // piece instances in Space Mode too (StructureBounds counts them).
+        // GroundGridController stays awake: the grid adapts to placed piece
+        // instances in Space Mode too (StructureBounds counts them), and its
+        // hover highlight follows the block ghost the same way it follows a
+        // part ghost.
     };
 
     readonly List<Behaviour> _slept = new List<Behaviour>();
     readonly List<GameObject> _hiddenBuildRoots = new List<GameObject>();
-    readonly List<GameObject> _hiddenUi = new List<GameObject>();
+    // (There is no _hiddenUi list any more: SwapUi hides nothing, so there is
+    // nothing to restore. See the note there.)
 
-    Button _modeButton;
-    TextMeshProUGUI _modeLabel;
-    Image _modeImage;
+    // (The lone "Space mode" pill's fields are gone with it — see
+    // UpdateModeButtonVisual, which now paints only the Pro | Lite segments.)
 
     UIBuildStats _stats;
     float _statsTimer;
 
-    UnityEngine.Events.UnityAction _undoAction, _redoAction, _clearAction;
+    // No _clearAction: Clear all was a ⋯-menu button, and My Projects calls
+    // SpaceClear directly when the mode is Lite. Nothing is re-pointed on the
+    // way in and out of the mode any more.
+    UnityEngine.Events.UnityAction _undoAction, _redoAction;
 
+    /// <summary>
+    /// Names neither the mode nor a panel that has moved.
+    ///
+    /// It said "Space Mode · pick a piece on the left" — two things wrong at
+    /// once. The mode is a switch the reader can see, so saying it spends the
+    /// line on something already on screen; and there is nothing on the left
+    /// any more, because blocks live in the dock's Blocks tab now. A hint
+    /// pointing at a panel that is not there is worse than no hint.
+    /// </summary>
     public const string IdleStatus =
-        "Space Mode · pick a piece on the left, then click the floor to place it. " +
-        "Drag pieces to move them, R rotates.";
+        "Pick a block below, then click the floor to place it. " +
+        "Drag blocks to move them, R rotates.";
 
     void OnEnable()
     {
@@ -86,6 +110,22 @@ public class SpaceModeController : MonoBehaviour
     // Mode switch
     // ------------------------------------------------------------------
 
+    /// <summary>
+    /// Said once per session, when you first switch modes carrying work that
+    /// is not in a project.
+    ///
+    /// A MODAL here would be wrong, and this is the one of the four guarded
+    /// moments that is not really a guard. Switching modes loses nothing:
+    /// EnterSpaceMode hides the build and ExitSpaceMode gives it straight
+    /// back. Asking "are you sure?" every time you press Pro | Lite would be
+    /// a false alarm on a control people use constantly, and the fastest way
+    /// to teach someone to dismiss the dialog that DOES matter.
+    ///
+    /// What is true, and worth saying once, is that the safety net is memory
+    /// only: it does not survive closing the tab.
+    /// </summary>
+    static bool _saidSwitchingKeepsWork;
+
     public void ToggleMode()
     {
         // During "Edit Piece" the mode button means "back to my space".
@@ -93,6 +133,15 @@ public class SpaceModeController : MonoBehaviour
         {
             editSession.CancelEdit();
             return;
+        }
+
+        if (!_saidSwitchingKeepsWork &&
+            CurrentProject.HasUnsavedWork(buildController, out _))
+        {
+            _saidSwitchingKeepsWork = true;
+            SelectionStatus.Set(
+                "Your work is kept while you switch modes — but it is not saved. "
+                + "Save it as a project to keep it for good.", 7f);
         }
 
         if (Active) ExitSpaceMode();
@@ -229,66 +278,67 @@ public class SpaceModeController : MonoBehaviour
         if (canvas == null)
             return;
 
-        if (toSpace)
-        {
-            _hiddenUi.Clear();
-            Hide(canvas.transform, "PartsPanel");
-            Hide(canvas.transform, "GuidedToolsPanel");
-            Hide(canvas.transform, "PiecesPanel");
-            Hide(canvas.transform, "TopBar/Btn_Pieces");
-            // Load code stays: it is mode-aware. (Space codes are copied
-            // from the Space panel's own button.)
-
-            spacePanel.Show();
-        }
-        else
-        {
-            spacePanel.Hide();
-
-            foreach (GameObject go in _hiddenUi)
-                if (go != null)
-                    go.SetActive(true);
-            _hiddenUi.Clear();
-        }
+        // This method used to hide a list of things on the way into Space mode
+        // and restore them on the way out. It hides nothing now, and the
+        // hide/restore machinery is gone with it:
+        //
+        //  - PartsPanel and GuidedToolsPanel live in the dock body, and
+        //    DockTabs owns what that body shows — it swaps its whole tab set
+        //    with the mode. Hiding them from here as well made two owners of
+        //    one piece of state, and whichever ran last won.
+        //
+        //  - Btn_Pieces and PiecesPanel were hidden because "Pieces" meant the
+        //    piece library, a Piece-mode idea with nothing to offer in Space
+        //    mode. So the rail silently lost a button whenever you switched to
+        //    Lite. Nothing is hidden now: a rail that changes length on a mode
+        //    switch is worse than a button that explains itself, and My Blocks
+        //    says plainly that blocks are built in Pro when you press Save
+        //    there. My Projects (Btn_Projects) is genuinely mode-independent —
+        //    a project is a SCENE, and both modes have one to save.
+        //
+        //  - Load code always stayed: it is mode-aware.
+        //
+        // The "My Pieces" panel is not shown in either mode. Lite's dock tabs
+        // own the body now, and its Blocks tab is waiting for the real block
+        // catalogue rather than borrowing that panel.
+        spacePanel.Hide();
 
         UpdateModeButtonVisual();
-
-        void Hide(Transform parent, string path)
-        {
-            Transform t = parent.Find(path);
-            if (t != null && t.gameObject.activeSelf)
-            {
-                t.gameObject.SetActive(false);
-                _hiddenUi.Add(t.gameObject);
-            }
-        }
+        ModeChanged?.Invoke(toSpace);
     }
 
     /// <summary>
-    /// While in Space Mode the top-bar Undo / Redo / Clear all buttons work
-    /// on the space (the builder history is suspended, so the original
-    /// listeners no-op — these extra listeners do the space work).
+    /// While in Space Mode the Undo / Redo buttons work on the space (the
+    /// builder history is suspended, so the original listeners no-op — these
+    /// extra listeners do the space work).
+    ///
+    /// Resolved from the CANVAS, not from a top bar. This used to bail out
+    /// entirely when it could not find a "TopBar", which meant dissolving that
+    /// bar would silently unwire undo and redo in Lite mode: both buttons
+    /// still there, still lit, doing nothing. The buttons live in the utility
+    /// rail and have for a long time.
     /// </summary>
     void RouteHistoryButtons(bool toSpace)
     {
         Canvas canvas = FindFirstObjectByType<Canvas>();
-        Transform bar = canvas != null ? canvas.transform.Find("TopBar") : null;
-        if (bar == null)
+        if (canvas == null)
             return;
+        Transform root = canvas.transform;
 
         _undoAction ??= () => { if (Active) SpaceUndo(); };
         _redoAction ??= () => { if (Active) SpaceRedo(); };
-        _clearAction ??= () => { if (Active) SpaceClear(); };
 
         Wire("Btn_Undo", _undoAction, toSpace);
         Wire("Btn_Redo", _redoAction, toSpace);
-        // Clear all lives in the ⋯ overflow menu now (old scenes: top bar).
-        Wire("MoreMenu/Btn_ClearAll", _clearAction, toSpace);
-        Wire("Btn_ClearAll", _clearAction, toSpace);
+
+        // No Clear all to route. It was a button in the ⋯ menu, which is
+        // retired; My Projects calls SpaceClear directly when the mode is
+        // Lite, so nothing has to be re-pointed on the way in and out.
 
         void Wire(string name, UnityEngine.Events.UnityAction action, bool add)
         {
-            Transform t = bar.Find(name);
+            Transform t = name.Contains("/") ? UIChrome.FindPanel(root, name)
+                                             : UIChrome.FindButton(root, name);
             if (t == null || !t.TryGetComponent(out Button btn))
                 return;
 
@@ -308,23 +358,21 @@ public class SpaceModeController : MonoBehaviour
         }
     }
 
-    public void RegisterModeButton(Button button)
-    {
-        _modeButton = button;
-        _modeLabel = button.GetComponentInChildren<TextMeshProUGUI>(true);
-        _modeImage = button.GetComponent<Image>();
-        button.onClick.AddListener(ToggleMode);
-        UpdateModeButtonVisual();
-    }
+    // RegisterModeButton (singular) is gone with the last caller. It wired a
+    // lone "Space mode" pill from a builder two revisions back; nothing has
+    // produced one for a long time.
 
-    // Segmented Build | Space switch (current top bar). The active segment
-    // gets the dark pill, matching the Tools/Parts tabs.
+    // The Pro | Lite switch. The active segment gets the dark pill, matching
+    // the dock's tabs.
     Button _segBuild, _segSpace;
 
     public void RegisterModeButtons(Button buildSegment, Button spaceSegment)
     {
         _segBuild = buildSegment;
         _segSpace = spaceSegment;
+        var motion = buildSegment.transform.parent.GetComponent<UIModeSwitchMotion>();
+        if (motion == null) motion = buildSegment.transform.parent.gameObject.AddComponent<UIModeSwitchMotion>();
+        motion.Initialize(buildSegment, spaceSegment);
 
         buildSegment.onClick.AddListener(() =>
         {
@@ -372,14 +420,6 @@ public class SpaceModeController : MonoBehaviour
                     label.color = on ? activeText : muted;
             }
         }
-
-        // Legacy single pill (older scenes).
-        if (_modeLabel != null)
-            _modeLabel.text = Active ? "Piece mode" : "Space mode";
-        if (_modeImage != null)
-            _modeImage.color = Active ? UIThemeController.AccentColor : UIThemeController.SurfaceColor;
-        if (_modeLabel != null)
-            _modeLabel.color = Active ? Color.white : UIThemeController.InkColor;
     }
 
     // ------------------------------------------------------------------
@@ -426,7 +466,7 @@ public class SpaceModeController : MonoBehaviour
         }
     }
 
-    void SpaceClear()
+    public void SpaceClear()
     {
         if (interaction.InstanceCount == 0)
         {
@@ -455,7 +495,30 @@ public class SpaceModeController : MonoBehaviour
 
         // Saved card prices can be older than the current placeholder rates,
         // and merges change both the frames and their generated finishes.
-        // The shared summary reads the active physical parts in this mode.
+        // The shared summary reads the active physical parts in this mode
+        // (TotalPrice below stays the figure a saved Lite project records).
         _stats.RefreshNow();
+    }
+
+    /// <summary>
+    /// What the space currently costs: every placed piece, plus the merge
+    /// correction. Merged pieces are priced as ONE structure — hidden shared
+    /// or covered parts are deducted, and catalogue pieces spawned by beam
+    /// splits and panel divisions are added.
+    ///
+    /// Public and static because a saved Lite project stores this figure, and
+    /// a second copy of the formula in the projects panel would disagree with
+    /// the price pill the moment two blocks touched.
+    /// </summary>
+    public static float TotalPrice(SpaceInteractionController interaction)
+    {
+        if (interaction == null)
+            return 0f;
+
+        float total = 0f;
+        foreach (SpaceInstance inst in interaction.Instances)
+            total += inst.price;
+
+        return Mathf.Max(0f, total + SpaceMerge.PriceDelta);
     }
 }

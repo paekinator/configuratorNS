@@ -2,10 +2,22 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Injects a small ruler button above the fullscreen button (bottom-right
-/// corner). It pins the CAD-style dimension annotations: pinned = always
-/// visible while something is built, unpinned = the existing behaviour where
-/// they flash for a few seconds after a change. The choice persists.
+/// Attaches the dimensions pin to the rail button the builder baked, and keeps
+/// it lit while pinned. Pinned = the CAD-style annotations stay visible
+/// whenever something is built; unpinned = they flash for a few seconds after
+/// a change. The choice persists.
+///
+/// It used to BUILD that button — and only attached the click on the path
+/// where it did. So it adopted a baked button, styled it correctly, and left
+/// it inert. The builder bakes it now and this only wires it.
+///
+/// Two things stay this script's responsibility, both because the builder
+/// cannot do them:
+///   - the icon sprite, which UIIcons draws procedurally at runtime and so
+///     cannot be saved into a scene;
+///   - the button's colours, which follow Pinned rather than an open panel.
+///     That is why the baked button carries no RailButtonVisual: the pair
+///     below would have had two owners.
 /// </summary>
 public static class DimensionsToggleBootstrap
 {
@@ -19,14 +31,25 @@ public static class DimensionsToggleBootstrap
         if (canvas == null)
             return;
 
-        Transform existing = canvas.transform.Find("Btn_Dimensions");
-        if (existing == null)
-            CreateButton(canvas);
-        else
+        Transform t = UIChrome.FindButton(canvas.transform, "Btn_Dimensions");
+        if (t == null)
+            return;
+
+        _background = t.GetComponent<Image>();
+
+        Transform icon = t.Find("Icon");
+        _icon = icon != null ? icon.GetComponent<Image>() : null;
+        if (_icon != null && _icon.sprite == null)
+            _icon.sprite = UIIcons.Get("Dimension");
+
+        var button = t.GetComponent<Button>();
+        if (button != null)
         {
-            _background = existing.GetComponent<Image>();
-            Transform icon = existing.Find("Icon");
-            _icon = icon != null ? icon.GetComponent<Image>() : null;
+            // A named method rather than a lambda, so the remove actually
+            // matches: a domain reload re-runs this, and an anonymous listener
+            // could never be taken off again.
+            button.onClick.RemoveListener(TogglePinned);
+            button.onClick.AddListener(TogglePinned);
         }
 
         UIThemeController.ThemeChanged -= Restyle;
@@ -34,59 +57,23 @@ public static class DimensionsToggleBootstrap
         Restyle();
     }
 
-    static void CreateButton(Canvas canvas)
+    static void TogglePinned()
     {
-        var go = new GameObject("Btn_Dimensions", typeof(RectTransform), typeof(Image), typeof(Button));
-        go.transform.SetParent(canvas.transform, false);
-
-        var rt = (RectTransform)go.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(1f, 0f);
-        rt.pivot = new Vector2(1f, 0f);
-        rt.anchoredPosition = new Vector2(-24f, 110f);   // stacked above fullscreen, same 10 px rhythm
-        rt.sizeDelta = new Vector2(40f, 40f);
-
-        _background = go.GetComponent<Image>();
-        ApplyCardSprite(canvas, _background);
-
-        UiPolish.SoftShadow(rt, scale: 0.45f);
-
-        var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-        iconGo.transform.SetParent(go.transform, false);
-        var iconRt = (RectTransform)iconGo.transform;
-        iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 0.5f);
-        iconRt.sizeDelta = new Vector2(22f, 22f);
-        _icon = iconGo.GetComponent<Image>();
-        _icon.sprite = UIIcons.Get("Dimension");
-        _icon.preserveAspect = true;
-        _icon.raycastTarget = false;
-
-        Button button = go.GetComponent<Button>();
-        UiPolish.HoverTint(button);
-        button.onClick.AddListener(() =>
-        {
-            StructureDimensionsController.Pinned = !StructureDimensionsController.Pinned;
-            Restyle();
-        });
+        StructureDimensionsController.Pinned = !StructureDimensionsController.Pinned;
+        Restyle();
     }
 
     static void Restyle()
     {
+        if (_background != null && _background.TryGetComponent(out RailButtonVisual visual))
+        {
+            visual.RefreshVisual();
+            return;
+        }
         bool on = StructureDimensionsController.Pinned;
         if (_background != null)
             _background.color = on ? UIThemeController.AccentColor : UIThemeController.SurfaceColor;
         if (_icon != null)
             _icon.color = on ? Color.white : UIThemeController.MutedColor;
-    }
-
-    static void ApplyCardSprite(Canvas canvas, Image img)
-    {
-        Transform partsPanel = canvas.transform.Find("PartsPanel");
-        var reference = partsPanel != null ? partsPanel.GetComponent<Image>() : null;
-        if (reference == null || reference.sprite == null)
-            return;
-
-        img.sprite = reference.sprite;
-        img.type = Image.Type.Sliced;
-        img.pixelsPerUnitMultiplier = reference.pixelsPerUnitMultiplier * 1.7f;
     }
 }

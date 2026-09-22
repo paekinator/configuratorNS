@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Loading configuration codes in the live app.
 ///
-///  - LOAD CODE (top bar) opens a dialog with a text box: paste any code and
+///  - "Open from code" (My Projects) opens a dialog with a text box: paste any code and
 ///    press Load. Piece codes ("NS1-…") open in Piece Mode, space codes
 ///    ("NSS1-…") open in Space Mode — the app switches modes automatically.
 ///    Loading replaces what is there (one undo step). Invalid codes show
@@ -61,7 +61,11 @@ public class ConfigurationCodeUI : MonoBehaviour
         _canvas = FindFirstObjectByType<Canvas>();
         _theme = FindFirstObjectByType<UIThemeController>();
         AdoptCardStyle();
-        InjectTopBarButtons();
+        // No top-bar injection. Load code was an item in the ⋯ menu, which is
+        // retired; My Projects calls ShowLoadDialog directly. The fallback
+        // that used to run when the menu item was missing CLONED a "Load
+        // code" pill into the top bar for older scenes -- so retiring the
+        // menu would have made a stray button appear rather than nothing.
     }
 
     void OnEnable() => UIThemeController.ThemeChanged += OnThemeChanged;
@@ -325,7 +329,12 @@ public class ConfigurationCodeUI : MonoBehaviour
             }
 
             CloseDialog();
-            StartCoroutine(LoadSpaceRoutine(states));
+            // The third guarded moment: a pasted code replaces the scene.
+            // Validated FIRST, so a mistyped code is refused before anyone is
+            // asked whether they want to lose their work for it.
+            CurrentProject.GuardThen(buildController, "Load this code?",
+                "Loading it replaces what is on screen.", "Discard and load",
+                () => StartCoroutine(LoadSpaceRoutine(states, null)));
             return;
         }
 
@@ -345,10 +354,74 @@ public class ConfigurationCodeUI : MonoBehaviour
         }
 
         CloseDialog();
-        LoadValidatedPiece(check);
+        CurrentProject.GuardThen(buildController, "Load this code?",
+            "Loading it replaces what is on screen.", "Discard and load",
+            () => LoadValidatedPiece(check, null));
     }
 
-    void LoadValidatedPiece(ConfigurationCodeValidation check)
+    /// <summary>
+    /// Open any NEOSPACE code from outside the dialog — the projects panel
+    /// uses this so it does not repeat the mode-switching dance, which is the
+    /// fiddly half: a piece code has to leave Space Mode first, and a space
+    /// code has to enter it and WAIT for the switch before placing anything.
+    ///
+    /// <paramref name="label"/> names the thing in the status line; pass null
+    /// for a bare code. Problems are reported through SelectionStatus instead
+    /// of the dialog's error line, so this is safe to call with the dialog
+    /// closed. Returns false when the code was rejected, in which case
+    /// nothing in the scene was touched.
+    /// </summary>
+    public bool OpenCode(string code, string label = null)
+    {
+        code = code != null ? code.Trim() : string.Empty;
+        if (string.IsNullOrEmpty(code))
+        {
+            SelectionStatus.Set("There is no code to open.", 4f);
+            return false;
+        }
+
+        // Whatever was open is no longer what is on screen. The projects
+        // panel re-establishes it straight afterwards when the code IS a
+        // project; a code pasted from elsewhere belongs to no project of
+        // yours, and saying so is more honest than leaving the old name up.
+        CurrentProject.Forget();
+
+        if (SpaceCodec.LooksLikeSpaceCode(code))
+        {
+            List<SpaceHistory.InstanceState> states;
+            try
+            {
+                states = SpaceCodec.Decode(code);
+            }
+            catch (ConfigurationCodeException e)
+            {
+                SelectionStatus.Set(e.Message, 6f);
+                return false;
+            }
+
+            StartCoroutine(LoadSpaceRoutine(states, label));
+            return true;
+        }
+
+        ConfigurationCodeValidation check = ConfigurationCode.Validate(code);
+        if (!check.IsValid)
+        {
+            SelectionStatus.Set(check.Error, 6f);
+            return false;
+        }
+
+        var restorer = ConfigurationCode.GetOrCreateRestorer(buildController);
+        if (restorer.IsRunning)
+        {
+            SelectionStatus.Set("Still loading · one moment.", 3f);
+            return false;
+        }
+
+        LoadValidatedPiece(check, label);
+        return true;
+    }
+
+    void LoadValidatedPiece(ConfigurationCodeValidation check, string label)
     {
         foreach (string warning in check.Warnings)
             Debug.LogWarning("[ConfigCode] " + warning);
@@ -363,18 +436,20 @@ public class ConfigurationCodeUI : MonoBehaviour
         if (SpaceModeController.Active && spaceMode != null)
             spaceMode.ExitSpaceMode();
 
+        string opened = string.IsNullOrEmpty(label) ? string.Empty : $"Opened \"{label}\" · ";
+
         // Replace, not merge: the decoded configuration becomes the build.
         var restorer = ConfigurationCode.GetOrCreateRestorer(buildController);
         restorer.Restore(check.Model, report =>
         {
             SelectionStatus.Set(
-                report.Summary + warningNote +
+                opened + report.Summary + warningNote +
                 (report.Succeeded ? " Ctrl+Z (Cmd+Z) restores the previous build." : string.Empty), 8f);
         });
         SelectionStatus.Set("Loading configuration…", 3f);
     }
 
-    IEnumerator LoadSpaceRoutine(List<SpaceHistory.InstanceState> states)
+    IEnumerator LoadSpaceRoutine(List<SpaceHistory.InstanceState> states, string label)
     {
         var spaceMode = FindFirstObjectByType<SpaceModeController>();
         var interaction = FindFirstObjectByType<SpaceInteractionController>();
@@ -408,8 +483,9 @@ public class ConfigurationCodeUI : MonoBehaviour
 
         history.Record(interaction.CurrentStates());
         int n = interaction.InstanceCount;
+        string opened = string.IsNullOrEmpty(label) ? "Space loaded" : $"Opened \"{label}\"";
         SelectionStatus.Set(
-            $"Space loaded · {n} piece{(n == 1 ? "" : "s")} placed. " +
+            $"{opened} · {n} piece{(n == 1 ? "" : "s")} placed. " +
             "Ctrl+Z (Cmd+Z) brings the previous space back.", 7f);
     }
 
@@ -587,89 +663,6 @@ public class ConfigurationCodeUI : MonoBehaviour
 
         _shareDialog.gameObject.SetActive(false);
     }
-
-    // ------------------------------------------------------------------
-    // Top-bar buttons
-    // ------------------------------------------------------------------
-
-    void InjectTopBarButtons()
-    {
-        Canvas canvas = _canvas != null ? _canvas : FindFirstObjectByType<Canvas>();
-        Transform bar = canvas != null ? canvas.transform.Find("TopBar") : null;
-        if (bar == null)
-            return;
-
-        // The "Share code" button is gone — remove it from scenes that still
-        // bake it (codes are copied from My Pieces / the Space panel now).
-        Transform legacyShare = bar.Find("Btn_CopyCode");
-        if (legacyShare != null)
-            Destroy(legacyShare.gameObject);
-
-        // Current builder: "Load code" is an item in the ⋯ overflow menu.
-        if (Wire(bar, "MoreMenu/Btn_LoadCode", "Load code", ShowLoadDialog))
-        {
-            // A leftover top-level pill from the previous layout is redundant.
-            Transform legacyLoad = bar.Find("Btn_PasteCode");
-            if (legacyLoad != null)
-                Destroy(legacyLoad.gameObject);
-            return;
-        }
-
-        // Previous builder: top-level "Load code" pill.
-        if (Wire(bar, "Btn_PasteCode", "Load code", ShowLoadDialog))
-            return;
-
-        // Older scene: clone a history button so fonts/sprites/colors match.
-        Transform template = bar.Find("Btn_ClearAll");
-        if (template == null)
-            template = bar.Find("Btn_Undo");
-        if (template == null || template.GetComponent<Button>() == null)
-            return;
-
-        GameObject clone = Instantiate(template.gameObject, bar);
-        clone.name = "Btn_PasteCode";
-
-        var rt = (RectTransform)clone.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
-        rt.pivot = new Vector2(0f, 0.5f);
-        rt.anchoredPosition = new Vector2(622f, 0f);
-        rt.sizeDelta = new Vector2(108f, 40f);
-
-        var text = clone.GetComponentInChildren<TextMeshProUGUI>(true);
-        if (text != null)
-            text.text = "Load code";
-
-        var btn = clone.GetComponent<Button>();
-        btn.onClick = new Button.ButtonClickedEvent();   // drop cloned listeners
-        btn.onClick.AddListener(ShowLoadDialog);
-
-        if (_theme != null)
-        {
-            var cloneImg = clone.GetComponent<Image>();
-            if (cloneImg != null)
-                _theme.surfaceImages.Add(cloneImg);
-            if (text != null)
-                _theme.inkTexts.Add(text);
-        }
-    }
-
-    static bool Wire(Transform bar, string name, string label,
-        UnityEngine.Events.UnityAction action)
-    {
-        Transform t = bar.Find(name);
-        var btn = t != null ? t.GetComponent<Button>() : null;
-        if (btn == null)
-            return false;
-
-        var text = t.GetComponentInChildren<TextMeshProUGUI>(true);
-        if (text != null)
-            text.text = label;
-
-        btn.onClick.RemoveListener(action);
-        btn.onClick.AddListener(action);
-        return true;
-    }
-
     // ------------------------------------------------------------------
     // Widget helpers (adopted card style, same pattern as PieceUI)
     // ------------------------------------------------------------------
@@ -678,7 +671,7 @@ public class ConfigurationCodeUI : MonoBehaviour
     {
         if (_canvas == null)
             return;
-        Transform partsPanel = _canvas.transform.Find("PartsPanel");
+        Transform partsPanel = UIChrome.FindPanel(_canvas.transform, "PartsPanel");
         if (partsPanel == null)
             return;
 

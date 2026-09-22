@@ -1,13 +1,14 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Runtime wiring for Space Mode: puts the factory, history, interaction,
-/// mode controller and the "My Pieces" panel on a "SpaceTools" host, and
-/// injects the Piece/Space mode button into the top bar (wiring the baked
-/// one when present, cloning a history button otherwise). Same injection
-/// pattern as the other bootstraps — existing scenes need no rebuild.
+/// Runtime wiring for Lite (Space) mode: puts the factory, history,
+/// interaction, mode controller and the piece panel on a "SpaceTools" host,
+/// and wires the Pro | Lite switch the builder baked.
+///
+/// It only WIRES that switch now. It used to fall back to creating one, which
+/// is a thing no bootstrap should do: a control built here has no styling the
+/// builder knows about, and lands wherever this file guesses.
 /// </summary>
 public static class SpaceBootstrap
 {
@@ -64,62 +65,28 @@ public static class SpaceBootstrap
     static void InjectModeButton(SpaceModeController controller)
     {
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
-        Transform bar = canvas != null ? canvas.transform.Find("TopBar") : null;
-        if (bar == null)
+        if (canvas == null)
             return;
 
-        // Current builder: segmented Build | Space switch.
-        Transform segBuild = bar.Find("ModeSwitch/Btn_ModeBuild");
-        Transform segSpace = bar.Find("ModeSwitch/Btn_ModeSpace");
-        if (segBuild != null && segSpace != null &&
-            segBuild.TryGetComponent(out Button buildBtn) &&
-            segSpace.TryGetComponent(out Button spaceBtn))
-        {
-            controller.RegisterModeButtons(buildBtn, spaceBtn);
-            return;
-        }
+        Transform root = canvas.transform;
 
-        // Previous builder: single "Space mode" pill.
-        Transform baked = bar.Find("Btn_SpaceMode");
-        if (baked != null && baked.TryGetComponent(out Button bakedBtn))
-        {
-            controller.RegisterModeButton(bakedBtn);
-            return;
-        }
-
-        // Older scene: clone a history button for a matching look.
-        Transform template = bar.Find("Btn_ClearAll");
-        if (template == null)
-            template = bar.Find("Btn_Undo");
-        if (template == null || template.GetComponent<Button>() == null)
+        // The Pro | Lite switch, located by UIChrome rather than by parent: it
+        // used to be a top-bar child and now sits in the band above the dock,
+        // and a parent-relative Find would return null after the move, leaving
+        // a switch that does nothing.
+        //
+        // There is no fallback any more. Two used to follow — wire a single
+        // "Space mode" pill from an older builder, or failing that CLONE a
+        // history button into the top bar and call it Btn_SpaceMode. Neither
+        // could fire: the builder has not produced a Btn_SpaceMode for a long
+        // time, and the clone would have dropped a stray pill into a top bar
+        // that no longer exists at all.
+        Transform modeSwitch = UIChrome.ModeSwitch(root);
+        if (modeSwitch == null)
             return;
 
-        GameObject go = Object.Instantiate(template.gameObject, bar);
-        go.name = "Btn_SpaceMode";
-
-        var rt = (RectTransform)go.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
-        rt.pivot = new Vector2(0f, 0.5f);
-        rt.anchoredPosition = new Vector2(944f, 0f);
-        rt.sizeDelta = new Vector2(110f, 40f);
-
-        var text = go.GetComponentInChildren<TextMeshProUGUI>(true);
-        if (text != null)
-            text.text = "Space mode";
-
-        var btn = go.GetComponent<Button>();
-        btn.onClick = new Button.ButtonClickedEvent();
-
-        var theme = Object.FindFirstObjectByType<UIThemeController>();
-        if (theme != null)
-        {
-            var img = go.GetComponent<Image>();
-            if (img != null)
-                theme.surfaceImages.Add(img);
-            if (text != null)
-                theme.inkTexts.Add(text);
-        }
-
-        controller.RegisterModeButton(btn);
+        if (modeSwitch.Find(UIChrome.ProSegmentName).TryGetComponent(out Button proBtn) &&
+            modeSwitch.Find(UIChrome.LiteSegmentName).TryGetComponent(out Button liteBtn))
+            controller.RegisterModeButtons(proBtn, liteBtn);
     }
 }

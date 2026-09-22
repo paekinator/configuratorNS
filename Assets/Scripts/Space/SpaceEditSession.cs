@@ -326,7 +326,8 @@ public class SpaceEditSession : MonoBehaviour
                 {
                     Camera cam = buildController != null && buildController.cam != null
                         ? buildController.cam : Camera.main;
-                    thumb = PieceLibrary.CaptureThumbnail(cam);
+                    // Same plain framing the block library uses for its cards.
+                    thumb = ThumbnailCapture.Plain(cam);
                     if (thumb != null)
                     {
                         PieceLibrary.SaveThumbnail(record.id, thumb);
@@ -501,7 +502,7 @@ public class SpaceEditSession : MonoBehaviour
 
     void AdoptCardStyle(Canvas canvas)
     {
-        Transform partsPanel = canvas.transform.Find("PartsPanel");
+        Transform partsPanel = UIChrome.FindPanel(canvas.transform, "PartsPanel");
         if (partsPanel == null)
             return;
 

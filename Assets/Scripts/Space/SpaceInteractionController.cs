@@ -59,6 +59,7 @@ public class SpaceInteractionController : MonoBehaviour
     Vector3 _lastGhostPos;
     float _lastGhostYaw;
     bool _ghostChecked;
+    int _placementRequestVersion;
 
     // Group highlight: pieces merged into one structure light up together —
     // persistently while one of them is selected, briefly after a snap.
@@ -70,6 +71,7 @@ public class SpaceInteractionController : MonoBehaviour
     SpaceInstance _pressInstance;
     bool _pressWithShift;
     bool _dragging;
+    public bool HasActiveAction => _armedRecord != null || _dragging;
     Vector3 _grabPoint;
     readonly List<Vector3> _dragStartPositions = new List<Vector3>();
     readonly List<int> _dragStartGroups = new List<int>();
@@ -296,11 +298,13 @@ public class SpaceInteractionController : MonoBehaviour
     {
         DisarmPlacement();
         DeselectAll();
+        int requestVersion = ++_placementRequestVersion;
 
         SelectionStatus.Set($"Preparing \"{record.name}\"…", 0f);
         factory.GetMaster(record.id, record.code, master =>
         {
-            if (master == null || !SpaceModeController.Active)
+            if (requestVersion != _placementRequestVersion ||
+                master == null || !SpaceModeController.Active)
             {
                 ArmedChanged?.Invoke();
                 return;
@@ -323,6 +327,7 @@ public class SpaceInteractionController : MonoBehaviour
 
     public void DisarmPlacement()
     {
+        _placementRequestVersion++;
         if (_ghost != null)
             Destroy(_ghost);
         _ghost = null;
@@ -335,12 +340,12 @@ public class SpaceInteractionController : MonoBehaviour
 
     void UpdatePlacement()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            DisarmPlacement();
-            return;
-        }
-
+        // Right-click used to disarm here. It cannot: the right button orbits
+        // the camera in every scheme (CadCameraController, FlyCameraController
+        // and OrbitCamera all read GetMouseButton(1)), so looking around to
+        // decide where to put a block threw the block away. Esc puts it down,
+        // which is what the hint has always said and what every other tool in
+        // the app uses.
         if (!TryFloorPoint(Input.mousePosition, out Vector3 point))
             return;
 
@@ -1157,7 +1162,7 @@ public class SpaceInteractionController : MonoBehaviour
 
     void AdoptCardStyle()
     {
-        Transform partsPanel = _canvas.transform.Find("PartsPanel");
+        Transform partsPanel = UIChrome.FindPanel(_canvas.transform, "PartsPanel");
         if (partsPanel == null)
             return;
 

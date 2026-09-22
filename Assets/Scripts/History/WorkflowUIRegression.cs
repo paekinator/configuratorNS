@@ -39,14 +39,20 @@ public static class WorkflowUIRegression
         ReplayApplicationBootstraps(failure);
         yield return Frames(5);
 
+        // The redesign's own bake/wiring audit must hold in the merged scene
+        // (dock, rail, mode switch, baked click targets).
+        checks += UIWiringCheck.RunAll(out List<string> wiringFailures);
+        foreach (string problem in wiringFailures)
+            failure("Redesign UI wiring: " + problem);
+
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
         var build = Object.FindFirstObjectByType<BuildController>();
         var history = Object.FindFirstObjectByType<BuildHistory>();
         var workflow = Object.FindFirstObjectByType<WorkflowReviewUI>();
-        var menu = Object.FindFirstObjectByType<UITopBarMenu>();
-        Check(canvas != null && build != null && history != null && workflow != null && menu != null,
-            $"The real scene must have canvas ({canvas != null}), build ({build != null}), history ({history != null}), workflow ({workflow != null}) and menu ({menu != null}) wiring.");
-        if (canvas == null || build == null || history == null || workflow == null || menu == null)
+        Transform rail = canvas != null ? UIChrome.Rail(canvas.transform) : null;
+        Check(canvas != null && build != null && history != null && workflow != null && rail != null,
+            $"The real scene must have canvas ({canvas != null}), build ({build != null}), history ({history != null}), workflow ({workflow != null}) and utility rail ({rail != null}) wiring.");
+        if (canvas == null || build == null || history == null || workflow == null || rail == null)
             yield break;
         RectTransform canvasRect = (RectTransform)canvas.transform;
 
@@ -56,20 +62,19 @@ public static class WorkflowUIRegression
         history.ClearAll();
         yield return Frames(5);
 
-        Transform spaceItem = menu.panel != null ? menu.panel.transform.Find("Btn_SpaceSize") : null;
-        Check(spaceItem != null && spaceItem.GetComponent<Button>() != null,
-            "Set space size must be connected to the real overflow menu.");
+        Transform spaceItem = UIChrome.FindButton(canvas.transform, "Btn_SpaceSize");
+        Check(spaceItem != null && spaceItem.IsChildOf(rail) && spaceItem.GetComponent<Button>() != null,
+            "Set space size must be connected to the real utility rail.");
         if (spaceItem == null) yield break;
-        Check(spaceItem.GetComponentInChildren<TMP_Text>(true)?.text == "Set space size",
-            "The space size menu label must be visible and correct.");
-        menu.Toggle();
+        Check(spaceItem.GetComponent<RailButtonVisual>()?.hint == "Set space size" &&
+            spaceItem.GetComponentInChildren<TMP_Text>(true)?.text == "Size",
+            "The space size rail button must carry its label and hint.");
         Canvas.ForceUpdateCanvases();
-        Check(WithinCanvas((RectTransform)menu.panel.transform, canvasRect), "The expanded menu must fit within the canvas.");
+        Check(WithinCanvas((RectTransform)rail, canvasRect), "The utility rail with the workflow rows must fit within the canvas.");
         var planningControls = WorkspaceControls();
         spaceItem.GetComponent<Button>().onClick.Invoke();
         yield return Frames(2);
         Check(SpacePlanningUI.IsOpen, "Selecting Set space size must open the planning dialog.");
-        Check(menu.panel != null && !menu.panel.activeSelf, "Selecting a menu item must close the overflow menu.");
         Check(AllPaused(planningControls), "The planning dialog must pause enabled workspace input.");
 
         Transform planning = canvas.transform.Find("SpacePlanningUI");
@@ -120,9 +125,9 @@ public static class WorkflowUIRegression
         Check(placement.Placed == 1, "The real scene catalogue must place a V9 for quote review.");
         yield return Frames(3);
         var partsControls = WorkspaceControls();
-        Transform partsItem = menu.panel.transform.Find("Btn_PartsPrices");
-        Check(partsItem != null && partsItem.GetComponent<Button>() != null,
-            "Parts & prices must be connected to the real overflow menu.");
+        Transform partsItem = UIChrome.FindButton(canvas.transform, "Btn_PartsPrices");
+        Check(partsItem != null && partsItem.IsChildOf(rail) && partsItem.GetComponent<Button>() != null,
+            "Parts & prices must be connected to the real utility rail.");
         if (partsItem != null)
             partsItem.GetComponent<Button>().onClick.Invoke();
         else
@@ -145,10 +150,16 @@ public static class WorkflowUIRegression
 
         // Raycast the visible pill, then dispatch the same left-click interface
         // used by the event system. This also catches a blocked raycast target.
+        // The redesign keeps UIBuildStats as a service without its own pill
+        // (the total moves to the Checkout tab); then the rail's Parts row is
+        // the click path and gets the same raycast treatment.
         var pillControls = WorkspaceControls();
         Canvas.ForceUpdateCanvases();
         bool pillHit = false;
-        if (stats != null && stats.transform is RectTransform pill && EventSystem.current != null)
+        RectTransform pill = stats != null && stats.GetComponent<Graphic>() != null && stats.gameObject.activeInHierarchy
+            ? stats.transform as RectTransform
+            : partsItem as RectTransform;
+        if (pill != null && EventSystem.current != null)
         {
             var click = new PointerEventData(EventSystem.current)
             {
@@ -157,10 +168,10 @@ public static class WorkflowUIRegression
             };
             var hits = new List<RaycastResult>();
             EventSystem.current.RaycastAll(click, hits);
-            pillHit = hits.Count > 0 && hits[0].gameObject.GetComponentInParent<UIBuildStats>() == stats;
+            pillHit = hits.Count > 0 && hits[0].gameObject.transform.IsChildOf(pill);
             if (pillHit) ExecuteEvents.ExecuteHierarchy(hits[0].gameObject, click, ExecuteEvents.pointerClickHandler);
         }
-        Check(pillHit, "The visible stats pill must receive the pointer raycast at its centre.");
+        Check(pillHit, "The visible parts control must receive the pointer raycast at its centre.");
         yield return Frames(2);
         Check(review.gameObject.activeSelf && body != null && stats != null &&
             body.text == QuoteSummary.CreateParts(stats.Summary),

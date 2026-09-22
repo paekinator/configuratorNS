@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03ab36f0a03bfd4a9dd904b6bf8229b, type: 3}
+  m_Name: 04 Space Grotesk + Geist Mono
+  m_EditorClassIdentifier: Assembly-CSharp::NeospaceTypographySet
+  displayName: "Prototype 04 \u2014 Space Grotesk + Geist Mono"
+  character: More expressive, cultural and overtly futuristic.
+  primaryRegular: {fileID: 11400000, guid: 0d7e898cfc8c66940947008e81acdeec, type: 2}
+  primaryMedium: {fileID: 11400000, guid: 0cd365a9107a7334ca35e0a834ab756f, type: 2}
+  primarySemiBold: {fileID: 11400000, guid: 934eb8aa2a3738149ba217b6fb33d94d, type: 2}
+  technicalRegular: {fileID: 11400000, guid: 38831f25acfe70045b3bfa424efdca48, type: 2}
+  technicalMedium: {fileID: 11400000, guid: 1918f51b2b4f41c4cab117d34da358e3, type: 2}
+  technicalSemiBold: {fileID: 11400000, guid: b92d980df22ac0344996f25389b4b9aa, type: 2}
+  displayMedium: {fileID: 0}
+  displaySemiBold: {fileID: 0}

@@ -465,3 +465,23 @@ Faster NST-style templates for beginners. **Expert Build/Select is unchanged.**
 - Batch place API: `BuildController.TemplateBatch.cs` (new partial only)
 - Selftest: **Tools → Configurator → Run NeospaceCore Selftest**
 - Branch: `feature/guided-templates`
+
+---
+
+## 14) Versions and releases
+
+- The source of truth is git on GitHub (`origin`, https://github.com/paekinator/configuratorNS). `main` is the
+  latest accepted state; features land through branches merged into it.
+- Every version worth keeping is an **annotated tag on `main`** (`git tag -a v1.0.0-beta.1 -m "..."`;
+  `v1.0.0-beta.1` is the 22 Sep 2026 configurator beta 1.0.0). Tag first, build from the tag: any tag can be
+  rebuilt into the identical player later, so builds do not need to be archived for every commit.
+- Builds are outputs, not sources: `Builds/` stays ignored. To publish a version, run
+  `Tools/Build-Configurator.ps1` on the tagged commit and attach the ZIP plus its `.sha256` to a **GitHub
+  Release** named after the tag (`gh release create v1.0.0-beta.1 Builds/<zip> Builds/<zip>.sha256`).
+- Scenes, prefabs and assets are Unity YAML: `.gitattributes` routes them through Unity's SmartMerge. Each
+  clone needs the driver once:
+  `git config merge.unityyamlmerge.driver "'C:/Program Files/Unity/Hub/Editor/6000.5.0f1/Editor/Data/Tools/UnityYAMLMerge.exe' merge -p %O %B %A %A"`.
+  When SmartMerge cannot settle a file it reports a conflict and leaves the local version; take the richer
+  side and re-apply the small local change by hand (that is how the UI redesign scene was merged).
+- Validation before tagging: `ConfiguratorValidation.Run` and `FinishDiagnostics.Run` in batch mode on an
+  isolated copy of the project (`tmp/task-validation`), never on the project the editor has open.

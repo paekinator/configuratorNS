@@ -29,7 +29,20 @@ public class PieceInstanceFactory : MonoBehaviour
     /// </summary>
     const int StagingOffsetMm = 2272 * 88;   // 199 936 mm ≈ 200 m
 
-    static readonly Color GhostTint = new Color(0.30f, 0.55f, 1.00f, 0.45f);
+    /// <summary>
+    /// Fallback tint, used only when no ghost material exists to borrow. The
+    /// scene answers "which one?" in one colour now, so this is that colour
+    /// rather than a second blue of its own — see UIThemeController.
+    /// </summary>
+    static Color GhostTint
+    {
+        get
+        {
+            Color c = UIThemeController.HighlightColor;
+            c.a = 0.45f;
+            return c;
+        }
+    }
 
     readonly Dictionary<string, GameObject> _masters = new Dictionary<string, GameObject>();
     readonly Queue<(string pieceId, string code, Action<GameObject> onReady)> _queue =
@@ -192,6 +205,13 @@ public class PieceInstanceFactory : MonoBehaviour
         }
         foreach (Transform child in master.transform)
             child.position -= shift;
+
+        // Write the pivot down in the BLOCK's own coordinates, so anything
+        // else placing this block measures from the same point. The staging
+        // shift is X-only and is taken back out here; what remains is where
+        // the pivot sits among the millimetres the code stores.
+        master.AddComponent<PieceMasterInfo>().ModelPivot =
+            shift - new Vector3(NeospaceUnits.Mm(StagingOffsetMm), 0f, 0f);
 
         var box = master.AddComponent<BoxCollider>();
         box.center = new Vector3(

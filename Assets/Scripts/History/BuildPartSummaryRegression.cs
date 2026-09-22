@@ -106,9 +106,13 @@ public static class BuildPartSummaryRegression
             Check(summary.TotalPrice == total && Mathf.Approximately(stats.TotalPrice, (float)total) &&
                   summary.UnpricedPartCount == unpriced && stats.UnpricedPartCount == unpriced,
                 action + ": summary and header totals agree with independently priced lines");
-            Check(stats.partCountText != null && stats.priceText != null &&
-                  stats.partCountText.text == (summary.PartCount == 1 ? "1 part" : summary.PartCount + " parts") &&
-                  stats.priceText.text == "Est. $" + total.ToString("N0") + (unpriced > 0 ? "*" : ""),
+            // The redesign retired the header pill (the total moves to the
+            // Checkout tab), so UIBuildStats may run with no labels at all;
+            // when labels exist they must read the same snapshot.
+            bool hasLabels = stats.partCountText != null && stats.priceText != null;
+            Check(!hasLabels ||
+                  (stats.partCountText.text == (summary.PartCount == 1 ? "1 part" : summary.PartCount + " parts") &&
+                   stats.priceText.text == "Est. $" + total.ToString("N0") + (unpriced > 0 ? "*" : "")),
                 action + ": visible count and estimated-price labels match the current summary");
         }
 

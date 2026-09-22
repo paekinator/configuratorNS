@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03ab36f0a03bfd4a9dd904b6bf8229b, type: 3}
+  m_Name: 06 Roboto Flex + Roboto Mono
+  m_EditorClassIdentifier: Assembly-CSharp::NeospaceTypographySet
+  displayName: Roboto Flex + Roboto Mono
+  character: Adaptive and highly functional. Roboto Flex uses its variable source
+    as a single Unity face for this first comparison.
+  primaryRegular: {fileID: 11400000, guid: 2f6ecc65c81039d4d96ee37a69222e1d, type: 2}
+  primaryMedium: {fileID: 11400000, guid: 1bfa8942b380eb04bbc929a0b3052a58, type: 2}
+  primarySemiBold: {fileID: 11400000, guid: ef2a112d5815a60408c3197b3a81cb73, type: 2}
+  technicalRegular: {fileID: 11400000, guid: 2332e167d5106df45b95d9d947863e77, type: 2}
+  technicalMedium: {fileID: 11400000, guid: 3e968004573c4ae44aad177108dbdb40, type: 2}
+  technicalSemiBold: {fileID: 11400000, guid: c84769d48d0a3f04b9074776fe71faec, type: 2}
+  displayMedium: {fileID: 0}
+  displaySemiBold: {fileID: 0}

@@ -1,10 +1,10 @@
 using UnityEngine;
 
 /// <summary>
-/// Runtime wiring for configuration codes in the live app: puts the
-/// restorer, the Load-code dialog UI and the Pieces library UI on the
-/// "ConfigurationTools" host. Same injection pattern as the other
-/// bootstraps, so existing scenes get the features without a rebuild.
+/// Runtime wiring for configuration codes in the live app: puts the restorer
+/// and the Load-code dialog UI on the "ConfigurationTools" host. Same
+/// injection pattern as the other bootstraps, so existing scenes get the
+/// features without a rebuild.
 /// </summary>
 public static class ConfigurationCodeBootstrap
 {
@@ -22,9 +22,10 @@ public static class ConfigurationCodeBootstrap
             ui = restorer.gameObject.AddComponent<ConfigurationCodeUI>();
         ui.buildController = build;
 
-        var pieces = restorer.GetComponent<PieceUI>();
-        if (pieces == null)
-            pieces = restorer.gameObject.AddComponent<PieceUI>();
-        pieces.buildController = build;
+        // The block library used to be a second component here, driving a
+        // panel that flew out of the rail. Blocks live in the dock's Blocks
+        // tab now, and two doors to one library is one too many: the panel
+        // and the gallery each had their own idea of renaming, deleting and
+        // which collection a block was in.
     }
 }

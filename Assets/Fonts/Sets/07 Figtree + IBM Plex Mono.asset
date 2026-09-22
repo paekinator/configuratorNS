@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b03ab36f0a03bfd4a9dd904b6bf8229b, type: 3}
+  m_Name: 07 Figtree + IBM Plex Mono
+  m_EditorClassIdentifier: Assembly-CSharp::NeospaceTypographySet
+  displayName: Figtree + IBM Plex Mono
+  character: Approachable and contemporary, with a friendlier creator-community tone.
+  primaryRegular: {fileID: 11400000, guid: 95fca78c14ee8464db8de13c515b7e26, type: 2}
+  primaryMedium: {fileID: 11400000, guid: 0ba3b3cac88b9c7478c70e3e8e8cd9f7, type: 2}
+  primarySemiBold: {fileID: 11400000, guid: 22bc63ca4a7a7904cae8959f681dd704, type: 2}
+  technicalRegular: {fileID: 11400000, guid: bf646336912b56d478f9ac9ba2b5a11e, type: 2}
+  technicalMedium: {fileID: 11400000, guid: 557e7430c89ee4e41a60336f6a121661, type: 2}
+  technicalSemiBold: {fileID: 11400000, guid: c187916bf245b8443b43f1bc97a81bb9, type: 2}
+  displayMedium: {fileID: 0}
+  displaySemiBold: {fileID: 0}
